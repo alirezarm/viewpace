@@ -1,0 +1,29 @@
+{
+  "manifest_version": 3,
+  "name": "AutoSpeed (prototype)",
+  "version": "0.1.0",
+  "description": "Experimental: adapts YouTube playback speed to how carefully the upcoming content needs to be heard.",
+  "minimum_chrome_version": "138",
+  "permissions": ["storage", "offscreen"],
+  "background": { "service_worker": "background.js" },
+  "content_scripts": [
+    {
+      "matches": ["https://www.youtube.com/*"],
+      "js": ["hook.js"],
+      "run_at": "document_start",
+      "world": "MAIN"
+    },
+    {
+      "matches": ["https://www.youtube.com/*"],
+      "js": ["content.js"],
+      "run_at": "document_start"
+    }
+  ],
+  "action": { "default_popup": "popup.html", "default_title": "AutoSpeed" },
+  "commands": {
+    "toggle-autospeed": {
+      "suggested_key": { "default": "Alt+Shift+S" },
+      "description": "Turn AutoSpeed on/off"
+    }
+  }
+}

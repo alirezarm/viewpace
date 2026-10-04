@@ -1,0 +1,20 @@
+{
+  "name": "autospeed",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Experimental Chrome extension that adapts YouTube playback speed to content difficulty.",
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "watch": "node build.mjs --watch",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "check": "npm run typecheck && npm test && npm run build"
+  },
+  "devDependencies": {
+    "@types/chrome": "^0.3.4",
+    "esbuild": "^0.28.2",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.3"
+  }
+}

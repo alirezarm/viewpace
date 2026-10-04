@@ -1,0 +1,63 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      body { width: 280px; margin: 0; padding: 12px; font: 13px/1.4 system-ui, sans-serif; color: #222; background: #fff; }
+      h1 { font-size: 15px; margin: 0 0 8px; }
+      fieldset { border: 1px solid #ddd; border-radius: 6px; margin: 0 0 10px; padding: 6px 8px; }
+      legend { font-size: 11px; color: #666; padding: 0 4px; }
+      label { display: block; margin: 2px 0; }
+      .row { display: flex; gap: 6px; flex-wrap: wrap; }
+      .muted { color: #666; font-size: 12px; }
+      button { font: inherit; padding: 3px 8px; }
+      @media (prefers-color-scheme: dark) {
+        body { color: #eee; background: #202124; }
+        fieldset { border-color: #444; }
+        legend, .muted { color: #aaa; }
+      }
+    </style>
+  </head>
+  <body>
+    <h1>AutoSpeed</h1>
+    <label><input type="checkbox" id="enabled" /> Enabled <span class="muted">(Alt+Shift+S)</span></label>
+
+    <fieldset>
+      <legend>Mode</legend>
+      <label><input type="radio" name="mode" value="baseline" /> Baseline Adaptive (speech features)</label>
+      <label><input type="radio" name="mode" value="ai" /> AI Adaptive (+ Gemini Nano)</label>
+    </fieldset>
+
+    <fieldset>
+      <legend>Speed profile</legend>
+      <div class="row">
+        <label><input type="radio" name="profile" value="relaxed" /> Relaxed</label>
+        <label><input type="radio" name="profile" value="normal" /> Normal</label>
+        <label><input type="radio" name="profile" value="fast" /> Fast</label>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Gemini Nano</legend>
+      <div>Status: <b id="nano">…</b></div>
+      <button id="download" hidden>Download model</button>
+      <div id="progress" class="muted"></div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Page</legend>
+      <label><input type="checkbox" id="overlay" /> Show debug overlay</label>
+      <label><input type="checkbox" id="autocc" /> Briefly toggle CC to load transcript</label>
+    </fieldset>
+
+    <fieldset>
+      <legend>Log</legend>
+      <div id="logcount" class="muted"></div>
+      <div class="row" style="margin-top: 4px">
+        <button id="export">Export JSON</button>
+        <button id="clear">Clear</button>
+      </div>
+    </fieldset>
+    <script src="popup.js"></script>
+  </body>
+</html>
