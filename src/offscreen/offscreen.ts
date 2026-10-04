@@ -17,7 +17,7 @@ chrome.runtime.onMessage.addListener((msg: OffscreenEnvelope, _sender, sendRespo
     const status = await nanoAvailability();
     if (status !== 'available') return { ok: false, status, error: `Gemini Nano is ${status}` };
     try {
-      return { ok: true, result: await engine.score(request.text) };
+      return { ok: true, result: await engine.score(request.text, request.context) };
     } catch (e) {
       return { ok: false, status, error: e instanceof Error ? e.message : String(e) };
     }

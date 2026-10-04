@@ -4,7 +4,8 @@ import { loadSettings, onSettingsChanged, saveSettings, type Settings } from '..
 import type { AiAvailability, DecisionLogEntry, Feedback, SpeechFeatures, TimedWord } from '../shared/types';
 import { LANGUAGE_OPTIONS, getLanguageModel } from '../shared/nano';
 import { ComplexityCache, DisabledProvider, NanoProvider, type ComplexityProvider } from './ai';
-import { computeTarget, initialState, resetSmoothing, step, videoMean, type ControllerState } from './controller';
+import type { ChunkContext } from '../shared/complexity-prompt';
+import { computeTarget, initialState, step, videoMean, type ControllerState } from './controller';
 import { computeFeatures, windowText } from './features';
 import { Overlay } from './overlay';
 import { TranscriptStore } from './transcript';
@@ -214,17 +215,11 @@ function onRateChange(): void {
   }
 }
 
-function onSeeked(): void {
-  ctrl = resetSmoothing(ctrl);
-}
-
 function bindVideo(v: HTMLVideoElement | null): void {
   if (video === v) return;
   video?.removeEventListener('ratechange', onRateChange);
-  video?.removeEventListener('seeked', onSeeked);
   video = v;
   video?.addEventListener('ratechange', onRateChange);
-  video?.addEventListener('seeked', onSeeked);
   const player = document.getElementById('movie_player');
   captionObserver.disconnect();
   if (player) captionObserver.observe(player, { childList: true, subtree: true, characterData: true });
@@ -267,26 +262,46 @@ interface Analysis {
   features: SpeechFeatures | null;
   chunk: string;
   aiKey: string | null;
+  /** Chunk position on the timeline, used to order scores for the video average. */
+  aiIndex: number;
   aiText: string;
+  aiContext: ChunkContext;
   source: string;
 }
 
+function videoTitle(): string {
+  const h1 = document.querySelector('h1.ytd-watch-metadata')?.textContent?.trim();
+  return h1 || document.title.replace(/\s*-\s*YouTube\s*$/, '');
+}
+
 function analyze(id: string, t: number): Analysis {
+  const title = videoTitle();
   const track = store.track(id);
   if (track) {
     const k = Math.round(t / CHUNK_STEP);
-    const aiFrom = k * CHUNK_STEP;
+    // Each chunk is scored with the ~20 s before it as context (so recaps can be recognized).
+    const chunkFor = (j: number) => {
+      const from = j * CHUNK_STEP;
+      return {
+        text: windowText(track.words, from, from + WINDOW_SEC),
+        context: { title, previous: windowText(track.words, from - WINDOW_SEC, from) },
+      };
+    };
     // Prefetch the next chunks so scores are ready before playback reaches them.
     if (aiReady()) {
       for (const j of [k + 1, k + 2]) {
-        ai.request(`${id}:${j}`, windowText(track.words, j * CHUNK_STEP, j * CHUNK_STEP + WINDOW_SEC));
+        const c = chunkFor(j);
+        ai.request(`${id}:${j}`, j, c.text, c.context);
       }
     }
+    const current = chunkFor(k);
     return {
       features: computeFeatures(track.words, track.cues, t, t + WINDOW_SEC, track.timing),
       chunk: windowText(track.words, t, t + WINDOW_SEC),
       aiKey: `${id}:${k}`,
-      aiText: windowText(track.words, aiFrom, aiFrom + WINDOW_SEC),
+      aiIndex: k,
+      aiText: current.text,
+      aiContext: current.context,
       source: `${track.source} (${track.lang}${track.kind ? ', ' + track.kind : ''}, ${track.timing} timing) · lookahead`,
     };
   }
@@ -294,20 +309,23 @@ function analyze(id: string, t: number): Analysis {
   if (live.length > 0 && live[live.length - 1]!.t > t - WINDOW_SEC) {
     const from = Math.max(0, t - WINDOW_SEC);
     const text = windowText(live, from, t + 0.01);
+    const k = Math.round(t / CHUNK_STEP);
     return {
       features: computeFeatures(live, [], from, t + 0.01, 'live-dom'),
       chunk: text,
-      aiKey: `${id}:live:${Math.round(t / CHUNK_STEP)}`,
+      aiKey: `${id}:live:${k}`,
+      aiIndex: k,
       aiText: text,
+      aiContext: { title, previous: windowText(live, from - WINDOW_SEC, from) },
       source: 'live captions · reactive (no lookahead)',
     };
   }
-  return { features: null, chunk: '', aiKey: null, aiText: '', source: 'none' };
+  return { features: null, chunk: '', aiKey: null, aiIndex: 0, aiText: '', aiContext: {}, source: 'none' };
 }
 
 function describeSpeech(f: SpeechFeatures | null): string {
   if (!f) return '—';
-  return `${Math.round(f.wpm)} wpm (artic. ${Math.round(f.articulationWpm)}) · ${f.pauseCount} pauses ${Math.round(
+  return `${Math.round(f.articulationWpm)} wpm talking (${Math.round(f.wpm)} overall) · ${f.pauseCount} pauses ${Math.round(
     f.pauseRatio * 100,
   )}% · ${f.words} words`;
 }
@@ -341,9 +359,9 @@ function tick(): void {
 
   const a = analyze(id, video.currentTime);
   const aiResult = aiReady() && a.aiKey ? ai.get(a.aiKey) : null;
-  const aiScores = ai.scores();
+  const aiScores = ai.scoresUpTo(a.aiIndex);
   const aiMean = videoMean(aiScores);
-  if (aiReady() && a.aiKey && !aiResult) ai.request(a.aiKey, a.aiText);
+  if (aiReady() && a.aiKey && !aiResult) ai.request(a.aiKey, a.aiIndex, a.aiText, a.aiContext);
 
   let notice: string | null = captionNotice;
   let blocked = false;

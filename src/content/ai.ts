@@ -1,3 +1,4 @@
+import type { ChunkContext } from '../shared/complexity-prompt';
 import type { AiRequest, AiResponse } from '../shared/messages';
 import type { AiAvailability, ComplexityResult } from '../shared/types';
 
@@ -5,7 +6,7 @@ import type { AiAvailability, ComplexityResult } from '../shared/types';
 export interface ComplexityProvider {
   readonly name: string;
   status(): Promise<AiAvailability>;
-  score(text: string): Promise<ComplexityResult>;
+  score(text: string, context?: ChunkContext): Promise<ComplexityResult>;
 }
 
 export class DisabledProvider implements ComplexityProvider {
@@ -35,8 +36,8 @@ export class NanoProvider implements ComplexityProvider {
     }
   }
 
-  async score(text: string): Promise<ComplexityResult> {
-    const r = await this.send({ kind: 'ai:score', text });
+  async score(text: string, context?: ChunkContext): Promise<ComplexityResult> {
+    const r = await this.send({ kind: 'ai:score', text, context });
     if (r.ok && 'result' in r) return r.result;
     throw new Error(r.ok ? 'unexpected response' : r.error);
   }
@@ -47,7 +48,7 @@ export class NanoProvider implements ComplexityProvider {
  * inference: it uses whatever score is ready and otherwise falls back to speech features.
  */
 export class ComplexityCache {
-  private results = new Map<string, ComplexityResult>();
+  private results = new Map<string, { index: number; result: ComplexityResult }>();
   private inflight = new Set<string>();
   private failures = 0;
   private generation = 0;
@@ -68,19 +69,20 @@ export class ComplexityCache {
   }
 
   get(key: string): ComplexityResult | null {
-    return this.results.get(key) ?? null;
+    return this.results.get(key)?.result ?? null;
   }
 
-  request(key: string, text: string): void {
+  /** `index` is the chunk's position on the video timeline (used to order scores). */
+  request(key: string, index: number, text: string, context?: ChunkContext): void {
     if (this.results.has(key) || this.inflight.has(key) || !text.trim()) return;
     if (this.failures >= 5) return; // stop hammering a broken provider; cleared on video change
     this.inflight.add(key);
     const gen = this.generation;
     this.provider
-      .score(text)
+      .score(text, context)
       .then((r) => {
         if (gen !== this.generation) return;
-        this.results.set(key, r);
+        this.results.set(key, { index, result: r });
         this.failures = 0;
         this.lastError = null;
       })
@@ -94,9 +96,12 @@ export class ComplexityCache {
       });
   }
 
-  /** All scores (0..1) computed so far for the current video. */
-  scores(): number[] {
-    return Array.from(this.results.values(), (r) => r.score);
+  /** Scores (0..1) of chunks up to and including `index`, in timeline order (no peeking ahead). */
+  scoresUpTo(index: number): number[] {
+    return Array.from(this.results.values())
+      .filter((e) => e.index <= index)
+      .sort((a, b) => a.index - b.index)
+      .map((e) => e.result.score);
   }
 
   get pending(): number {

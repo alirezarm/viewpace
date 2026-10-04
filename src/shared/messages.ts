@@ -1,10 +1,11 @@
+import type { ChunkContext } from './complexity-prompt';
 import type { AiAvailability, ComplexityResult } from './types';
 
 // --- content script <-> background <-> offscreen (chrome.runtime messaging) ---
 
 export type AiRequest =
   | { kind: 'ai:status' }
-  | { kind: 'ai:score'; text: string };
+  | { kind: 'ai:score'; text: string; context?: ChunkContext };
 
 export type AiResponse =
   | { ok: true; status: AiAvailability; detail?: string }

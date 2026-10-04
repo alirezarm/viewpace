@@ -1,9 +1,19 @@
 /** Prompt + output contract for the semantic complexity provider. Model-agnostic. */
 
 export const MAX_CHUNK_CHARS = 1500;
+const MAX_TITLE_CHARS = 150;
+
+/** Context shown to the model but not scored. */
+export interface ChunkContext {
+  title?: string;
+  /** Transcript of the ~20 s just before the excerpt. */
+  previous?: string;
+}
 
 export const SYSTEM_PROMPT = `You rate how much careful listening a short excerpt of a spoken video transcript requires.
 The excerpt is auto-transcribed speech: it may lack punctuation and contain transcription errors.
+You may also get the video title and the text spoken just before the excerpt. Use them only as
+context: score only the excerpt. If the excerpt mostly repeats or recaps the previous text, score it low.
 
 Score "complexity" as an integer from 0 to 10:
 0-2: filler, greetings, small talk, sponsor reads, repetition, jokes, recaps of what was already said.
@@ -26,9 +36,19 @@ export const RESPONSE_SCHEMA = {
   additionalProperties: false,
 } as const;
 
-export function buildUserPrompt(chunk: string): string {
-  const text = chunk.length > MAX_CHUNK_CHARS ? chunk.slice(0, MAX_CHUNK_CHARS) + ' …' : chunk;
-  return `Transcript excerpt:\n"""\n${text}\n"""`;
+const cap = (s: string, n: number) => (s.length > n ? s.slice(0, n) + ' …' : s);
+
+export function buildUserPrompt(chunk: string, ctx: ChunkContext = {}): string {
+  const parts: string[] = [];
+  if (ctx.title?.trim()) parts.push(`Video title: ${cap(ctx.title.trim(), MAX_TITLE_CHARS)}`);
+  if (ctx.previous?.trim()) {
+    // Keep the end of the previous text: it's what leads into the excerpt.
+    const prev = ctx.previous.trim();
+    const tail = prev.length > MAX_CHUNK_CHARS ? '… ' + prev.slice(-MAX_CHUNK_CHARS) : prev;
+    parts.push(`Previous text (context only, do not score):\n"""\n${tail}\n"""`);
+  }
+  parts.push(`Excerpt to score:\n"""\n${cap(chunk, MAX_CHUNK_CHARS)}\n"""`);
+  return parts.join('\n\n');
 }
 
 /** Validate and clamp the model output. Throws on anything unusable. */

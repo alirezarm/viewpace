@@ -1,6 +1,6 @@
 /** Gemini Nano via Chrome's Prompt API. Usable from any extension *window* context (not workers). */
 import type { AiAvailability, ComplexityResult } from './types';
-import { RESPONSE_SCHEMA, SYSTEM_PROMPT, buildUserPrompt, parseComplexity } from './complexity-prompt';
+import { RESPONSE_SCHEMA, SYSTEM_PROMPT, buildUserPrompt, parseComplexity, type ChunkContext } from './complexity-prompt';
 
 export const LANGUAGE_OPTIONS = {
   expectedInputs: [{ type: 'text', languages: ['en'] }],
@@ -52,7 +52,7 @@ export class NanoComplexityEngine {
   }
 
   /** Scores are serialized: one on-device inference at a time. */
-  score(chunk: string): Promise<ComplexityResult> {
+  score(chunk: string, context?: ChunkContext): Promise<ComplexityResult> {
     const run = async (): Promise<ComplexityResult> => {
       const t0 = performance.now();
       const base = await this.baseSession();
@@ -61,7 +61,7 @@ export class NanoComplexityEngine {
       // Clone per prompt so earlier excerpts don't accumulate in context or bias later scores.
       const session = await base.clone({ signal: controller.signal });
       try {
-        const out = await session.prompt(buildUserPrompt(chunk), {
+        const out = await session.prompt(buildUserPrompt(chunk, context), {
           responseConstraint: RESPONSE_SCHEMA,
           signal: controller.signal,
         });

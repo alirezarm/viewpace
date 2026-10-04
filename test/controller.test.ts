@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { CONTROL, PROFILES, computeTarget, initialState, step, videoMean } from '../src/content/controller';
-import { parseComplexity } from '../src/shared/complexity-prompt';
+import { buildUserPrompt, parseComplexity } from '../src/shared/complexity-prompt';
 import type { SpeechFeatures } from '../src/shared/types';
 
 const feat = (wpm: number, extra: Partial<SpeechFeatures> = {}): SpeechFeatures => ({
@@ -23,6 +23,20 @@ describe('computeTarget', () => {
     const fast = computeTarget({ features: feat(240), complexity: null }, 'normal', 'baseline');
     expect(slow.rate).toBeCloseTo(PROFILES.normal.targetWpm / 125);
     expect(fast.rate).toBeLessThan(1.1);
+  });
+
+  it('does not over-speed a fast talker who pauses a lot', () => {
+    // 220 wpm while talking, 40% silence → 132 wpm overall
+    const f = feat(132, { articulationWpm: 220, pauseRatio: 0.4, pauseSec: 8 });
+    const t = computeTarget({ features: f, complexity: null }, 'normal', 'baseline');
+    expect(t.rate).toBeCloseTo((250 / 220) * 1.2); // ≈1.36×, not 250/132 ≈ 1.9×
+    expect(t.reason).toMatch(/40% pauses → \+20%/);
+  });
+
+  it('caps the pause bonus', () => {
+    const f = feat(100, { articulationWpm: 200, pauseRatio: 0.9 });
+    const t = computeTarget({ features: f, complexity: null }, 'normal', 'baseline');
+    expect(t.rate).toBeCloseTo((250 / 200) * (1 + CONTROL.pauseBonusMax));
   });
 
   it('respects profile clamps', () => {
@@ -78,6 +92,11 @@ describe('videoMean', () => {
     expect(one).toBeLessThan(0.65); // one chunk can't swing it far
     expect(many).toBeGreaterThan(0.73); // after 12 chunks the real scores dominate
   });
+
+  it('becomes a moving average that follows a video getting harder', () => {
+    const scores = [...Array(30).fill(0.4), ...Array(20).fill(0.8)];
+    expect(videoMean(scores)).toBeGreaterThan(0.7); // a lifetime average would be 0.56
+  });
 });
 
 describe('step', () => {
@@ -109,7 +128,7 @@ describe('step', () => {
     expect(s.current).toBe(1.2);
   });
 
-  it('never oscillates faster than the decision interval under a noisy target', () => {
+  it('never changes speed more often than every 7 s, whatever the target does', () => {
     let s = initialState(1.3);
     const changes: number[] = [];
     for (let t = 0; t < 120000; t += 1000) {
@@ -119,7 +138,25 @@ describe('step', () => {
       if (r.decision?.changed) changes.push(t);
     }
     for (let i = 1; i < changes.length; i++) expect(changes[i]! - changes[i - 1]!).toBeGreaterThanOrEqual(CONTROL.minIntervalMs);
-    expect(changes.length).toBeLessThan(4); // EMA averages the noise out
+  });
+
+  it('ignores small flip-flops of the target (e.g. AI scores alternating between chunks)', () => {
+    let s = step(initialState(1.3), 1.45, 0).state; // one real change up to 1.45
+    let changes = 0;
+    for (let t = 1000; t < 60000; t += 1000) {
+      const target = Math.floor(t / 10000) % 2 === 0 ? 1.45 : 1.3; // alternates every 10 s
+      const r = step(s, target, t);
+      s = r.state;
+      if (r.decision?.changed) changes++;
+    }
+    expect(changes).toBeLessThanOrEqual(1);
+  });
+
+  it('slows down in bigger steps than it speeds up', () => {
+    const down = step(initialState(2.0), 1.2, 0).decision!;
+    const up = step(initialState(1.2), 2.0, 0).decision!;
+    expect(down.rate).toBe(1.5); // −0.5
+    expect(up.rate).toBe(1.45); // +0.25
   });
 });
 
@@ -130,5 +167,17 @@ describe('parseComplexity', () => {
   });
   it('throws on garbage', () => {
     expect(() => parseComplexity('{"complexity": "lots"}')).toThrow();
+  });
+});
+
+describe('buildUserPrompt', () => {
+  it('puts title and previous text before the excerpt, marked as context', () => {
+    const p = buildUserPrompt('the excerpt', { title: 'Neural nets', previous: 'earlier words' });
+    expect(p.indexOf('Video title: Neural nets')).toBeLessThan(p.indexOf('Previous text (context only'));
+    expect(p.indexOf('earlier words')).toBeLessThan(p.indexOf('Excerpt to score'));
+    expect(p.trim().endsWith('the excerpt\n"""')).toBe(true);
+  });
+  it('omits empty context', () => {
+    expect(buildUserPrompt('x', { title: '', previous: '  ' })).toBe('Excerpt to score:\n"""\nx\n"""');
   });
 });
