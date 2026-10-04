@@ -4,7 +4,7 @@ import { loadSettings, onSettingsChanged, saveSettings, type Settings } from '..
 import type { AiAvailability, DecisionLogEntry, Feedback, SpeechFeatures, TimedWord } from '../shared/types';
 import { LANGUAGE_OPTIONS, getLanguageModel } from '../shared/nano';
 import { ComplexityCache, DisabledProvider, NanoProvider, type ComplexityProvider } from './ai';
-import { computeTarget, initialState, resetSmoothing, step, type ControllerState } from './controller';
+import { computeTarget, initialState, resetSmoothing, step, videoMean, type ControllerState } from './controller';
 import { computeFeatures, windowText } from './features';
 import { Overlay } from './overlay';
 import { TranscriptStore } from './transcript';
@@ -341,6 +341,8 @@ function tick(): void {
 
   const a = analyze(id, video.currentTime);
   const aiResult = aiReady() && a.aiKey ? ai.get(a.aiKey) : null;
+  const aiScores = ai.scores();
+  const aiMean = videoMean(aiScores);
   if (aiReady() && a.aiKey && !aiResult) ai.request(a.aiKey, a.aiText);
 
   let notice: string | null = captionNotice;
@@ -357,7 +359,11 @@ function tick(): void {
   }
 
   if (!blocked && !video.paused && video.readyState >= 2) {
-    const target = computeTarget({ features: a.features, complexity: aiResult?.score ?? null }, settings.profile, settings.mode);
+    const target = computeTarget(
+      { features: a.features, complexity: aiResult?.score ?? null, complexityMean: aiMean },
+      settings.profile,
+      settings.mode,
+    );
     lastTargetRate = target.rate;
     const { state, decision } = step(ctrl, target.rate, performance.now());
     ctrl = state;
@@ -373,6 +379,7 @@ function tick(): void {
         features: a.features,
         aiScore: aiResult?.raw ?? null,
         aiLabel: aiResult?.label ?? null,
+        aiMean: aiResult ? Number((aiMean * 10).toFixed(2)) : null,
         previousRate: decision.previousRate,
         selectedRate: decision.rate,
         targetRate: Number(target.rate.toFixed(3)),
@@ -401,7 +408,11 @@ function tick(): void {
       aiText = `Gemini Nano status: ${aiStatus} (using speech features only)`;
     }
   } else if (settings.mode === 'ai') {
-    if (aiResult) aiText = `${aiResult.raw}/10: ${aiResult.label} (${aiResult.latencyMs} ms)`;
+    if (aiResult) {
+      const diff = aiResult.raw - aiMean * 10;
+      const vs = Math.abs(diff) < 0.5 ? 'about average' : diff > 0 ? 'harder than avg' : 'easier than avg';
+      aiText = `${aiResult.raw}/10, ${vs} ${(aiMean * 10).toFixed(1)} (${aiScores.length} chunks): ${aiResult.label} (${aiResult.latencyMs} ms)`;
+    }
     else if (ai.lastError) aiText = `error: ${ai.lastError}`;
     else aiText = a.aiKey ? `pending… (${ai.pending} in flight)` : '— (no transcript)';
   }

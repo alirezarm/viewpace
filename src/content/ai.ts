@@ -94,6 +94,11 @@ export class ComplexityCache {
       });
   }
 
+  /** All scores (0..1) computed so far for the current video. */
+  scores(): number[] {
+    return Array.from(this.results.values(), (r) => r.score);
+  }
+
   get pending(): number {
     return this.inflight.size;
   }

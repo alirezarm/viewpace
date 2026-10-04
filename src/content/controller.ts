@@ -29,14 +29,32 @@ export const CONTROL = {
   quantum: 0.05,
   /** Below this many words in the window we don't trust speech-rate estimates. */
   minWords: 8,
-  /** How strongly AI complexity (0..1, centred at 0.5) scales the comfortable wpm: ±aiWeight. */
+  /**
+   * How strongly AI complexity scales the comfortable wpm. The score is judged relative to this
+   * video's running average: factor = 1 − 2·aiWeight·(score − mean), clamped to 1 ± aiWeight.
+   */
   aiWeight: 0.3,
+  /** Starting guess for a video's average complexity (0..1) before real scores arrive. */
+  aiPriorMean: 0.5,
+  /** The starting guess counts as this many chunks; real scores dominate after ~2× this. */
+  aiPriorWeight: 3,
 };
 
 export interface Signals {
   features: SpeechFeatures | null;
   /** Normalized AI complexity 0..1, or null when unavailable/pending. */
   complexity: number | null;
+  /** This video's running average complexity 0..1 (see videoMean). Defaults to the prior. */
+  complexityMean?: number;
+}
+
+/**
+ * Running average of the scores seen so far in this video, blended with a prior so the first
+ * one or two chunks can't swing the reference point.
+ */
+export function videoMean(scores: number[]): number {
+  const sum = scores.reduce((a, b) => a + b, 0);
+  return (CONTROL.aiPriorMean * CONTROL.aiPriorWeight + sum) / (CONTROL.aiPriorWeight + scores.length);
 }
 
 export interface Target {
@@ -65,9 +83,10 @@ export function computeTarget(signals: Signals, profileName: ProfileName, mode: 
 
   if (mode === 'ai') {
     if (signals.complexity !== null) {
-      const factor = 1 + CONTROL.aiWeight * (1 - 2 * signals.complexity);
+      const mean = signals.complexityMean ?? CONTROL.aiPriorMean;
+      const factor = clamp(1 - 2 * CONTROL.aiWeight * (signals.complexity - mean), 1 - CONTROL.aiWeight, 1 + CONTROL.aiWeight);
       comfortWpm *= factor;
-      parts.push(`AI ${Math.round(signals.complexity * 10)}/10 → ×${fmt(factor)}`);
+      parts.push(`AI ${Math.round(signals.complexity * 10)}/10 vs avg ${(mean * 10).toFixed(1)} → ×${fmt(factor)}`);
     } else {
       parts.push('AI pending → speech only');
     }

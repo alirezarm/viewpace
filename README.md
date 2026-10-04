@@ -65,15 +65,18 @@ the upcoming 20 s window (pauses included, so pause-heavy speech is sped up).
 | Normal | 250 | 1.0–2.0× | 1.35× |
 | Fast | 320 | 1.1–2.5× | 1.6× |
 
-**AI Adaptive** scales `comfortWpm` by `1 + 0.3·(1 − 2c)` for complexity `c ∈ [0,1]`
-(×1.3 for trivial content, ×0.7 for very dense content). The model only produces `c`; it never
-picks a speed. If no score is ready, the decision falls back to speech features and the reason says so.
+**AI Adaptive** judges each chunk's complexity `c ∈ [0,1]` *relative to this video's running
+average* `m`: `comfortWpm × clamp(1 − 0.6·(c − m), 0.7, 1.3)`. `m` averages the scores of chunks
+already scored for playback (no extra model calls), blended with a prior of 0.5 worth 3 chunks so
+the first scores can't swing it. A uniformly dense video therefore plays at about Baseline speed
+on average; AI mode only redistributes time toward the harder parts. The model only produces `c`;
+it never picks a speed. If no score is ready, the decision falls back to speech features and the reason says so.
 
 ## Log format
 
 Popup → **Export JSON**. One entry per decision (every ≥7 s, including "hold" decisions):
 `timestamp, videoId, videoTime, chunk, features{wpm, articulationWpm, pauseCount, pauseSec,
-pauseRatio, words, timing}, aiScore, aiLabel, previousRate, selectedRate, targetRate, changed,
+pauseRatio, words, timing}, aiScore, aiLabel, aiMean, previousRate, selectedRate, targetRate, changed,
 mode, profile, reason, transcriptSource, feedback, feedbackAt`. Feedback buttons attach to the
 most recent decision.
 

@@ -70,6 +70,8 @@ export interface DecisionLogEntry {
   features: SpeechFeatures | null;
   aiScore: number | null; // 0..10 raw
   aiLabel: string | null;
+  /** Video's running average complexity (0..10, prior-blended) the AI score was compared against. */
+  aiMean: number | null;
   previousRate: number;
   selectedRate: number;
   targetRate: number;

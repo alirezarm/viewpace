@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { CONTROL, PROFILES, computeTarget, initialState, step } from '../src/content/controller';
+import { CONTROL, PROFILES, computeTarget, initialState, step, videoMean } from '../src/content/controller';
 import { parseComplexity } from '../src/shared/complexity-prompt';
 import type { SpeechFeatures } from '../src/shared/types';
 
@@ -45,11 +45,38 @@ describe('computeTarget', () => {
     expect(easy).toBeGreaterThan(base);
   });
 
+  it('AI mode judges complexity relative to the video average', () => {
+    const f = feat(150);
+    const baseline = computeTarget({ features: f, complexity: null }, 'normal', 'baseline').rate;
+    // A uniformly "hard" video (avg 0.7): an average chunk plays at Baseline speed...
+    expect(computeTarget({ features: f, complexity: 0.7, complexityMean: 0.7 }, 'normal', 'ai').rate).toBeCloseTo(baseline);
+    // ...and only chunks harder/easier than that average move the speed.
+    expect(computeTarget({ features: f, complexity: 0.9, complexityMean: 0.7 }, 'normal', 'ai').rate).toBeLessThan(baseline);
+    expect(computeTarget({ features: f, complexity: 0.5, complexityMean: 0.7 }, 'normal', 'ai').rate).toBeGreaterThan(baseline);
+  });
+
+  it('caps the AI effect at ±aiWeight', () => {
+    const f = feat(150);
+    const t = computeTarget({ features: f, complexity: 1, complexityMean: 0 }, 'normal', 'ai');
+    expect(t.reason).toContain(`×${(1 - CONTROL.aiWeight).toFixed(2)}`);
+  });
+
   it('baseline mode ignores the AI score', () => {
     const f = feat(150);
     expect(computeTarget({ features: f, complexity: 1 }, 'normal', 'baseline').rate).toBe(
       computeTarget({ features: f, complexity: 0 }, 'normal', 'baseline').rate,
     );
+  });
+});
+
+describe('videoMean', () => {
+  it('starts at the prior and moves toward real scores as chunks accumulate', () => {
+    expect(videoMean([])).toBe(CONTROL.aiPriorMean);
+    const one = videoMean([0.8]);
+    const many = videoMean(Array(12).fill(0.8));
+    expect(one).toBeGreaterThan(0.5);
+    expect(one).toBeLessThan(0.65); // one chunk can't swing it far
+    expect(many).toBeGreaterThan(0.73); // after 12 chunks the real scores dominate
   });
 });
 
