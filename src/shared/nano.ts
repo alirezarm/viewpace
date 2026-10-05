@@ -24,6 +24,24 @@ export async function nanoAvailability(): Promise<AiAvailability> {
   }
 }
 
+/**
+ * Download/set up Gemini Nano. Must be called from a user gesture (popup or overlay click);
+ * the model is shared browser-wide, so the service worker can use it afterwards.
+ * `onProgress` receives the download fraction 0..1. Throws if the Prompt API is missing or
+ * the download fails.
+ */
+export async function downloadNanoModel(onProgress?: (fraction: number) => void): Promise<void> {
+  const LM = getLanguageModel();
+  if (!LM) throw new Error('Prompt API not available in this context');
+  const session = await LM.create({
+    ...LANGUAGE_OPTIONS,
+    monitor(m) {
+      m.addEventListener('downloadprogress', (e) => onProgress?.((e as ProgressEvent).loaded ?? 0));
+    },
+  });
+  session.destroy();
+}
+
 const SCORE_TIMEOUT_MS = 10000;
 
 export class NanoComplexityEngine {

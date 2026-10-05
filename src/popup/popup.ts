@@ -1,5 +1,5 @@
 import { clearLog, readLog } from '../shared/log';
-import { LANGUAGE_OPTIONS, getLanguageModel, nanoAvailability } from '../shared/nano';
+import { downloadNanoModel, nanoAvailability } from '../shared/nano';
 import { loadSettings, saveSettings, type Settings } from '../shared/settings';
 
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
@@ -37,19 +37,9 @@ function bind(): void {
 
   // Model download needs a user gesture, so it happens here rather than in the service worker.
   $<HTMLButtonElement>('download').addEventListener('click', async () => {
-    const LM = getLanguageModel();
-    if (!LM) return;
     const progress = $('progress');
     try {
-      const session = await LM.create({
-        ...LANGUAGE_OPTIONS,
-        monitor(m) {
-          m.addEventListener('downloadprogress', (e) => {
-            progress.textContent = `downloading ${Math.round(((e as ProgressEvent).loaded ?? 0) * 100)}%`;
-          });
-        },
-      });
-      session.destroy();
+      await downloadNanoModel((f) => (progress.textContent = `downloading ${Math.round(f * 100)}%`));
       progress.textContent = 'ready';
     } catch (e) {
       progress.textContent = `failed: ${e instanceof Error ? e.message : String(e)}`;

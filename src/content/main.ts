@@ -2,7 +2,7 @@ import { appendDecision, attachFeedback } from '../shared/log';
 import { PAGE_TAG, type ContentToPage, type PageToContent } from '../shared/messages';
 import { loadSettings, onSettingsChanged, saveSettings, type Settings } from '../shared/settings';
 import type { AiAvailability, DecisionLogEntry, Feedback, SpeechFeatures, TimedWord } from '../shared/types';
-import { LANGUAGE_OPTIONS, getLanguageModel } from '../shared/nano';
+import { downloadNanoModel } from '../shared/nano';
 import { ComplexityCache, DisabledProvider, NanoProvider, type ComplexityProvider } from './ai';
 import type { ChunkContext } from '../shared/complexity-prompt';
 import { computeTarget, initialState, step, videoMean, type ControllerState } from './controller';
@@ -87,22 +87,9 @@ let downloadProgress: string | null = null;
  * is shared browser-wide, so downloading it here also makes it available to the service worker.
  */
 async function downloadModel(): Promise<void> {
-  const LM = getLanguageModel();
-  if (!LM) {
-    downloadProgress = 'Prompt API not available here: use the AutoSpeed popup → Download model';
-    return;
-  }
   downloadProgress = 'starting download…';
   try {
-    const session = await LM.create({
-      ...LANGUAGE_OPTIONS,
-      monitor(m) {
-        m.addEventListener('downloadprogress', (e) => {
-          downloadProgress = `downloading ${Math.round(((e as ProgressEvent).loaded ?? 0) * 100)}%`;
-        });
-      },
-    });
-    session.destroy();
+    await downloadNanoModel((f) => (downloadProgress = `downloading ${Math.round(f * 100)}%`));
     downloadProgress = null;
   } catch (e) {
     downloadProgress = `download failed (${e instanceof Error ? e.message : String(e)}): try the AutoSpeed popup`;
