@@ -35,7 +35,7 @@ function bind(): void {
     r.addEventListener('change', () => patch({ profile: r.value as Settings['profile'] })),
   );
 
-  // Model download needs a user gesture, so it happens here rather than in the offscreen doc.
+  // Model download needs a user gesture, so it happens here rather than in the service worker.
   $<HTMLButtonElement>('download').addEventListener('click', async () => {
     const LM = getLanguageModel();
     if (!LM) return;

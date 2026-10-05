@@ -12,7 +12,6 @@ const options = {
     hook: 'src/page/hook.ts',
     content: 'src/content/main.ts',
     background: 'src/background/background.ts',
-    offscreen: 'src/offscreen/offscreen.ts',
     popup: 'src/popup/popup.ts',
   },
   outdir: 'dist',

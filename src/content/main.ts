@@ -84,7 +84,7 @@ let downloadProgress: string | null = null;
 
 /**
  * Start the Gemini Nano download from an overlay click (a user gesture in this page). The model
- * is shared browser-wide, so downloading it here also makes it available to the offscreen doc.
+ * is shared browser-wide, so downloading it here also makes it available to the service worker.
  */
 async function downloadModel(): Promise<void> {
   const LM = getLanguageModel();

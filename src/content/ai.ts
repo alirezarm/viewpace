@@ -19,7 +19,7 @@ export class DisabledProvider implements ComplexityProvider {
   }
 }
 
-/** Gemini Nano, running in the extension's offscreen document (via the service worker). */
+/** Gemini Nano, running in the extension service worker. */
 export class NanoProvider implements ComplexityProvider {
   readonly name = 'gemini-nano';
 

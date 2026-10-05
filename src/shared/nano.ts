@@ -1,4 +1,7 @@
-/** Gemini Nano via Chrome's Prompt API. Usable from any extension *window* context (not workers). */
+/**
+ * Gemini Nano via Chrome's Prompt API. Usable from extension pages and the extension service
+ * worker (Chrome enables the API for workers only in extension processes).
+ */
 import type { AiAvailability, ComplexityResult } from './types';
 import { RESPONSE_SCHEMA, SYSTEM_PROMPT, buildUserPrompt, parseComplexity, type ChunkContext } from './complexity-prompt';
 
@@ -59,7 +62,14 @@ export class NanoComplexityEngine {
       const controller = new AbortController();
       const timer = setTimeout(() => controller.abort(), SCORE_TIMEOUT_MS);
       // Clone per prompt so earlier excerpts don't accumulate in context or bias later scores.
-      const session = await base.clone({ signal: controller.signal });
+      let session: LanguageModelSession;
+      try {
+        session = await base.clone({ signal: controller.signal });
+      } catch (e) {
+        clearTimeout(timer);
+        this.base = null; // base session unusable (e.g. destroyed by Chrome): re-create next time
+        throw e;
+      }
       try {
         const out = await session.prompt(buildUserPrompt(chunk, context), {
           responseConstraint: RESPONSE_SCHEMA,

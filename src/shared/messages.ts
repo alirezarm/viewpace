@@ -1,7 +1,7 @@
 import type { ChunkContext } from './complexity-prompt';
 import type { AiAvailability, ComplexityResult } from './types';
 
-// --- content script <-> background <-> offscreen (chrome.runtime messaging) ---
+// --- content script / popup <-> background service worker (chrome.runtime messaging) ---
 
 export type AiRequest =
   | { kind: 'ai:status' }
@@ -11,12 +11,6 @@ export type AiResponse =
   | { ok: true; status: AiAvailability; detail?: string }
   | { ok: true; result: ComplexityResult }
   | { ok: false; error: string; status?: AiAvailability };
-
-/** Background forwards AI requests to the offscreen document wrapped like this. */
-export interface OffscreenEnvelope {
-  target: 'offscreen';
-  request: AiRequest;
-}
 
 // --- MAIN-world hook <-> isolated content script (window.postMessage) ---
 

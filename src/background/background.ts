@@ -1,44 +1,31 @@
-import type { AiRequest, AiResponse, OffscreenEnvelope } from '../shared/messages';
+import type { AiRequest, AiResponse } from '../shared/messages';
+import { NanoComplexityEngine, nanoAvailability } from '../shared/nano';
 import { loadSettings, saveSettings } from '../shared/settings';
 
-const OFFSCREEN_URL = 'offscreen.html';
-let creating: Promise<void> | null = null;
+/**
+ * Gemini Nano runs here, in the extension service worker: Chrome exposes the Prompt API to
+ * extension service workers (unlike web-page workers). When Chrome stops this worker after
+ * ~30 s idle, the session is lost; this module is re-evaluated on the next message and the
+ * engine re-creates its session lazily on the first score request.
+ */
+const engine = new NanoComplexityEngine();
 
-async function ensureOffscreen(): Promise<void> {
-  const url = chrome.runtime.getURL(OFFSCREEN_URL);
-  const existing = await chrome.runtime.getContexts({
-    contextTypes: [chrome.runtime.ContextType.OFFSCREEN_DOCUMENT],
-    documentUrls: [url],
-  });
-  if (existing.length > 0) return;
-  if (!creating) {
-    creating = chrome.offscreen
-      .createDocument({
-        url: OFFSCREEN_URL,
-        // No offscreen reason covers on-device LLM inference; DOM_PARSER is the closest
-        // generic one. Chrome does not enforce the reason for unpacked extensions.
-        reasons: [chrome.offscreen.Reason.DOM_PARSER],
-        justification: 'Run the on-device Prompt API (Gemini Nano) to score transcript complexity.',
-      })
-      .finally(() => (creating = null));
-  }
-  await creating;
-}
-
-chrome.runtime.onMessage.addListener((msg: AiRequest | OffscreenEnvelope, _sender, sendResponse: (r: AiResponse) => void) => {
-  if (!msg || 'target' in msg) return false; // messages for the offscreen doc
-  if (msg.kind !== 'ai:status' && msg.kind !== 'ai:score') return false;
+chrome.runtime.onMessage.addListener((msg: AiRequest, _sender, sendResponse: (r: AiResponse) => void) => {
+  if (msg?.kind !== 'ai:status' && msg?.kind !== 'ai:score') return false;
 
   (async (): Promise<AiResponse> => {
+    if (msg.kind === 'ai:status') return { ok: true, status: await nanoAvailability() };
+    const status = await nanoAvailability();
+    // The model download needs a user gesture, which a service worker never has: it is
+    // started from the popup. Until then, report the status instead of trying to create.
+    if (status !== 'available') return { ok: false, status, error: `Gemini Nano is ${status}` };
     try {
-      await ensureOffscreen();
-      const envelope: OffscreenEnvelope = { target: 'offscreen', request: msg };
-      return (await chrome.runtime.sendMessage(envelope)) as AiResponse;
+      return { ok: true, result: await engine.score(msg.text, msg.context) };
     } catch (e) {
-      return { ok: false, status: 'error', error: e instanceof Error ? e.message : String(e) };
+      return { ok: false, status, error: e instanceof Error ? e.message : String(e) };
     }
   })().then(sendResponse);
-  return true;
+  return true; // async response
 });
 
 chrome.commands.onCommand.addListener(async (command) => {
