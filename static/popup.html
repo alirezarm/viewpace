@@ -2,62 +2,161 @@
 <html>
   <head>
     <meta charset="utf-8" />
+    <title>AutoSpeed</title>
     <style>
-      body { width: 280px; margin: 0; padding: 12px; font: 13px/1.4 system-ui, sans-serif; color: #222; background: #fff; }
-      h1 { font-size: 15px; margin: 0 0 8px; }
-      fieldset { border: 1px solid #ddd; border-radius: 6px; margin: 0 0 10px; padding: 6px 8px; }
-      legend { font-size: 11px; color: #666; padding: 0 4px; }
-      label { display: block; margin: 2px 0; }
-      .row { display: flex; gap: 6px; flex-wrap: wrap; }
-      .muted { color: #666; font-size: 12px; }
-      button { font: inherit; padding: 3px 8px; }
-      @media (prefers-color-scheme: dark) {
-        body { color: #eee; background: #202124; }
-        fieldset { border-color: #444; }
-        legend, .muted { color: #aaa; }
+      :root {
+        --bg: #ffffff;
+        --ink: #1f1f1f;
+        --muted: #5f6368;
+        --line: #e3e3e3;
+        --field: #f1f3f4;
+        --accent: #a35f00; /* amber, dark enough for text on white */
+        --accent-fill: #ffb627;
+        --on-accent: #1f1f1f;
       }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #202124;
+          --ink: #e8eaed;
+          --muted: #9aa0a6;
+          --line: #3c4043;
+          --field: #2d2e31;
+          --accent: #ffc857;
+          --accent-fill: #ffc857;
+          --on-accent: #1f1f1f;
+        }
+      }
+      * { box-sizing: border-box; }
+      body { width: 300px; margin: 0; padding: 16px; background: var(--bg); color: var(--ink);
+        font: 13px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+      [hidden] { display: none !important; }
+      button, input { font: inherit; color: inherit; }
+      :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+      p { margin: 0; }
+      .muted { color: var(--muted); }
+
+      /* Header: name + master switch */
+      header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+      h1 { margin: 0; font-size: 16px; font-weight: 650; letter-spacing: -0.01em; }
+      .intro { margin-top: 4px; color: var(--muted); }
+
+      .switch { position: relative; width: 36px; height: 20px; flex: none; }
+      .switch input { position: absolute; inset: 0; margin: 0; opacity: 0; cursor: pointer; }
+      .switch span { position: absolute; inset: 0; border-radius: 10px; background: var(--line); transition: background .15s; pointer-events: none; }
+      .switch span::after { content: ""; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%;
+        background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.3); transition: transform .15s; }
+      .switch input:checked + span { background: var(--accent-fill); }
+      .switch input:checked + span::after { transform: translateX(16px); }
+      .switch input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+      section { margin-top: 18px; }
+      h2 { margin: 0 0 8px; font-size: 13px; font-weight: 600; }
+
+      /* Pace: segmented control */
+      .segmented { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); padding: 3px; border-radius: 10px; background: var(--field); }
+      .segmented label { position: relative; }
+      .segmented input { position: absolute; opacity: 0; pointer-events: none; }
+      .segmented span { display: block; padding: 6px 0; border-radius: 8px; text-align: center; cursor: pointer; color: var(--muted); }
+      .segmented input:checked + span { background: var(--bg); color: var(--ink); font-weight: 600; box-shadow: 0 1px 2px rgba(0,0,0,.15); }
+      .segmented input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+      /* The speed track: this pace's range, with the live speed as a dot */
+      .track-row { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 8px; margin-top: 14px;
+        font-variant-numeric: tabular-nums; color: var(--muted); font-size: 12px; }
+      .track { position: relative; height: 4px; border-radius: 2px; background: var(--line); }
+      .dot { position: absolute; top: 50%; width: 12px; height: 12px; margin: -6px 0 0 -6px; border-radius: 50%;
+        background: var(--accent-fill); box-shadow: 0 0 0 3px var(--bg); transition: left .4s ease; }
+      .dot.paused { background: var(--bg); box-shadow: inset 0 0 0 2px var(--accent-fill), 0 0 0 3px var(--bg); }
+      .now { margin-top: 8px; }
+      .now strong { font-variant-numeric: tabular-nums; }
+
+      .smart { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; }
+      .primary { padding: 7px 12px; border: 0; border-radius: 8px; background: var(--accent-fill); color: var(--on-accent); font-weight: 600; cursor: pointer; justify-self: start; }
+      .primary:disabled { opacity: .6; cursor: default; }
+
+      .shortcut { margin-top: 18px; color: var(--muted); font-size: 12px; }
+      kbd { font: inherit; padding: 1px 5px; border: 1px solid var(--line); border-radius: 4px; }
+
+      /* Advanced: everything for testing and diagnostics */
+      details { margin-top: 16px; border-top: 1px solid var(--line); padding-top: 10px; }
+      summary { cursor: pointer; color: var(--muted); font-weight: 600; }
+      details[open] summary { color: var(--ink); }
+      .adv { display: grid; gap: 14px; margin-top: 12px; }
+      .adv label.check { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 8px; align-items: start; }
+      .adv label.check input { margin: 2px 0 0; accent-color: var(--accent-fill); }
+      .hint { color: var(--muted); font-size: 12px; }
+      .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+      .ghost { padding: 5px 10px; border: 1px solid var(--line); border-radius: 8px; background: transparent; cursor: pointer; }
+      .ghost:hover { background: var(--field); }
+      @media (prefers-reduced-motion: reduce) { .dot, .switch span, .switch span::after { transition: none; } }
     </style>
   </head>
   <body>
-    <h1>AutoSpeed</h1>
-    <label><input type="checkbox" id="enabled" /> Enabled <span class="muted">(Alt+Shift+S)</span></label>
+    <header>
+      <h1>AutoSpeed</h1>
+      <label class="switch" title="Turn AutoSpeed on or off">
+        <input type="checkbox" id="enabled" role="switch" aria-label="AutoSpeed on" />
+        <span></span>
+      </label>
+    </header>
+    <p class="intro">Speeds up YouTube when it's easy to follow and slows down when it isn't.</p>
 
-    <fieldset>
-      <legend>Mode</legend>
-      <label><input type="radio" name="mode" value="baseline" /> Baseline Adaptive (speech features)</label>
-      <label><input type="radio" name="mode" value="ai" /> AI Adaptive (+ Gemini Nano)</label>
-    </fieldset>
-
-    <fieldset>
-      <legend>Speed profile</legend>
-      <div class="row">
-        <label><input type="radio" name="profile" value="relaxed" /> Relaxed</label>
-        <label><input type="radio" name="profile" value="normal" /> Normal</label>
-        <label><input type="radio" name="profile" value="fast" /> Fast</label>
+    <section aria-labelledby="pace-h">
+      <h2 id="pace-h">Pace</h2>
+      <div class="segmented" role="radiogroup" aria-labelledby="pace-h">
+        <label><input type="radio" name="profile" value="relaxed" /><span>Relaxed</span></label>
+        <label><input type="radio" name="profile" value="normal" /><span>Normal</span></label>
+        <label><input type="radio" name="profile" value="fast" /><span>Fast</span></label>
       </div>
-    </fieldset>
-
-    <fieldset>
-      <legend>Gemini Nano</legend>
-      <div>Status: <b id="nano">…</b></div>
-      <button id="download" hidden>Download model</button>
-      <div id="progress" class="muted"></div>
-    </fieldset>
-
-    <fieldset>
-      <legend>Page</legend>
-      <label><input type="checkbox" id="overlay" /> Show debug overlay</label>
-      <label><input type="checkbox" id="autocc" /> Briefly toggle CC to load transcript</label>
-    </fieldset>
-
-    <fieldset>
-      <legend>Log</legend>
-      <div id="logcount" class="muted"></div>
-      <div class="row" style="margin-top: 4px">
-        <button id="export">Export JSON</button>
-        <button id="clear">Clear</button>
+      <div class="track-row" aria-hidden="true">
+        <span id="min"></span>
+        <div class="track"><span class="dot" id="dot" hidden></span></div>
+        <span id="max"></span>
       </div>
-    </fieldset>
+      <p class="now" id="now" aria-live="polite"></p>
+    </section>
+
+    <section id="smart" aria-labelledby="smart-h" hidden>
+      <h2 id="smart-h">Smart pacing</h2>
+      <div class="smart">
+        <p id="smart-text" class="muted"></p>
+        <button class="primary" id="setup" hidden>Set up smart pacing</button>
+      </div>
+    </section>
+
+    <p class="shortcut">Turn on or off anytime with <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>S</kbd></p>
+
+    <details id="advanced">
+      <summary>Advanced</summary>
+      <div class="adv">
+        <div>
+          <h2 id="mode-h">Analysis</h2>
+          <div class="segmented" role="radiogroup" aria-labelledby="mode-h" style="grid-template-columns: repeat(2, minmax(0, 1fr))">
+            <label><input type="radio" name="mode" value="baseline" /><span>Speech only</span></label>
+            <label><input type="radio" name="mode" value="ai" /><span>Speech + content</span></label>
+          </div>
+          <p class="hint" style="margin-top: 6px">Speech + content also reads what's being said, using Chrome's on-device AI (Gemini Nano). Nothing leaves your computer.</p>
+        </div>
+
+        <label class="check"><input type="checkbox" id="overlay" /><span>Speed badge on the video</span></label>
+        <label class="check"><input type="checkbox" id="debug" /><span>Detailed debug overlay<br /><span class="hint">Shows speech rate, AI scores, transcript and decision reasons.</span></span></label>
+        <label class="check"><input type="checkbox" id="autocc" /><span>Read captions automatically<br /><span class="hint">Briefly turns CC on and off when a video starts, so AutoSpeed can read the transcript.</span></span></label>
+
+        <div>
+          <h2>On-device model</h2>
+          <p class="hint">Gemini Nano: <span id="nano">checking…</span></p>
+        </div>
+
+        <div>
+          <h2>Feedback log</h2>
+          <p class="hint" id="logcount"></p>
+          <div class="row" style="margin-top: 6px">
+            <button class="ghost" id="export">Export JSON</button>
+            <button class="ghost" id="clear">Clear log</button>
+          </div>
+        </div>
+      </div>
+    </details>
     <script src="popup.js"></script>
   </body>
 </html>

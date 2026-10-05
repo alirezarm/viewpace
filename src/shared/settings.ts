@@ -4,7 +4,10 @@ export interface Settings {
   enabled: boolean;
   mode: Mode;
   profile: ProfileName;
+  /** Small speed badge on the video (normal users). */
   showOverlay: boolean;
+  /** Replace the badge with the detailed research/debug overlay. */
+  debugOverlay: boolean;
   /** Briefly turn CC on (then restore) so the player fetches the caption track we can capture. */
   autoEnableCaptions: boolean;
 }
@@ -14,6 +17,7 @@ export const DEFAULT_SETTINGS: Settings = {
   mode: 'baseline',
   profile: 'normal',
   showOverlay: true,
+  debugOverlay: false,
   autoEnableCaptions: true,
 };
 

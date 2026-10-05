@@ -14,7 +14,21 @@ npm run watch        # rebuild TS on change (re-copy static/ by restarting)
 `chrome://extensions` → Developer mode → **Load unpacked** → select `dist/`.
 After each rebuild: press reload on the extension card, then reload the YouTube tab.
 
-Toggle instantly with **Alt+Shift+S**, the overlay's On/Off button, or the popup.
+Toggle instantly with **Alt+Shift+S**, the badge menu on the video, or the popup.
+
+## User interface
+
+- **Popup:** on/off switch, pace (Relaxed / Normal / Fast) with the pace's speed range and the live
+  speed of the current video, and a "Smart pacing" status (the AI enhancement, shown in AI mode),
+  including one-click setup when the model still needs downloading.
+- **Advanced** (collapsed in the popup): analysis mode (Speech only = Baseline, Speech + content =
+  AI), speed badge on/off, detailed debug overlay, automatic caption reading, model status, and the
+  feedback log (export/clear).
+- **Speed badge** (default): a small badge in the player's bottom-right corner. It follows YouTube's
+  control visibility and appears for 4 s after each speed change with a plain-language reason. Click
+  it to rate the speed (Too slow / Just right / Too fast) or turn AutoSpeed off.
+- **Debug overlay** (Advanced): the detailed research panel with speech rate, AI scores, transcript
+  chunk and decision reasons. It replaces the badge while enabled.
 
 ## Feasibility findings (checked 2026-10-04, Chrome 154)
 

@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "AutoSpeed (prototype)",
+  "name": "AutoSpeed",
   "version": "0.1.0",
-  "description": "Experimental: adapts YouTube playback speed to how carefully the upcoming content needs to be heard.",
+  "description": "Speeds up YouTube when it's easy to follow and slows down when it isn't.",
   "minimum_chrome_version": "138",
   "permissions": ["storage"],
   "background": { "service_worker": "background.js" },
@@ -23,7 +23,7 @@
   "commands": {
     "toggle-autospeed": {
       "suggested_key": { "default": "Alt+Shift+S" },
-      "description": "Turn AutoSpeed on/off"
+      "description": "Turn AutoSpeed on or off"
     }
   }
 }

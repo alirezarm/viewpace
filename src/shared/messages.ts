@@ -12,6 +12,19 @@ export type AiResponse =
   | { ok: true; result: ComplexityResult }
   | { ok: false; error: string; status?: AiAvailability };
 
+// --- popup <-> content script in the active tab (chrome.tabs.sendMessage) ---
+
+export type TabState = 'active' | 'off' | 'paused-by-user' | 'ad' | 'unsupported' | 'idle';
+
+export interface TabStatus {
+  /** A YouTube watch page with a video element. */
+  onVideo: boolean;
+  state: TabState;
+  rate: number | null;
+}
+
+export type TabRequest = { kind: 'tab:status' };
+
 // --- MAIN-world hook <-> isolated content script (window.postMessage) ---
 
 export const PAGE_TAG = '__autospeed';

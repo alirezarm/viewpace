@@ -5,9 +5,12 @@ import type { AiAvailability, DecisionLogEntry, Feedback, SpeechFeatures, TimedW
 import { downloadNanoModel } from '../shared/nano';
 import { ComplexityCache, DisabledProvider, NanoProvider, type ComplexityProvider } from './ai';
 import type { ChunkContext } from '../shared/complexity-prompt';
-import { computeTarget, initialState, step, videoMean, type ControllerState } from './controller';
+import { PROFILES, computeTarget, initialState, step, videoMean, type ControllerState } from './controller';
 import { computeFeatures, windowText } from './features';
 import { Overlay } from './overlay';
+import { Badge, type BadgeView } from './badge';
+import { describeChange } from './friendly';
+import type { TabRequest, TabStatus } from '../shared/messages';
 import { TranscriptStore } from './transcript';
 
 const TICK_MS = 1000;
@@ -39,17 +42,39 @@ let lastDecisionId: string | null = null;
 let feedbackAck: string | null = null;
 const captionAttempted = new Set<string>();
 let captionNotice: string | null = null;
+// User-facing badge state
+let flashText: string | null = null;
+let flashUntil = 0;
+let badgeAck: string | null = null;
+let tabStatus: TabStatus = { onVideo: false, state: 'idle', rate: null };
+const FLASH_MS = 4000;
 
 const overlay = new Overlay({
   onFeedback: (f) => void giveFeedback(f),
   onToggleEnabled: () => void saveSettings({ enabled: !settings.enabled }),
   onToggleMode: () => void saveSettings({ mode: settings.mode === 'ai' ? 'baseline' : 'ai' }),
   onDownloadModel: () => void downloadModel(),
-  onResume: () => {
-    manualOverride = false;
-    ctrl = initialState(video?.playbackRate ?? 1);
-  },
+  onResume: () => resumeAfterOverride(),
 });
+
+const badge = new Badge({
+  onFeedback: (f) => void giveFeedback(f),
+  onToggleEnabled: () => void saveSettings({ enabled: !settings.enabled }),
+  onResume: () => resumeAfterOverride(),
+});
+
+function resumeAfterOverride(): void {
+  manualOverride = false;
+  ctrl = initialState(video?.playbackRate ?? 1);
+}
+
+/** Plain-language version of the caption status, for the badge. Null = nothing worth saying. */
+function captionHint(notice: string | null): string | null {
+  if (!notice || notice.startsWith('Loading')) return null;
+  if (notice.startsWith('This video has no captions')) return 'No captions, so the pace stays steady';
+  if (notice.startsWith('Turn on CC')) return 'Turn on captions (CC) so AutoSpeed can follow along';
+  return 'Couldn\'t read the captions. Keep CC on to help';
+}
 
 // ---------- helpers ----------
 function currentVideoId(): string | null {
@@ -119,11 +144,13 @@ function releaseControl(): void {
 async function giveFeedback(f: Feedback): Promise<void> {
   if (!lastDecisionId) {
     feedbackAck = 'No decision logged yet';
+    badgeAck = 'Let the video play a few seconds, then try again';
     return;
   }
   const ok = await attachFeedback(lastDecisionId, f);
   const label = { too_slow: 'Too Slow', good: 'Good', too_fast: 'Too Fast' }[f];
   feedbackAck = ok ? `Logged "${label}" @ ${lastDecisionId.slice(-6)}` : 'Could not log feedback';
+  badgeAck = ok ? 'Feedback saved' : 'Couldn\'t save feedback';
 }
 
 // ---------- page hook bridge ----------
@@ -222,6 +249,8 @@ function onVideoChange(id: string | null): void {
   lastDecisionId = null;
   lastReason = '';
   feedbackAck = null;
+  badgeAck = null;
+  flashText = null;
   captionNotice = null;
   lastCaptionText = '';
   ctrl = initialState(video?.playbackRate ?? 1);
@@ -322,8 +351,21 @@ function tick(): void {
   bindVideo(id ? findVideo() : null);
   if (id !== videoId) onVideoChange(id);
 
-  overlay.setVisible(Boolean(settings.showOverlay && id && video));
-  if (!id || !video) return;
+  const onVideo = Boolean(id && video);
+  const playable = onVideo && Number.isFinite(video!.duration) && !adShowing();
+  overlay.setVisible(Boolean(settings.debugOverlay && onVideo));
+  badge.setVisible(Boolean(settings.showOverlay && !settings.debugOverlay && playable));
+  if (!id || !video) {
+    tabStatus = { onVideo: false, state: 'idle', rate: null };
+    return;
+  }
+  const range = PROFILES[settings.profile];
+  const badgeBase: Omit<BadgeView, 'state' | 'line' | 'flash'> = {
+    rate: video.playbackRate,
+    minRate: range.minRate,
+    maxRate: range.maxRate,
+    ack: badgeAck,
+  };
 
   const base = {
     enabled: settings.enabled,
@@ -339,6 +381,8 @@ function tick(): void {
   if (!settings.enabled) {
     if (controlling) releaseControl();
     overlay.update({ ...base, speech: '—', ai: '—', transcript: '—', chunk: '', reason: 'AutoSpeed disabled', notice: null });
+    badge.update({ ...badgeBase, state: 'off', line: null, flash: false });
+    tabStatus = { onVideo: true, state: 'off', rate: video.playbackRate };
     return;
   }
 
@@ -373,7 +417,19 @@ function tick(): void {
     const { state, decision } = step(ctrl, target.rate, performance.now());
     ctrl = state;
     if (decision) {
-      if (decision.changed) applyRate(decision.rate);
+      if (decision.changed) {
+        applyRate(decision.rate);
+        flashText = describeChange({
+          previousRate: decision.previousRate,
+          rate: decision.rate,
+          mode: settings.mode,
+          aiScore: aiResult?.raw ?? null,
+          aiMean: aiResult ? aiMean * 10 : null,
+          pauseRatio: a.features?.pauseRatio ?? null,
+          littleSpeech: !a.features || a.features.words < 8,
+        });
+        flashUntil = performance.now() + FLASH_MS;
+      }
       lastReason = `${target.reason} · ${decision.why}`;
       const entry: DecisionLogEntry = {
         id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
@@ -434,7 +490,28 @@ function tick(): void {
     canResume: manualOverride,
     aiAction,
   });
+
+  const flashing = performance.now() < flashUntil;
+  badge.update({
+    ...badgeBase,
+    rate: video.playbackRate,
+    state: manualOverride ? 'paused-by-user' : 'active',
+    line: flashing ? flashText : a.source === 'none' || a.source.startsWith('live') ? captionHint(captionNotice) : null,
+    flash: flashing,
+  });
+  tabStatus = {
+    onVideo: true,
+    state: !Number.isFinite(video.duration) ? 'unsupported' : adShowing() ? 'ad' : manualOverride ? 'paused-by-user' : 'active',
+    rate: video.playbackRate,
+  };
 }
+
+// The popup asks the active tab for its live status.
+chrome.runtime.onMessage.addListener((msg: TabRequest, _sender, sendResponse: (s: TabStatus) => void) => {
+  if (msg?.kind !== 'tab:status') return false;
+  sendResponse(tabStatus);
+  return false;
+});
 
 // ---------- boot ----------
 async function boot(): Promise<void> {
