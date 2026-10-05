@@ -21,6 +21,8 @@ export interface Transcript {
   videoId: string;
   lang: string;
   kind: string; // 'asr' for auto-generated, '' for uploaded
+  /** Auto-translated captions (tlang): word counts don't match what is actually spoken. */
+  translated: boolean;
   source: 'player-track' | 'transcript-panel';
   timing: TimingSource;
   words: TimedWord[]; // sorted by t
@@ -82,4 +84,9 @@ export interface DecisionLogEntry {
   transcriptSource: string;
   feedback: Feedback | null;
   feedbackAt: number | null;
+  /**
+   * 'decision': full decision record (only with the developer "Keep decision log" setting).
+   * 'feedback': a feedback click with the decision's numbers but no transcript text (default).
+   */
+  kind?: 'decision' | 'feedback';
 }

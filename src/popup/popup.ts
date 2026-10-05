@@ -63,6 +63,7 @@ async function render(): Promise<void> {
   $<HTMLInputElement>('overlay').checked = settings.showOverlay;
   $<HTMLInputElement>('debug').checked = settings.debugOverlay;
   $<HTMLInputElement>('autocc').checked = settings.autoEnableCaptions;
+  $<HTMLInputElement>('decisionlog').checked = settings.keepDecisionLog;
   document.querySelectorAll<HTMLInputElement>('input[name=mode]').forEach((r) => (r.checked = r.value === settings.mode));
   document.querySelectorAll<HTMLInputElement>('input[name=profile]').forEach((r) => (r.checked = r.value === settings.profile));
 
@@ -72,7 +73,8 @@ async function render(): Promise<void> {
 
   const log = await readLog();
   const rated = log.filter((e) => e.feedback).length;
-  $('logcount').textContent = `${log.length} decisions, ${rated} with feedback`;
+  const decisions = log.filter((e) => e.kind !== 'feedback').length;
+  $('logcount').textContent = `${rated} feedback clicks, ${decisions} logged decisions`;
 }
 
 async function renderDiagnostics(): Promise<void> {
@@ -88,12 +90,13 @@ async function renderDiagnostics(): Promise<void> {
 
 function bind(): void {
   const patch = (p: Partial<Settings>) => void saveSettings(p);
-  const onCheck = (id: string, key: 'enabled' | 'showOverlay' | 'debugOverlay' | 'autoEnableCaptions') =>
+  const onCheck = (id: string, key: 'enabled' | 'showOverlay' | 'debugOverlay' | 'autoEnableCaptions' | 'keepDecisionLog') =>
     $<HTMLInputElement>(id).addEventListener('change', (e) => patch({ [key]: (e.target as HTMLInputElement).checked }));
   onCheck('enabled', 'enabled');
   onCheck('overlay', 'showOverlay');
   onCheck('debug', 'debugOverlay');
   onCheck('autocc', 'autoEnableCaptions');
+  onCheck('decisionlog', 'keepDecisionLog');
   document.querySelectorAll<HTMLInputElement>('input[name=mode]').forEach((r) =>
     r.addEventListener('change', () => void chooseMode(r.value as Settings['mode'])),
   );

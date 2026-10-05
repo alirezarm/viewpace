@@ -130,6 +130,11 @@ export class Badge {
     this.host.toggleAttribute('data-open', open);
   }
 
+  remove(): void {
+    this.host.remove();
+    document.getElementById('autospeed-badge-style')?.remove();
+  }
+
   setVisible(v: boolean): void {
     this.host.style.display = v ? '' : 'none';
     if (!v && this.open) this.setOpen(false);

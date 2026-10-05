@@ -113,6 +113,10 @@ export class Overlay {
     if (player && this.host.parentElement !== player) player.appendChild(this.host);
   }
 
+  remove(): void {
+    this.host.remove();
+  }
+
   setVisible(v: boolean): void {
     this.host.style.display = v ? '' : 'none';
   }

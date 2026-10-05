@@ -186,6 +186,7 @@ export function transcriptFromTimedtext(url: string, body: string): Transcript |
     videoId,
     lang: u.searchParams.get('tlang') ?? u.searchParams.get('lang') ?? '?',
     kind: u.searchParams.get('kind') ?? '',
+    translated: u.searchParams.has('tlang'),
     source: 'player-track',
     ...parsed,
   };

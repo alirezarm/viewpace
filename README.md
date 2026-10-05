@@ -32,6 +32,32 @@ Toggle instantly with **Alt+Shift+S**, the badge menu on the video, or the popup
   status and the last setup error are shown under Advanced.
 - State is stored in `chrome.storage.local` under `autospeed.onboarding`.
 
+## Robustness rules
+
+AutoSpeed should never make YouTube worse:
+
+- **Never fight** (`src/content/rate-owner.ts`): a speed change AutoSpeed didn't make pauses
+  adaptation for that video (Resume from the badge). Exceptions: AutoSpeed re-applies its own speed
+  only during known YouTube resets (3 s after a media load); changes during ads or while AutoSpeed
+  is off are ignored; a change that returns to AutoSpeed's speed within 15 s (e.g. press-and-hold
+  2×) resumes automatically.
+- **No data, no change** (`src/content/guards.ts`): without a transcript, or before live captions
+  cover a full 20 s window, AutoSpeed leaves the speed alone. Pauses and music *inside* a caption
+  track are still handled by the speed algorithm.
+- **Give the speed back**: leaving a video (another video, home, miniplayer, Shorts), an ad
+  starting, a live stream, or turning AutoSpeed off restores the user's own speed, captured once
+  before AutoSpeed's first change.
+- **Orphaned tabs**: after an extension update/reload, old content scripts detect it, restore the
+  user's speed, remove their UI and stop.
+- **Captions**: loading is only attempted when no ad is on screen and the player has switched to
+  the URL's video (checked via the player API in the MAIN-world hook), with one retry. CC is
+  switched back off as soon as the player has its answer (at most 2.5 s). Original-language tracks
+  are preferred over auto-translated ones.
+- **AI**: one request in flight; chunks behind the playhead are skipped; lost messages (worker
+  restarts) don't count as model failures.
+- **Logging**: by default only feedback clicks are stored (numbers, no transcript text; max 500).
+  The full decision log with transcript text is an Advanced opt-in (max 1000).
+
 ## User interface
 
 - **Popup:** on/off switch, pace (Relaxed / Normal / Fast) with the pace's speed range and the live

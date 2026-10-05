@@ -1,4 +1,4 @@
-import { appendDecision, attachFeedback } from '../shared/log';
+import { MAX_DECISION_ENTRIES, MAX_FEEDBACK_ENTRIES, appendDecision, attachFeedback, feedbackOnlyEntry } from '../shared/log';
 import { PAGE_TAG, type ContentToPage, type PageToContent } from '../shared/messages';
 import { loadSettings, onSettingsChanged, saveSettings, type Settings } from '../shared/settings';
 import type { AiAvailability, DecisionLogEntry, Feedback, SpeechFeatures, TimedWord } from '../shared/types';
@@ -12,12 +12,15 @@ import { Badge, type BadgeView } from './badge';
 import { describeChange } from './friendly';
 import type { TabRequest, TabStatus } from '../shared/messages';
 import { TranscriptStore } from './transcript';
+import { RateOwner } from './rate-owner';
+import { captionAttemptAllowed, hasEnoughData, isExtensionAlive, type TranscriptKind } from './guards';
 
 const TICK_MS = 1000;
 const WINDOW_SEC = 20; // analysis window length (media seconds)
 const CHUNK_STEP = 10; // AI chunk grid step (media seconds)
-const USER_INPUT_GRACE_MS = 1500; // a ratechange this soon after user input on speed controls = manual override
-const SETTLE_MS = 2000; // ignore rate changes YouTube makes right after a video loads
+const AD_SETTLE_MS = 3000; // YouTube may still adjust the speed this long after an ad ends
+const CAPTION_WAIT_MS = 2500; // longest CC stays switched on while loading the caption track
+const PLAYER_INFO_FRESH_MS = 3000;
 
 // ---------- state ----------
 let settings: Settings;
@@ -31,16 +34,21 @@ let video: HTMLVideoElement | null = null;
 let videoId: string | null = null;
 let videoChangedAt = 0;
 let ctrl: ControllerState = initialState(1);
-let controlling = false; // we have set the rate at least once for this video
-let rateBeforeControl = 1;
-let lastApplied: number | null = null;
-let manualOverride = false;
-let lastUserSpeedInput = -Infinity;
+/** Who owns the playback speed; AutoSpeed never fights changes it didn't make. */
+const owner = new RateOwner();
+let lastAdSeenAt = -Infinity;
+let wasAd = false;
 let lastReason = '';
 let lastTargetRate = 1;
 let lastDecisionId: string | null = null;
+let lastDecision: DecisionLogEntry | null = null;
 let feedbackAck: string | null = null;
-const captionAttempted = new Set<string>();
+const captionAttempts = new Map<string, { count: number; last: number; running: boolean }>();
+/** What YouTube's player API says it has loaded (from the MAIN-world hook). */
+let playerInfo = { videoId: null as string | null, isLive: false, at: -Infinity };
+let tickTimer: ReturnType<typeof setInterval> | undefined;
+let statusTimer: ReturnType<typeof setInterval> | undefined;
+let shutDown = false;
 let captionNotice: string | null = null;
 // User-facing badge state
 let flashText: string | null = null;
@@ -64,7 +72,7 @@ const badge = new Badge({
 });
 
 function resumeAfterOverride(): void {
-  manualOverride = false;
+  owner.resume();
   ctrl = initialState(video?.playbackRate ?? 1);
 }
 
@@ -124,32 +132,55 @@ async function downloadModel(): Promise<void> {
 
 function applyRate(rate: number): void {
   if (!video) return;
-  if (!controlling) {
-    rateBeforeControl = video.playbackRate;
-    controlling = true;
-  }
-  lastApplied = rate;
+  owner.take(rate, video.playbackRate);
   video.playbackRate = rate;
 }
 
+/** Give the speed back to the user (their own speed), if AutoSpeed was in control. */
 function releaseControl(): void {
-  if (video && controlling && !manualOverride) {
-    lastApplied = rateBeforeControl;
-    video.playbackRate = rateBeforeControl;
-  }
-  controlling = false;
+  const restore = owner.release();
+  if (video && restore !== null) video.playbackRate = restore;
   ctrl = initialState(video?.playbackRate ?? 1);
 }
 
+/**
+ * H1: this content script has been orphaned by an extension update/reload. It can no longer
+ * receive settings (so it can't be turned off): hand the speed back and stop completely.
+ */
+function shutdown(): void {
+  if (shutDown) return;
+  shutDown = true;
+  clearInterval(tickTimer);
+  clearInterval(statusTimer);
+  releaseControl();
+  bindVideo(null);
+  captionObserver.disconnect();
+  overlay.remove();
+  badge.remove();
+}
+
 async function giveFeedback(f: Feedback): Promise<void> {
-  if (!lastDecisionId) {
+  const decision = lastDecision;
+  const loggedId = lastDecisionId;
+  if (!decision) {
     feedbackAck = 'No decision logged yet';
     badgeAck = 'Let the video play a few seconds, then try again';
     return;
   }
-  const ok = await attachFeedback(lastDecisionId, f);
+  // With the full decision log on, annotate the logged decision; otherwise keep a small
+  // feedback-only record (numbers, no transcript text).
+  let ok = false;
+  try {
+    ok = loggedId !== null && (await attachFeedback(loggedId, f));
+    if (!ok) {
+      await appendDecision(feedbackOnlyEntry(decision, f, Date.now()), MAX_FEEDBACK_ENTRIES);
+      ok = true;
+    }
+  } catch {
+    ok = false;
+  }
   const label = { too_slow: 'Too Slow', good: 'Good', too_fast: 'Too Fast' }[f];
-  feedbackAck = ok ? `Logged "${label}" @ ${lastDecisionId.slice(-6)}` : 'Could not log feedback';
+  feedbackAck = ok ? `Logged "${label}" @ ${decision.id.slice(-6)}` : 'Could not log feedback';
   badgeAck = ok ? 'Feedback saved' : 'Couldn\'t save feedback';
 }
 
@@ -166,6 +197,8 @@ window.addEventListener('message', (ev: MessageEvent<PageToContent>) => {
   } else if (msg.type === 'transcript-panel') {
     const id = currentVideoId();
     if (id) store.ingestTranscriptPanel(id, msg.body);
+  } else if (msg.type === 'player-info') {
+    playerInfo = { videoId: msg.videoId, isLive: msg.isLive, at: performance.now() };
   }
 });
 window.postMessage({ [PAGE_TAG]: true, type: 'replay' } satisfies ContentToPage, location.origin);
@@ -184,13 +217,43 @@ const captionObserver = new MutationObserver(() => {
 // ---------- making the player fetch the caption track ----------
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
+/** The player's own video id, if the hook reported it recently. */
+function freshPlayerVideoId(): string | null {
+  return performance.now() - playerInfo.at < PLAYER_INFO_FRESH_MS ? playerInfo.videoId : null;
+}
+
 /**
  * The only reliable way to get the timed track is to let the player request it. If CC is off,
- * briefly turn it on (the player fetches the whole track), then restore the user's choice.
+ * briefly turn it on (the player fetches the whole track), then restore the user's choice as soon
+ * as the player has its answer. Only tried when it can mean something (H4): no ad, the player has
+ * switched to this video, and at most one retry.
  */
 async function ensureCaptionTrack(id: string): Promise<void> {
-  if (captionAttempted.has(id) || store.track(id)) return;
-  captionAttempted.add(id);
+  if (store.track(id)) return;
+  const attempt = captionAttempts.get(id) ?? { count: 0, last: -Infinity, running: false };
+  const now = performance.now();
+  if (
+    attempt.running ||
+    !captionAttemptAllowed({
+      inAd: adShowing(),
+      msSinceVideoChange: now - videoChangedAt,
+      playerVideoId: freshPlayerVideoId(),
+      urlVideoId: id,
+      attempts: attempt.count,
+      msSinceLastAttempt: now - attempt.last,
+    })
+  ) {
+    return;
+  }
+  captionAttempts.set(id, { count: attempt.count + 1, last: now, running: true });
+  try {
+    await loadCaptionTrack(id);
+  } finally {
+    captionAttempts.get(id)!.running = false;
+  }
+}
+
+async function loadCaptionTrack(id: string): Promise<void> {
   const btn = document.querySelector<HTMLButtonElement>('#movie_player .ytp-subtitles-button');
   if (!btn || btn.offsetParent === null || btn.getAttribute('aria-disabled') === 'true') {
     captionNotice = 'This video has no captions';
@@ -202,12 +265,14 @@ async function ensureCaptionTrack(id: string): Promise<void> {
     return;
   }
   captionNotice = 'Loading caption track…';
+  const before = store.responseCount(id);
   if (wasOn) {
     btn.click(); // off
     await sleep(300);
   }
   btn.click(); // on → player fetches track
-  for (let i = 0; i < 30 && !store.track(id); i++) await sleep(200);
+  // M5: switch CC back off as soon as the player has an answer (even an empty one).
+  for (let waited = 0; waited < CAPTION_WAIT_MS && store.responseCount(id) === before; waited += 100) await sleep(100);
   if (!wasOn && btn.getAttribute('aria-pressed') === 'true') btn.click(); // restore off
   if (!store.track(id)) {
     captionNotice = store.lastCaptureEmpty
@@ -217,36 +282,47 @@ async function ensureCaptionTrack(id: string): Promise<void> {
 }
 
 // ---------- video binding ----------
+function inAdOrJustAfter(): boolean {
+  return adShowing() || performance.now() - lastAdSeenAt < AD_SETTLE_MS;
+}
+
+/** H2: never fight a speed change AutoSpeed didn't make. */
 function onRateChange(): void {
-  if (!video || lastApplied === null || adShowing()) return;
-  if (Math.abs(video.playbackRate - lastApplied) < 0.01) return;
-  if (performance.now() - videoChangedAt < SETTLE_MS) return;
-  if (performance.now() - lastUserSpeedInput < USER_INPUT_GRACE_MS) {
-    manualOverride = true; // the user picked a speed; respect it until they resume
-    lastApplied = video.playbackRate;
-  } else if (settings.enabled && controlling && !manualOverride) {
-    video.playbackRate = lastApplied; // YouTube reset it (ad end, quality switch…) → re-apply
-  }
+  if (!video) return;
+  // While AutoSpeed is off, the user's speed changes are simply theirs: nothing to pause.
+  const action = owner.onRateChange(video.playbackRate, performance.now(), inAdOrJustAfter() || !settings.enabled);
+  if (action === 'reapply' && owner.applied !== null) video.playbackRate = owner.applied;
+  else if (action === 'resume') ctrl = initialState(video.playbackRate);
+}
+
+/** The player is (re)loading media: YouTube may apply its own speed for a moment. */
+function onLoadStart(): void {
+  owner.settle(performance.now());
 }
 
 function bindVideo(v: HTMLVideoElement | null): void {
   if (video === v) return;
+  releaseControl(); // M1: hand the old element its user speed back before letting go of it
   video?.removeEventListener('ratechange', onRateChange);
+  video?.removeEventListener('loadstart', onLoadStart);
   video = v;
   video?.addEventListener('ratechange', onRateChange);
+  video?.addEventListener('loadstart', onLoadStart);
   const player = document.getElementById('movie_player');
   captionObserver.disconnect();
-  if (player) captionObserver.observe(player, { childList: true, subtree: true, characterData: true });
+  if (player && v) captionObserver.observe(player, { childList: true, subtree: true, characterData: true });
 }
 
 function onVideoChange(id: string | null): void {
+  // M1/M2: leaving a video (another video, the home page, the miniplayer, Shorts) gives the
+  // user's own speed back; the next video starts from it until AutoSpeed is confident.
+  releaseControl();
   if (videoId) store.forget(videoId);
   videoId = id;
   videoChangedAt = performance.now();
-  controlling = false;
-  manualOverride = false;
-  lastApplied = null;
+  owner.newVideo(videoChangedAt);
   lastDecisionId = null;
+  lastDecision = null;
   lastReason = '';
   feedbackAck = null;
   badgeAck = null;
@@ -256,22 +332,6 @@ function onVideoChange(id: string | null): void {
   ctrl = initialState(video?.playbackRate ?? 1);
   ai.clear();
 }
-
-// Track user interaction with YouTube's own speed controls.
-document.addEventListener(
-  'keydown',
-  (e) => {
-    if (e.shiftKey && (e.key === '>' || e.key === '<' || e.key === '.' || e.key === ',')) lastUserSpeedInput = performance.now();
-  },
-  true,
-);
-document.addEventListener(
-  'click',
-  (e) => {
-    if ((e.target as Element | null)?.closest?.('.ytp-settings-menu, .ytp-popup')) lastUserSpeedInput = performance.now();
-  },
-  true,
-);
 
 // ---------- control loop ----------
 interface Analysis {
@@ -283,6 +343,9 @@ interface Analysis {
   aiText: string;
   aiContext: ChunkContext;
   source: string;
+  kind: TranscriptKind;
+  /** Seconds of continuous live captions behind the playhead (live kind only). */
+  liveCoverage: number;
 }
 
 function videoTitle(): string {
@@ -318,7 +381,9 @@ function analyze(id: string, t: number): Analysis {
       aiIndex: k,
       aiText: current.text,
       aiContext: current.context,
-      source: `${track.source} (${track.lang}${track.kind ? ', ' + track.kind : ''}, ${track.timing} timing) · lookahead`,
+      source: `${track.source} (${track.lang}${track.kind ? ', ' + track.kind : ''}${track.translated ? ', translated' : ''}, ${track.timing} timing) · lookahead`,
+      kind: 'track',
+      liveCoverage: 0,
     };
   }
   const live: TimedWord[] = store.liveWords(id);
@@ -334,9 +399,11 @@ function analyze(id: string, t: number): Analysis {
       aiText: text,
       aiContext: { title, previous: windowText(live, from - WINDOW_SEC, from) },
       source: 'live captions · reactive (no lookahead)',
+      kind: 'live',
+      liveCoverage: store.liveCoverage(id, t),
     };
   }
-  return { features: null, chunk: '', aiKey: null, aiIndex: 0, aiText: '', aiContext: {}, source: 'none' };
+  return { features: null, chunk: '', aiKey: null, aiIndex: 0, aiText: '', aiContext: {}, source: 'none', kind: 'none', liveCoverage: 0 };
 }
 
 function describeSpeech(f: SpeechFeatures | null): string {
@@ -347,6 +414,9 @@ function describeSpeech(f: SpeechFeatures | null): string {
 }
 
 function tick(): void {
+  if (shutDown) return;
+  if (!isExtensionAlive()) return shutdown();
+  window.postMessage({ [PAGE_TAG]: true, type: 'player-info?' } satisfies ContentToPage, location.origin);
   const id = currentVideoId();
   bindVideo(id ? findVideo() : null);
   if (id !== videoId) onVideoChange(id);
@@ -378,34 +448,51 @@ function tick(): void {
     aiAction: null,
   };
 
+  // Ads: hand the speed back while an ad plays (never speed up ads); adapt again afterwards.
+  const ad = adShowing();
+  if (ad) {
+    if (!wasAd) releaseControl();
+    lastAdSeenAt = performance.now();
+  }
+  wasAd = ad;
+
   if (!settings.enabled) {
-    if (controlling) releaseControl();
+    releaseControl();
     overlay.update({ ...base, speech: '—', ai: '—', transcript: '—', chunk: '', reason: 'AutoSpeed disabled', notice: null });
     badge.update({ ...badgeBase, state: 'off', line: null, flash: false });
     tabStatus = { onVideo: true, state: 'off', rate: video.playbackRate };
     return;
   }
 
-  if (video.readyState >= 2 && !video.paused) void ensureCaptionTrack(id);
+  const live = !Number.isFinite(video.duration) || (playerInfo.isLive && freshPlayerVideoId() === id);
+  if (!live && video.readyState >= 2 && !video.paused) void ensureCaptionTrack(id);
 
   const a = analyze(id, video.currentTime);
   const aiResult = aiReady() && a.aiKey ? ai.get(a.aiKey) : null;
   const aiScores = ai.scoresUpTo(a.aiIndex);
   const aiMean = videoMean(aiScores);
+  ai.setPlayhead(a.aiIndex);
   if (aiReady() && a.aiKey && !aiResult) ai.request(a.aiKey, a.aiIndex, a.aiText, a.aiContext);
 
   let notice: string | null = captionNotice;
   let blocked = false;
-  if (!Number.isFinite(video.duration)) {
-    notice = 'Live stream: not supported in V1';
+  if (live) {
+    releaseControl(); // in case the live signal arrived after AutoSpeed had already acted
+    notice = 'Live stream: not supported';
     blocked = true;
-  } else if (adShowing()) {
+  } else if (ad) {
     notice = 'Ad playing: paused';
     blocked = true;
-  } else if (manualOverride) {
+  } else if (owner.suspended) {
     notice = `Manual speed ${video.playbackRate}× detected: AutoSpeed paused`;
     blocked = true;
+  } else if (!hasEnoughData(a.kind, a.liveCoverage, WINDOW_SEC)) {
+    // H3: no transcript or not enough of it: leave the user's speed alone.
+    if (!notice) notice = a.kind === 'live' ? 'Collecting live captions…' : 'Waiting for captions: speed unchanged';
+    blocked = true;
   }
+  // While AutoSpeed isn't in control, its controller starts from whatever speed is playing.
+  if (!owner.controlling) ctrl = { ...ctrl, current: video.playbackRate };
 
   if (!blocked && !video.paused && video.readyState >= 2) {
     const target = computeTarget(
@@ -452,8 +539,10 @@ function tick(): void {
         feedback: null,
         feedbackAt: null,
       };
-      lastDecisionId = entry.id;
-      void appendDecision(entry);
+      lastDecision = entry;
+      // M4: the full decision log (with transcript text) is a developer opt-in.
+      lastDecisionId = settings.keepDecisionLog ? entry.id : null;
+      if (settings.keepDecisionLog) void appendDecision(entry, MAX_DECISION_ENTRIES).catch(() => undefined);
     }
   }
 
@@ -487,7 +576,7 @@ function tick(): void {
     chunk: a.chunk.slice(0, 240),
     reason: lastReason ? `${lastReason} (target ${lastTargetRate.toFixed(2)}×)` : 'waiting for first decision…',
     notice,
-    canResume: manualOverride,
+    canResume: owner.suspended,
     aiAction,
   });
 
@@ -495,13 +584,13 @@ function tick(): void {
   badge.update({
     ...badgeBase,
     rate: video.playbackRate,
-    state: manualOverride ? 'paused-by-user' : 'active',
+    state: owner.suspended ? 'paused-by-user' : 'active',
     line: flashing ? flashText : a.source === 'none' || a.source.startsWith('live') ? captionHint(captionNotice) : null,
     flash: flashing,
   });
   tabStatus = {
     onVideo: true,
-    state: !Number.isFinite(video.duration) ? 'unsupported' : adShowing() ? 'ad' : manualOverride ? 'paused-by-user' : 'active',
+    state: live ? 'unsupported' : ad ? 'ad' : owner.suspended ? 'paused-by-user' : 'active',
     rate: video.playbackRate,
   };
 }
@@ -520,6 +609,7 @@ async function boot(): Promise<void> {
   void refreshAiStatus();
   onSettingsChanged((s) => {
     const modeChanged = s.mode !== settings.mode;
+    if (s.enabled && !settings.enabled) resumeAfterOverride(); // turning AutoSpeed on starts fresh
     settings = s;
     if (modeChanged) {
       ai.setProvider(providerFor(s));
@@ -527,10 +617,13 @@ async function boot(): Promise<void> {
     }
     tick();
   });
-  setInterval(tick, TICK_MS);
+  tickTimer = setInterval(tick, TICK_MS);
   // Poll faster while the model isn't ready, so AI mode kicks in soon after a download finishes.
-  setInterval(() => {
-    if (aiStatus !== 'available' || Math.random() < 0.2) void refreshAiStatus();
+  // Once it's ready, check rarely, and not at all while nothing plays (lets the worker sleep).
+  statusTimer = setInterval(() => {
+    if (!isExtensionAlive()) return shutdown();
+    if (aiStatus !== 'available') void refreshAiStatus();
+    else if (video && !video.paused && Math.random() < 0.2) void refreshAiStatus();
   }, 5000);
 }
 

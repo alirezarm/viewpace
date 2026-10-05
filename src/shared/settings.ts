@@ -8,6 +8,8 @@ export interface Settings {
   showOverlay: boolean;
   /** Replace the badge with the detailed research/debug overlay. */
   debugOverlay: boolean;
+  /** Developer: log every decision with its transcript text (otherwise only feedback clicks). */
+  keepDecisionLog: boolean;
   /** Briefly turn CC on (then restore) so the player fetches the caption track we can capture. */
   autoEnableCaptions: boolean;
 }
@@ -18,6 +20,7 @@ export const DEFAULT_SETTINGS: Settings = {
   profile: 'normal',
   showOverlay: true,
   debugOverlay: false,
+  keepDecisionLog: false,
   autoEnableCaptions: true,
 };
 

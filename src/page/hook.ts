@@ -10,7 +10,7 @@
  */
 import { PAGE_TAG, type ContentToPage, type PageToContent } from '../shared/messages';
 
-type CaptureType = PageToContent['type'];
+type CaptureType = 'timedtext' | 'transcript-panel';
 
 const MAX_BUFFERED = 8;
 const buffered: PageToContent[] = [];
@@ -80,8 +80,29 @@ window.fetch = async function (this: unknown, input: RequestInfo | URL, init?: R
   return response;
 };
 
-// The content script may load (or reload) after captures happened; let it ask for a replay.
+interface YtPlayer {
+  getVideoData?: () => { video_id?: string; isLive?: boolean } | undefined;
+  getPlayerResponse?: () => { videoDetails?: { isLive?: boolean } } | undefined;
+}
+
+/** Ask YouTube's player API (MAIN world only) which video it has loaded and whether it's live. */
+function playerInfo(): PageToContent {
+  let videoId: string | null = null;
+  let isLive = false;
+  try {
+    const p = document.getElementById('movie_player') as unknown as YtPlayer | null;
+    const data = p?.getVideoData?.();
+    videoId = data?.video_id || null;
+    isLive = Boolean(data?.isLive || p?.getPlayerResponse?.()?.videoDetails?.isLive);
+  } catch {
+    /* player API missing or changed: report unknown */
+  }
+  return { [PAGE_TAG]: true, type: 'player-info', videoId, isLive };
+}
+
 window.addEventListener('message', (ev: MessageEvent<ContentToPage>) => {
-  if (ev.source !== window || !ev.data || ev.data[PAGE_TAG] !== true || ev.data.type !== 'replay') return;
-  for (const msg of buffered) window.postMessage(msg, location.origin);
+  if (ev.source !== window || !ev.data || ev.data[PAGE_TAG] !== true) return;
+  // The content script may load (or reload) after captures happened; let it ask for a replay.
+  if (ev.data.type === 'replay') for (const msg of buffered) window.postMessage(msg, location.origin);
+  else if (ev.data.type === 'player-info?') window.postMessage(playerInfo(), location.origin);
 });

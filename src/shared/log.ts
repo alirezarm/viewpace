@@ -1,7 +1,10 @@
 import type { DecisionLogEntry, Feedback } from './types';
 
 export const LOG_KEY = 'autospeed.log';
-const MAX_ENTRIES = 5000;
+/** Full decision log (developer opt-in): about 1 KB per entry. */
+export const MAX_DECISION_ENTRIES = 1000;
+/** Feedback-only log (default): small entries, enough for many viewing sessions. */
+export const MAX_FEEDBACK_ENTRIES = 500;
 
 // Serialize read-modify-write cycles within this context. Concurrent tabs can still race;
 // acceptable for a single-user prototype.
@@ -17,13 +20,30 @@ export async function readLog(): Promise<DecisionLogEntry[]> {
   return (got[LOG_KEY] as DecisionLogEntry[] | undefined) ?? [];
 }
 
-export function appendDecision(entry: DecisionLogEntry): Promise<void> {
+/** Append an entry, keeping at most `maxEntries` (oldest dropped first). */
+export function appendDecision(entry: DecisionLogEntry, maxEntries = MAX_DECISION_ENTRIES): Promise<void> {
   return serial(async () => {
     const log = await readLog();
     log.push(entry);
-    if (log.length > MAX_ENTRIES) log.splice(0, log.length - MAX_ENTRIES);
+    if (log.length > maxEntries) log.splice(0, log.length - maxEntries);
     await chrome.storage.local.set({ [LOG_KEY]: log });
   });
+}
+
+/**
+ * The default, privacy-light record of a feedback click: the decision's numbers (speeds, speech
+ * features, AI score) without transcript text or the model's description of it.
+ */
+export function feedbackOnlyEntry(decision: DecisionLogEntry, feedback: Feedback, now: number): DecisionLogEntry {
+  return {
+    ...decision,
+    id: `${now}-${Math.random().toString(36).slice(2, 8)}`,
+    chunk: '',
+    aiLabel: null,
+    feedback,
+    feedbackAt: now,
+    kind: 'feedback',
+  };
 }
 
 export function attachFeedback(id: string, feedback: Feedback): Promise<boolean> {

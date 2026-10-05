@@ -31,6 +31,8 @@ export const PAGE_TAG = '__autospeed';
 
 export type PageToContent =
   | { [PAGE_TAG]: true; type: 'timedtext'; url: string; body: string }
-  | { [PAGE_TAG]: true; type: 'transcript-panel'; url: string; body: string };
+  | { [PAGE_TAG]: true; type: 'transcript-panel'; url: string; body: string }
+  /** What YouTube's player reports (via its own API) about the video it has loaded. */
+  | { [PAGE_TAG]: true; type: 'player-info'; videoId: string | null; isLive: boolean };
 
-export type ContentToPage = { [PAGE_TAG]: true; type: 'replay' };
+export type ContentToPage = { [PAGE_TAG]: true; type: 'replay' | 'player-info?' };
