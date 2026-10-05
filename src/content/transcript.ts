@@ -25,8 +25,13 @@ export function newTokens(prev: string[], cur: string[]): string[] {
   return cur;
 }
 
-/** Transcripts kept in memory per tab (the current video plus a few recent ones). */
-export const MAX_TRACKS = 5;
+/**
+ * Safety limit on caption tracks held at once. retainOnly() keeps only the current video's data,
+ * but it runs on video changes; in between, captions the player fetches for other videos (ads,
+ * possibly inline previews on the home page) are stored too. This cap keeps that bounded without
+ * depending on YouTube's navigation timing. The most recently stored tracks are kept.
+ */
+export const SAFETY_MAX_TRACKS = 5;
 /** A jump in live-caption time larger than this starts a new continuous run (seek, CC off). */
 const LIVE_GAP_SEC = 30;
 
@@ -66,7 +71,7 @@ export class TranscriptStore {
   private setTrack(t: Transcript): void {
     this.tracks.delete(t.videoId); // re-insert as most recent
     this.tracks.set(t.videoId, t);
-    while (this.tracks.size > MAX_TRACKS) this.tracks.delete(this.tracks.keys().next().value!);
+    while (this.tracks.size > SAFETY_MAX_TRACKS) this.tracks.delete(this.tracks.keys().next().value!);
   }
 
   ingestTranscriptPanel(videoId: string, body: string): Transcript | null {

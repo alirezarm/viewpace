@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { MAX_TRACKS, TranscriptStore } from '../src/content/transcript';
+import { SAFETY_MAX_TRACKS, TranscriptStore } from '../src/content/transcript';
 
 const json3 = (text: string) => JSON.stringify({ events: [{ tStartMs: 0, dDurationMs: 2000, segs: [{ utf8: text }] }] });
 const url = (v: string, extra = '') => `/api/timedtext?v=${v}&lang=en&fmt=json3${extra}`;
@@ -41,12 +41,22 @@ describe('Prefer original-language captions', () => {
   });
 });
 
-describe('Bounded memory', () => {
-  it(`keeps only the ${MAX_TRACKS} most recent transcripts`, () => {
+describe('Safety limit on stored caption tracks', () => {
+  // Between video changes, captures for other videos (ads, possible inline previews) still get
+  // stored; the cap keeps that bounded.
+  it(`holds at most ${SAFETY_MAX_TRACKS} tracks, dropping the oldest`, () => {
     const s = new TranscriptStore();
-    for (let i = 0; i < MAX_TRACKS + 2; i++) s.ingestTimedtext(url(`v${i}`), json3('words here'));
-    expect(s.track('v0')).toBeNull();
-    expect(s.track(`v${MAX_TRACKS + 1}`)).not.toBeNull();
+    for (let i = 0; i < SAFETY_MAX_TRACKS + 2; i++) s.ingestTimedtext(url(`other${i}`), json3('words here'));
+    expect(s.track('other0')).toBeNull();
+    expect(s.track('other1')).toBeNull();
+    expect(s.track(`other${SAFETY_MAX_TRACKS + 1}`)).not.toBeNull();
+  });
+
+  it('never drops the most recent capture, e.g. the current video after a burst of ad captures', () => {
+    const s = new TranscriptStore();
+    for (let i = 0; i < SAFETY_MAX_TRACKS * 2; i++) s.ingestTimedtext(url(`ad${i}`), json3('ad words'));
+    s.ingestTimedtext(url('current'), json3('video words'));
+    expect(s.track('current')).not.toBeNull();
   });
 });
 
