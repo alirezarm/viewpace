@@ -13,7 +13,7 @@ import { describeChange } from './friendly';
 import type { TabRequest, TabStatus } from '../shared/messages';
 import { TranscriptStore } from './transcript';
 import { RateOwner } from './rate-owner';
-import { captionAttemptAllowed, hasEnoughData, isExtensionAlive, type TranscriptKind } from './guards';
+import { CaptionAttempts, captionAttemptAllowed, hasEnoughData, isExtensionAlive, type TranscriptKind } from './guards';
 
 const TICK_MS = 1000;
 const WINDOW_SEC = 20; // analysis window length (media seconds)
@@ -43,7 +43,7 @@ let lastTargetRate = 1;
 let lastDecisionId: string | null = null;
 let lastDecision: DecisionLogEntry | null = null;
 let feedbackAck: string | null = null;
-const captionAttempts = new Map<string, { count: number; last: number; running: boolean }>();
+const captionAttempts = new CaptionAttempts();
 /** What YouTube's player API says it has loaded (from the MAIN-world hook). */
 let playerInfo = { videoId: null as string | null, isLive: false, at: -Infinity };
 let tickTimer: ReturnType<typeof setInterval> | undefined;
@@ -230,7 +230,7 @@ function freshPlayerVideoId(): string | null {
  */
 async function ensureCaptionTrack(id: string): Promise<void> {
   if (store.track(id)) return;
-  const attempt = captionAttempts.get(id) ?? { count: 0, last: -Infinity, running: false };
+  const attempt = captionAttempts.get(id);
   const now = performance.now();
   if (
     attempt.running ||
@@ -245,11 +245,11 @@ async function ensureCaptionTrack(id: string): Promise<void> {
   ) {
     return;
   }
-  captionAttempts.set(id, { count: attempt.count + 1, last: now, running: true });
+  captionAttempts.start(id, now);
   try {
     await loadCaptionTrack(id);
   } finally {
-    captionAttempts.get(id)!.running = false;
+    captionAttempts.finish(id);
   }
 }
 
@@ -317,7 +317,9 @@ function onVideoChange(id: string | null): void {
   // M1/M2: leaving a video (another video, the home page, the miniplayer, Shorts) gives the
   // user's own speed back; the next video starts from it until AutoSpeed is confident.
   releaseControl();
-  if (videoId) store.forget(videoId);
+  // Transient data is kept for the current video only (keeping anything already captured for it).
+  store.retainOnly(id);
+  captionAttempts.retainOnly(id);
   videoId = id;
   videoChangedAt = performance.now();
   owner.newVideo(videoChangedAt);

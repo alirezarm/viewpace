@@ -111,8 +111,14 @@ export class TranscriptStore {
     return start === undefined ? 0 : Math.max(0, t - start);
   }
 
-  forget(videoId: string): void {
-    this.live.delete(videoId);
-    this.liveRunStart.delete(videoId);
+  /**
+   * Keep transient data only for the current video (null = no video). Data already captured for
+   * that video is kept, e.g. a caption track the player fetched just before AutoSpeed noticed
+   * the navigation.
+   */
+  retainOnly(videoId: string | null): void {
+    for (const map of [this.tracks, this.live, this.liveRunStart, this.responses] as Map<string, unknown>[]) {
+      for (const key of [...map.keys()]) if (key !== videoId) map.delete(key);
+    }
   }
 }

@@ -53,6 +53,9 @@ AutoSpeed should never make YouTube worse:
   the URL's video (checked via the player API in the MAIN-world hook), with one retry. CC is
   switched back off as soon as the player has its answer (at most 2.5 s). Original-language tracks
   are preferred over auto-translated ones.
+- **Current video only**: transcripts, live captions, caption-response counts, caption attempts,
+  AI scores and the page hook's replay buffer are kept in memory for the current video only and
+  dropped on every video change (anything already captured for the new video is kept).
 - **AI**: one request in flight; chunks behind the playhead are skipped; lost messages (worker
   restarts) don't count as model failures.
 - **Logging**: by default only feedback clicks are stored (numbers, no transcript text; max 500).

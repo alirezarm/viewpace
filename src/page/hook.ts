@@ -9,11 +9,21 @@
  * and hand them to the isolated content script via window.postMessage.
  */
 import { PAGE_TAG, type ContentToPage, type PageToContent } from '../shared/messages';
+import { ReplayBuffer } from './replay-buffer';
 
 type CaptureType = 'timedtext' | 'transcript-panel';
 
-const MAX_BUFFERED = 8;
-const buffered: PageToContent[] = [];
+const buffered = new ReplayBuffer<PageToContent>();
+
+/** The video a capture belongs to: the request's `v` for caption tracks, else the page's video. */
+function captureVideoId(type: CaptureType, url: string): string | null {
+  try {
+    const fromUrl = type === 'timedtext' ? new URL(url, location.origin).searchParams.get('v') : null;
+    return fromUrl ?? new URLSearchParams(location.search).get('v');
+  } catch {
+    return null;
+  }
+}
 
 function classify(url: string): CaptureType | null {
   if (url.includes('/api/timedtext')) return 'timedtext';
@@ -23,8 +33,7 @@ function classify(url: string): CaptureType | null {
 
 function emit(type: CaptureType, url: string, body: string): void {
   const msg = { [PAGE_TAG]: true, type, url, body } as PageToContent;
-  buffered.push(msg);
-  if (buffered.length > MAX_BUFFERED) buffered.shift();
+  buffered.push(msg, captureVideoId(type, url));
   window.postMessage(msg, location.origin);
 }
 
@@ -103,6 +112,6 @@ function playerInfo(): PageToContent {
 window.addEventListener('message', (ev: MessageEvent<ContentToPage>) => {
   if (ev.source !== window || !ev.data || ev.data[PAGE_TAG] !== true) return;
   // The content script may load (or reload) after captures happened; let it ask for a replay.
-  if (ev.data.type === 'replay') for (const msg of buffered) window.postMessage(msg, location.origin);
+  if (ev.data.type === 'replay') for (const msg of buffered.all()) window.postMessage(msg, location.origin);
   else if (ev.data.type === 'player-info?') window.postMessage(playerInfo(), location.origin);
 });

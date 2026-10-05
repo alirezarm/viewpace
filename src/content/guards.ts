@@ -52,3 +52,32 @@ export function captionAttemptAllowed(c: CaptionAttemptContext): boolean {
   if (c.attempts > 0 && c.msSinceLastAttempt < CAPTION_RETRY_MS) return false;
   return true;
 }
+
+export interface CaptionAttemptState {
+  count: number;
+  last: number;
+  running: boolean;
+}
+
+/** Caption-loading attempts, kept for the current video only (like all transient data). */
+export class CaptionAttempts {
+  private attempts = new Map<string, CaptionAttemptState>();
+
+  get(videoId: string): CaptionAttemptState {
+    return this.attempts.get(videoId) ?? { count: 0, last: -Infinity, running: false };
+  }
+
+  start(videoId: string, now: number): void {
+    this.attempts.set(videoId, { count: this.get(videoId).count + 1, last: now, running: true });
+  }
+
+  finish(videoId: string): void {
+    const a = this.attempts.get(videoId);
+    if (a) a.running = false;
+  }
+
+  /** Forget attempts for every other video, so returning to one later starts afresh. */
+  retainOnly(videoId: string | null): void {
+    for (const key of [...this.attempts.keys()]) if (key !== videoId) this.attempts.delete(key);
+  }
+}
