@@ -9,7 +9,7 @@ function controlling(user = 1, rate = 1.6): RateOwner {
 }
 const LATER = 100_000;
 
-describe('H2: never fight a speed change AutoSpeed did not make', () => {
+describe('Never fight a speed change AutoSpeed did not make', () => {
   it('recognizes its own change', () => {
     expect(controlling().onRateChange(1.6, LATER, false)).toBe('own');
   });
@@ -63,7 +63,7 @@ describe('H2: never fight a speed change AutoSpeed did not make', () => {
   });
 });
 
-describe('M1/M2: giving the speed back', () => {
+describe('Giving the speed back', () => {
   it('restores the user speed captured before the first change', () => {
     const o = controlling(1, 1.6);
     o.take(1.8, 1.6); // later changes don't overwrite the user speed

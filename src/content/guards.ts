@@ -1,7 +1,7 @@
 /** Small pure checks that decide when AutoSpeed may act at all. */
 
 /**
- * H1: after the extension is updated or reloaded, content scripts already running in open tabs
+ * After the extension is updated or reloaded, content scripts already running in open tabs
  * are orphaned: chrome.runtime.id disappears and they can no longer receive settings.
  */
 export function isExtensionAlive(): boolean {
@@ -15,7 +15,7 @@ export function isExtensionAlive(): boolean {
 export type TranscriptKind = 'track' | 'live' | 'none';
 
 /**
- * H3: may AutoSpeed make a speed decision from this data? A full caption track is enough data
+ * May AutoSpeed make a speed decision from this data? A full caption track is enough data
  * everywhere, including genuine pauses or music inside it (handled by the speed algorithm).
  * Live on-screen captions only count once they cover a full analysis window; before that, and
  * with no transcript at all, AutoSpeed leaves the speed alone.
@@ -41,7 +41,7 @@ export const CAPTION_MAX_ATTEMPTS = 2;
 export const CAPTION_RETRY_MS = 15000;
 
 /**
- * H4: only try to load captions when the attempt can mean something: no ad on screen, the player
+ * Only try to load captions when the attempt can mean something: no ad on screen, the player
  * has finished switching to the URL's video, and at most one retry.
  */
 export function captionAttemptAllowed(c: CaptionAttemptContext): boolean {

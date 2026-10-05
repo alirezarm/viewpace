@@ -144,7 +144,7 @@ function releaseControl(): void {
 }
 
 /**
- * H1: this content script has been orphaned by an extension update/reload. It can no longer
+ * This content script has been orphaned by an extension update/reload. It can no longer
  * receive settings (so it can't be turned off): hand the speed back and stop completely.
  */
 function shutdown(): void {
@@ -225,7 +225,7 @@ function freshPlayerVideoId(): string | null {
 /**
  * The only reliable way to get the timed track is to let the player request it. If CC is off,
  * briefly turn it on (the player fetches the whole track), then restore the user's choice as soon
- * as the player has its answer. Only tried when it can mean something (H4): no ad, the player has
+ * as the player has its answer. Only tried when it can mean something: no ad, the player has
  * switched to this video, and at most one retry.
  */
 async function ensureCaptionTrack(id: string): Promise<void> {
@@ -271,7 +271,7 @@ async function loadCaptionTrack(id: string): Promise<void> {
     await sleep(300);
   }
   btn.click(); // on → player fetches track
-  // M5: switch CC back off as soon as the player has an answer (even an empty one).
+  // Switch CC back off as soon as the player has an answer (even an empty one).
   for (let waited = 0; waited < CAPTION_WAIT_MS && store.responseCount(id) === before; waited += 100) await sleep(100);
   if (!wasOn && btn.getAttribute('aria-pressed') === 'true') btn.click(); // restore off
   if (!store.track(id)) {
@@ -286,7 +286,7 @@ function inAdOrJustAfter(): boolean {
   return adShowing() || performance.now() - lastAdSeenAt < AD_SETTLE_MS;
 }
 
-/** H2: never fight a speed change AutoSpeed didn't make. */
+/** Never fight a speed change AutoSpeed didn't make. */
 function onRateChange(): void {
   if (!video) return;
   // While AutoSpeed is off, the user's speed changes are simply theirs: nothing to pause.
@@ -302,7 +302,7 @@ function onLoadStart(): void {
 
 function bindVideo(v: HTMLVideoElement | null): void {
   if (video === v) return;
-  releaseControl(); // M1: hand the old element its user speed back before letting go of it
+  releaseControl(); // Hand the old element its user speed back before letting go of it
   video?.removeEventListener('ratechange', onRateChange);
   video?.removeEventListener('loadstart', onLoadStart);
   video = v;
@@ -314,7 +314,7 @@ function bindVideo(v: HTMLVideoElement | null): void {
 }
 
 function onVideoChange(id: string | null): void {
-  // M1/M2: leaving a video (another video, the home page, the miniplayer, Shorts) gives the
+  // Leaving a video (another video, the home page, the miniplayer, Shorts) gives the
   // user's own speed back; the next video starts from it until AutoSpeed is confident.
   releaseControl();
   // Transient data is kept for the current video only (keeping anything already captured for it).
@@ -489,7 +489,7 @@ function tick(): void {
     notice = `Manual speed ${video.playbackRate}× detected: AutoSpeed paused`;
     blocked = true;
   } else if (!hasEnoughData(a.kind, a.liveCoverage, WINDOW_SEC)) {
-    // H3: no transcript or not enough of it: leave the user's speed alone.
+    // No transcript or not enough of it: leave the user's speed alone.
     if (!notice) notice = a.kind === 'live' ? 'Collecting live captions…' : 'Waiting for captions: speed unchanged';
     blocked = true;
   }
@@ -542,7 +542,7 @@ function tick(): void {
         feedbackAt: null,
       };
       lastDecision = entry;
-      // M4: the full decision log (with transcript text) is a developer opt-in.
+      // The full decision log (with transcript text) is a developer opt-in.
       lastDecisionId = settings.keepDecisionLog ? entry.id : null;
       if (settings.keepDecisionLog) void appendDecision(entry, MAX_DECISION_ENTRIES).catch(() => undefined);
     }

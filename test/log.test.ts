@@ -16,7 +16,7 @@ beforeEach(() => {
   };
 });
 
-describe('M4: lightweight feedback log', () => {
+describe('Lightweight feedback log', () => {
   it('keeps the numbers but no transcript text', () => {
     const e = feedbackOnlyEntry(decision, 'too_fast', 99);
     expect(e).toMatchObject({ kind: 'feedback', feedback: 'too_fast', feedbackAt: 99, aiScore: 7, selectedRate: 1.4 });

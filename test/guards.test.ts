@@ -8,7 +8,7 @@ import {
   type CaptionAttemptContext,
 } from '../src/content/guards';
 
-describe('H1: orphaned content script detection', () => {
+describe('Orphaned content script detection', () => {
   const g = globalThis as { chrome?: unknown };
   afterEach(() => delete g.chrome);
 
@@ -32,7 +32,7 @@ describe('H1: orphaned content script detection', () => {
   });
 });
 
-describe('H3: no transcript or not enough data = no speed change', () => {
+describe('No transcript or not enough data = no speed change', () => {
   it('never decides without a transcript', () => {
     expect(hasEnoughData('none', 0, 20)).toBe(false);
   });
@@ -45,7 +45,7 @@ describe('H3: no transcript or not enough data = no speed change', () => {
   });
 });
 
-describe('H4: when to try loading captions', () => {
+describe('When to try loading captions', () => {
   const ok: CaptionAttemptContext = {
     inAd: false,
     msSinceVideoChange: 10_000,

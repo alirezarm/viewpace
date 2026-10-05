@@ -15,7 +15,7 @@ function manualProvider() {
 const result = (raw: number): ComplexityResult => ({ raw, score: raw / 10, label: '', latencyMs: 1 });
 const flush = () => new Promise((r) => setTimeout(r, 0));
 
-describe('L1: AI request queue', () => {
+describe('AI request queue', () => {
   it('has one request in flight and serves the most urgent chunk next', async () => {
     const { provider, calls } = manualProvider();
     const cache = new ComplexityCache(provider);

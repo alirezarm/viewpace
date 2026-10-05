@@ -4,7 +4,7 @@ import { MAX_TRACKS, TranscriptStore } from '../src/content/transcript';
 const json3 = (text: string) => JSON.stringify({ events: [{ tStartMs: 0, dDurationMs: 2000, segs: [{ utf8: text }] }] });
 const url = (v: string, extra = '') => `/api/timedtext?v=${v}&lang=en&fmt=json3${extra}`;
 
-describe('H3: live caption coverage', () => {
+describe('Live caption coverage', () => {
   it('grows with continuous observation and restarts after a jump', () => {
     const s = new TranscriptStore();
     s.observeLive('v', '', 'hello there', 100);
@@ -25,7 +25,7 @@ describe('H3: live caption coverage', () => {
   });
 });
 
-describe('L2: prefer original-language captions', () => {
+describe('Prefer original-language captions', () => {
   it('keeps the original track when a translation arrives later', () => {
     const s = new TranscriptStore();
     s.ingestTimedtext(url('v'), json3('original words'));
@@ -41,7 +41,7 @@ describe('L2: prefer original-language captions', () => {
   });
 });
 
-describe('L3: bounded memory', () => {
+describe('Bounded memory', () => {
   it(`keeps only the ${MAX_TRACKS} most recent transcripts`, () => {
     const s = new TranscriptStore();
     for (let i = 0; i < MAX_TRACKS + 2; i++) s.ingestTimedtext(url(`v${i}`), json3('words here'));
@@ -50,7 +50,7 @@ describe('L3: bounded memory', () => {
   });
 });
 
-describe('M5: caption responses are counted even when empty', () => {
+describe('Caption responses are counted even when empty', () => {
   it('counts empty and full responses per video', () => {
     const s = new TranscriptStore();
     s.ingestTimedtext(url('v'), '');
