@@ -2,7 +2,7 @@ import { appendDecision, attachFeedback } from '../shared/log';
 import { PAGE_TAG, type ContentToPage, type PageToContent } from '../shared/messages';
 import { loadSettings, onSettingsChanged, saveSettings, type Settings } from '../shared/settings';
 import type { AiAvailability, DecisionLogEntry, Feedback, SpeechFeatures, TimedWord } from '../shared/types';
-import { downloadNanoModel } from '../shared/nano';
+import { chooseMode, setUpSmartPacing } from '../shared/onboarding';
 import { ComplexityCache, DisabledProvider, NanoProvider, type ComplexityProvider } from './ai';
 import type { ChunkContext } from '../shared/complexity-prompt';
 import { PROFILES, computeTarget, initialState, step, videoMean, type ControllerState } from './controller';
@@ -52,7 +52,7 @@ const FLASH_MS = 4000;
 const overlay = new Overlay({
   onFeedback: (f) => void giveFeedback(f),
   onToggleEnabled: () => void saveSettings({ enabled: !settings.enabled }),
-  onToggleMode: () => void saveSettings({ mode: settings.mode === 'ai' ? 'baseline' : 'ai' }),
+  onToggleMode: () => void chooseMode(settings.mode === 'ai' ? 'baseline' : 'ai'),
   onDownloadModel: () => void downloadModel(),
   onResume: () => resumeAfterOverride(),
 });
@@ -114,7 +114,7 @@ let downloadProgress: string | null = null;
 async function downloadModel(): Promise<void> {
   downloadProgress = 'starting download…';
   try {
-    await downloadNanoModel((f) => (downloadProgress = `downloading ${Math.round(f * 100)}%`));
+    await setUpSmartPacing((f) => (downloadProgress = `downloading ${Math.round(f * 100)}%`));
     downloadProgress = null;
   } catch (e) {
     downloadProgress = `download failed (${e instanceof Error ? e.message : String(e)}): try the AutoSpeed popup`;

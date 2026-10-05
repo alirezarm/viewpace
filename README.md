@@ -16,6 +16,22 @@ After each rebuild: press reload on the extension card, then reload the YouTube 
 
 Toggle instantly with **Alt+Shift+S**, the badge menu on the video, or the popup.
 
+## First run and smart pacing setup
+
+- On install, AutoSpeed opens a welcome page. It already works in speech-only (Baseline) mode, with
+  no setup needed.
+- "Smart pacing" is the user-facing name for AI mode. Its states are: on, needs a one-time download
+  (one button: *Turn on smart pacing*), downloading, unavailable. The logic is in
+  `src/shared/onboarding.ts`; the card UI in `src/shared/smart-card.ts` is shared by the popup and
+  the welcome page.
+- When the model becomes available (setup button, a background download finishing, or already
+  present), AI mode is switched on automatically, unless the user picked an analysis mode
+  themselves in Advanced (`modeChosenByUser`). The check runs on install, at browser startup, and on
+  every availability check from a YouTube tab.
+- If unavailable, AutoSpeed says so once on the welcome page and is silent everywhere else. Raw
+  status and the last setup error are shown under Advanced.
+- State is stored in `chrome.storage.local` under `autospeed.onboarding`.
+
 ## User interface
 
 - **Popup:** on/off switch, pace (Relaxed / Normal / Fast) with the pace's speed range and the live

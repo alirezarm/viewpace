@@ -1,5 +1,6 @@
 import type { AiRequest, AiResponse } from '../shared/messages';
 import { NanoComplexityEngine, nanoAvailability } from '../shared/nano';
+import { loadOnboarding, reconcileSmartPacing, saveOnboarding } from '../shared/onboarding';
 import { loadSettings, saveSettings } from '../shared/settings';
 
 /**
@@ -14,7 +15,9 @@ chrome.runtime.onMessage.addListener((msg: AiRequest, _sender, sendResponse: (r:
   if (msg?.kind !== 'ai:status' && msg?.kind !== 'ai:score') return false;
 
   (async (): Promise<AiResponse> => {
-    if (msg.kind === 'ai:status') return { ok: true, status: await nanoAvailability() };
+    // Status checks double as the moment to switch smart pacing on once the model is ready
+    // (e.g. a download that finished after the popup was closed).
+    if (msg.kind === 'ai:status') return { ok: true, status: await reconcileSmartPacing() };
     const status = await nanoAvailability();
     // The model download needs a user gesture, which a service worker never has: it is
     // started from the popup. Until then, report the status instead of trying to create.
@@ -27,6 +30,17 @@ chrome.runtime.onMessage.addListener((msg: AiRequest, _sender, sendResponse: (r:
   })().then(sendResponse);
   return true; // async response
 });
+
+// First run: AutoSpeed already works (speech-based); the welcome page offers smart pacing.
+chrome.runtime.onInstalled.addListener(async ({ reason }) => {
+  if (reason === chrome.runtime.OnInstalledReason.INSTALL && !(await loadOnboarding()).welcomed) {
+    await saveOnboarding({ welcomed: true });
+    await chrome.tabs.create({ url: chrome.runtime.getURL('welcome.html') });
+  }
+  void reconcileSmartPacing();
+});
+
+chrome.runtime.onStartup.addListener(() => void reconcileSmartPacing());
 
 chrome.commands.onCommand.addListener(async (command) => {
   if (command !== 'toggle-autospeed') return;

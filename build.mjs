@@ -13,6 +13,7 @@ const options = {
     content: 'src/content/main.ts',
     background: 'src/background/background.ts',
     popup: 'src/popup/popup.ts',
+    welcome: 'src/welcome/welcome.ts',
   },
   outdir: 'dist',
   bundle: true,

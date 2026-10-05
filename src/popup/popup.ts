@@ -2,14 +2,16 @@ import { PROFILES } from '../content/controller';
 import { formatRate } from '../content/badge';
 import { clearLog, readLog } from '../shared/log';
 import type { TabRequest, TabStatus } from '../shared/messages';
-import { downloadNanoModel, nanoAvailability } from '../shared/nano';
+import { nanoAvailability } from '../shared/nano';
+import { chooseMode, loadOnboarding } from '../shared/onboarding';
+import { SmartCard } from '../shared/smart-card';
 import { loadSettings, onSettingsChanged, saveSettings, type Settings } from '../shared/settings';
-import type { AiAvailability } from '../shared/types';
 
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 
 let settings: Settings;
-let downloadText: string | null = null;
+// The popup stays quiet about smart pacing unless there's something useful to offer or report.
+const smart = new SmartCard($('smart'), { hideIn: ['unavailable', 'off-by-choice'] });
 
 // ---------- live status from the active tab ----------
 
@@ -53,37 +55,6 @@ function renderPace(status: TabStatus | null): void {
   }
 }
 
-// ---------- smart pacing (the AI enhancement, in plain words) ----------
-
-function renderSmart(status: AiAvailability): void {
-  $('smart').hidden = settings.mode !== 'ai';
-  const text = $('smart-text');
-  const setup = $<HTMLButtonElement>('setup');
-  setup.hidden = true;
-  if (downloadText) {
-    text.textContent = downloadText;
-    return;
-  }
-  switch (status) {
-    case 'available':
-      text.textContent = 'On. Slows down for harder parts and speeds through easier ones.';
-      break;
-    case 'downloadable':
-      text.textContent = 'Needs a one-time download before it can start. Until then, AutoSpeed uses speaking speed only.';
-      setup.hidden = false;
-      break;
-    case 'downloading':
-      text.textContent = 'Downloading. AutoSpeed uses speaking speed only until it finishes.';
-      break;
-    case 'unavailable':
-    case 'unsupported':
-      text.textContent = 'Not available on this device. AutoSpeed uses speaking speed only.';
-      break;
-    default:
-      text.textContent = "Couldn't start. AutoSpeed uses speaking speed only for now.";
-  }
-}
-
 // ---------- render ----------
 
 async function render(): Promise<void> {
@@ -95,14 +66,22 @@ async function render(): Promise<void> {
   document.querySelectorAll<HTMLInputElement>('input[name=mode]').forEach((r) => (r.checked = r.value === settings.mode));
   document.querySelectorAll<HTMLInputElement>('input[name=profile]').forEach((r) => (r.checked = r.value === settings.profile));
 
-  const ai = await nanoAvailability();
-  $('nano').textContent = ai;
-  renderSmart(ai);
+  void smart.refresh();
   renderPace(await activeTabStatus());
+  void renderDiagnostics();
 
   const log = await readLog();
   const rated = log.filter((e) => e.feedback).length;
   $('logcount').textContent = `${log.length} decisions, ${rated} with feedback`;
+}
+
+async function renderDiagnostics(): Promise<void> {
+  $('nano').textContent = await nanoAvailability();
+  const o = await loadOnboarding();
+  const parts = [o.modeChosenByUser ? 'Analysis mode chosen manually.' : 'Analysis mode set automatically.'];
+  if (o.autoEnabledAt) parts.push(`Smart pacing turned on automatically ${new Date(o.autoEnabledAt).toLocaleString()}.`);
+  if (o.lastSetupError) parts.push(`Last setup error: ${o.lastSetupError}`);
+  $('setup-diag').textContent = parts.join(' ');
 }
 
 // ---------- actions ----------
@@ -116,27 +95,11 @@ function bind(): void {
   onCheck('debug', 'debugOverlay');
   onCheck('autocc', 'autoEnableCaptions');
   document.querySelectorAll<HTMLInputElement>('input[name=mode]').forEach((r) =>
-    r.addEventListener('change', () => patch({ mode: r.value as Settings['mode'] })),
+    r.addEventListener('change', () => void chooseMode(r.value as Settings['mode'])),
   );
   document.querySelectorAll<HTMLInputElement>('input[name=profile]').forEach((r) =>
     r.addEventListener('change', () => patch({ profile: r.value as Settings['profile'] })),
   );
-
-  // Model download needs a user gesture, so it starts from this click.
-  $<HTMLButtonElement>('setup').addEventListener('click', async () => {
-    downloadText = 'Starting download…';
-    void render();
-    try {
-      await downloadNanoModel((f) => {
-        downloadText = `Downloading ${Math.round(f * 100)}%. You can keep watching meanwhile.`;
-        $('smart-text').textContent = downloadText;
-      });
-      downloadText = null;
-    } catch (e) {
-      downloadText = `Setup failed: ${e instanceof Error ? e.message : String(e)}`;
-    }
-    void render();
-  });
 
   $<HTMLButtonElement>('export').addEventListener('click', async () => {
     const log = await readLog();
