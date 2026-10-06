@@ -1,6 +1,7 @@
 import { PROFILES } from '../content/controller';
 import { formatRate } from '../content/badge';
 import { clearLog, readLog } from '../shared/log';
+import { clearStats, loadStats, summarize, type BetaSummary, type SummaryColumn } from '../shared/stats';
 import type { TabRequest, TabStatus } from '../shared/messages';
 import { nanoAvailability } from '../shared/nano';
 import { chooseMode, loadOnboarding } from '../shared/onboarding';
@@ -75,6 +76,7 @@ async function render(): Promise<void> {
   const rated = log.filter((e) => e.feedback).length;
   const decisions = log.filter((e) => e.kind !== 'feedback').length;
   $('logcount').textContent = `${rated} feedback clicks, ${decisions} logged decisions`;
+  renderSummary(summarize(log, await loadStats()));
 }
 
 async function renderDiagnostics(): Promise<void> {
@@ -84,6 +86,43 @@ async function renderDiagnostics(): Promise<void> {
   if (o.autoEnabledAt) parts.push(`Smart pacing turned on automatically ${new Date(o.autoEnabledAt).toLocaleString()}.`);
   if (o.lastSetupError) parts.push(`Last setup error: ${o.lastSetupError}`);
   $('setup-diag').textContent = parts.join(' ');
+}
+
+/** Below this many ratings, percentages are anecdotal. */
+const FEW_RATINGS = 20;
+
+function renderSummary(s: BetaSummary): void {
+  const pct = (x: number | null) => (x === null ? '—' : `${Math.round(x * 100)}%`);
+  const rows: [string, (c: SummaryColumn) => string][] = [
+    ['Ratings', (c) => String(c.feedback)],
+    ['Just right', (c) => pct(c.justRight)],
+    ['Too slow', (c) => pct(c.tooSlow)],
+    ['Too fast', (c) => pct(c.tooFast)],
+    ['Avg speed', (c) => (c.avgSpeed === null ? '—' : `${c.avgSpeed.toFixed(2)}×`)],
+    ['Watched', (c) => `${Math.round(c.playMinutes)} min`],
+    ['Videos', (c) => String(c.videos)],
+    ['Overrides', (c) => String(c.overrides)],
+    ['Per video', (c) => (c.overridesPerVideo === null ? '—' : c.overridesPerVideo.toFixed(2))],
+  ];
+  const cols = [s.byAnalysis.speech, s.byAnalysis.content, s.total];
+  const body = $('summary').querySelector('tbody')!;
+  body.replaceChildren(
+    ...rows.map(([label, cell]) => {
+      const tr = document.createElement('tr');
+      for (const text of [label, ...cols.map(cell)]) {
+        const td = document.createElement('td');
+        td.textContent = text;
+        tr.append(td);
+      }
+      return tr;
+    }),
+  );
+  const notes: string[] = [];
+  if (s.since) notes.push(`Usage counted since ${new Date(s.since).toLocaleDateString()}.`);
+  notes.push('Avg speed and overrides cover time when AutoSpeed was choosing the speed.');
+  if (cols.slice(0, 2).some((c) => c.feedback < FEW_RATINGS)) notes.push(`Under ${FEW_RATINGS} ratings in a column is too few to compare.`);
+  notes.push('Not a controlled comparison: the two columns cover different videos and moments.');
+  $('summary-note').textContent = notes.join(' ');
 }
 
 // ---------- actions ----------
@@ -105,8 +144,9 @@ function bind(): void {
   );
 
   $<HTMLButtonElement>('export').addEventListener('click', async () => {
-    const log = await readLog();
-    const blob = new Blob([JSON.stringify(log, null, 2)], { type: 'application/json' });
+    // Raw data: the bounded feedback/decision log plus the fixed-size usage counters.
+    const data = { exportedAt: new Date().toISOString(), usage: await loadStats(), log: await readLog() };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
     a.download = `autospeed-log-${new Date().toISOString().replace(/[:.]/g, '-')}.json`;
@@ -115,8 +155,8 @@ function bind(): void {
   });
 
   $<HTMLButtonElement>('clear').addEventListener('click', async () => {
-    if (!confirm('Delete all logged decisions and feedback?')) return;
-    await clearLog();
+    if (!confirm('Delete all feedback, logged decisions and usage counters?')) return;
+    await Promise.all([clearLog(), clearStats()]);
     void render();
   });
 

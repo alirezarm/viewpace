@@ -61,6 +61,21 @@ AutoSpeed should never make YouTube worse:
 - **Logging**: by default only feedback clicks are stored (numbers, no transcript text; max 500).
   The full decision log with transcript text is an Advanced opt-in (max 1000).
 
+## Beta summary (Advanced)
+
+A local-only summary built from data AutoSpeed already keeps. There's no backend or account, and
+no transcript text by default.
+
+- **Ratings and Just right / Too slow / Too fast %**: from the bounded feedback log.
+- **Avg speed, time watched, videos, overrides**: from `autospeed.stats`, a fixed-size counter
+  record (`src/shared/stats.ts`) written by the content script every 30 s and on video change or
+  tab hide. Speed is time-weighted over playback while AutoSpeed was choosing the speed.
+  Overrides count only user speed changes while AutoSpeed was in control, minus temporary ones
+  that returned by themselves (e.g. press-and-hold).
+- **Speech vs Content columns**: split by whether the decision actually used an AI content score
+  (AI mode without a ready score counts as Speech). It's not a controlled comparison.
+- **Export JSON**: `{ exportedAt, usage, log }`. **Clear data** removes the log and the counters.
+
 ## User interface
 
 - **Popup:** on/off switch, pace (Relaxed / Normal / Fast) with the pace's speed range and the live

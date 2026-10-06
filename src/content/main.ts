@@ -13,6 +13,7 @@ import { describeChange } from './friendly';
 import type { TabRequest, TabStatus } from '../shared/messages';
 import { TranscriptStore } from './transcript';
 import { RateOwner } from './rate-owner';
+import { UsageMeter, addStats, analysisOf, type Analysis as ScoringKind } from '../shared/stats';
 import { CaptionAttempts, captionAttemptAllowed, hasEnoughData, isExtensionAlive, type TranscriptKind } from './guards';
 
 const TICK_MS = 1000;
@@ -49,6 +50,12 @@ let playerInfo = { videoId: null as string | null, isLive: false, at: -Infinity 
 let tickTimer: ReturnType<typeof setInterval> | undefined;
 let statusTimer: ReturnType<typeof setInterval> | undefined;
 let shutDown = false;
+// Local beta usage counters (fixed size; see shared/stats.ts).
+const meter = new UsageMeter();
+let adaptedThisVideo = false;
+let suspendAnalysis: ScoringKind = 'speech';
+let ticksSinceFlush = 0;
+const FLUSH_EVERY_TICKS = 30;
 let captionNotice: string | null = null;
 // User-facing badge state
 let flashText: string | null = null;
@@ -130,8 +137,12 @@ async function downloadModel(): Promise<void> {
   void refreshAiStatus();
 }
 
-function applyRate(rate: number): void {
+function applyRate(rate: number, analysis: ScoringKind): void {
   if (!video) return;
+  if (!owner.controlling && !adaptedThisVideo) {
+    adaptedThisVideo = true;
+    meter.videoAdapted(analysis);
+  }
   owner.take(rate, video.playbackRate);
   video.playbackRate = rate;
 }
@@ -141,6 +152,13 @@ function releaseControl(): void {
   const restore = owner.release();
   if (video && restore !== null) video.playbackRate = restore;
   ctrl = initialState(video?.playbackRate ?? 1);
+}
+
+/** Write the usage counters gathered since the last flush. */
+function flushStats(): void {
+  ticksSinceFlush = 0;
+  const delta = meter.takeDelta();
+  if (delta && isExtensionAlive()) void addStats(delta).catch(() => undefined);
 }
 
 /**
@@ -290,9 +308,17 @@ function inAdOrJustAfter(): boolean {
 function onRateChange(): void {
   if (!video) return;
   // While AutoSpeed is off, the user's speed changes are simply theirs: nothing to pause.
+  const wasControlling = owner.controlling;
   const action = owner.onRateChange(video.playbackRate, performance.now(), inAdOrJustAfter() || !settings.enabled);
   if (action === 'reapply' && owner.applied !== null) video.playbackRate = owner.applied;
-  else if (action === 'resume') ctrl = initialState(video.playbackRate);
+  else if (action === 'resume') {
+    ctrl = initialState(video.playbackRate);
+    meter.temporaryOverride(suspendAnalysis);
+  } else if (action === 'suspend' && wasControlling) {
+    // Only a change while AutoSpeed was choosing the speed counts as overriding it.
+    suspendAnalysis = lastDecision ? analysisOf(lastDecision) : 'speech';
+    meter.override(suspendAnalysis);
+  }
 }
 
 /** The player is (re)loading media: YouTube may apply its own speed for a moment. */
@@ -317,6 +343,8 @@ function onVideoChange(id: string | null): void {
   // Leaving a video (another video, the home page, the miniplayer, Shorts) gives the
   // user's own speed back; the next video starts from it until AutoSpeed is confident.
   releaseControl();
+  flushStats();
+  adaptedThisVideo = false;
   // Transient data is kept for the current video only (keeping anything already captured for it).
   store.retainOnly(id);
   captionAttempts.retainOnly(id);
@@ -428,9 +456,11 @@ function tick(): void {
   overlay.setVisible(Boolean(settings.debugOverlay && onVideo));
   badge.setVisible(Boolean(settings.showOverlay && !settings.debugOverlay && playable));
   if (!id || !video) {
+    meter.tick(performance.now(), false, 1, 'speech');
     tabStatus = { onVideo: false, state: 'idle', rate: null };
     return;
   }
+  if (++ticksSinceFlush >= FLUSH_EVERY_TICKS) flushStats();
   const range = PROFILES[settings.profile];
   const badgeBase: Omit<BadgeView, 'state' | 'line' | 'flash'> = {
     rate: video.playbackRate,
@@ -463,6 +493,7 @@ function tick(): void {
     overlay.update({ ...base, speech: '—', ai: '—', transcript: '—', chunk: '', reason: 'AutoSpeed disabled', notice: null });
     badge.update({ ...badgeBase, state: 'off', line: null, flash: false });
     tabStatus = { onVideo: true, state: 'off', rate: video.playbackRate };
+    meter.tick(performance.now(), false, 1, 'speech');
     return;
   }
 
@@ -507,7 +538,7 @@ function tick(): void {
     ctrl = state;
     if (decision) {
       if (decision.changed) {
-        applyRate(decision.rate);
+        applyRate(decision.rate, aiResult ? 'content' : 'speech');
         flashText = describeChange({
           previousRate: decision.previousRate,
           rate: decision.rate,
@@ -582,6 +613,10 @@ function tick(): void {
     aiAction,
   });
 
+  // Time-weighted speed: count playback only while AutoSpeed is choosing the speed.
+  const counting = owner.controlling && !video.paused && !ad && !live;
+  meter.tick(performance.now(), counting, video.playbackRate, aiResult ? 'content' : 'speech');
+
   const flashing = performance.now() < flashUntil;
   badge.update({
     ...badgeBase,
@@ -620,6 +655,11 @@ async function boot(): Promise<void> {
     tick();
   });
   tickTimer = setInterval(tick, TICK_MS);
+  // Don't lose the last few seconds of counters when the tab goes away.
+  addEventListener('pagehide', flushStats);
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') flushStats();
+  });
   // Poll faster while the model isn't ready, so AI mode kicks in soon after a download finishes.
   // Once it's ready, check rarely, and not at all while nothing plays (lets the worker sleep).
   statusTimer = setInterval(() => {

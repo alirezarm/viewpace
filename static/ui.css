@@ -86,3 +86,11 @@ details[open] summary { color: var(--ink); }
 .ghost { padding: 5px 10px; border: 1px solid var(--line); border-radius: 8px; background: transparent; cursor: pointer; }
 .ghost:hover { background: var(--field); }
 @media (prefers-reduced-motion: reduce) { .dot, .switch span, .switch span::after { transition: none; } }
+
+/* Beta summary table (Advanced) */
+.summary { width: 100%; margin-top: 6px; border-collapse: collapse; font-size: 12px; font-variant-numeric: tabular-nums; }
+.summary th, .summary td { padding: 3px 0; text-align: right; font-weight: normal; }
+.summary th:first-child, .summary td:first-child { text-align: left; color: var(--muted); }
+.summary thead th { color: var(--muted); border-bottom: 1px solid var(--line); }
+.summary tbody tr:first-child td { padding-top: 5px; }
+.summary + .hint { margin-top: 8px; }
