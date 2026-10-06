@@ -1,5 +1,7 @@
 import type { ChunkContext } from '../shared/complexity-prompt';
+import type { BlockRating, PartSummary, SectionRange } from '../shared/goal-prompt';
 import type { AiRequest, AiResponse } from '../shared/messages';
+import type { GoalAnalyzer } from './goal/goal-session';
 import type { AiAvailability, ComplexityResult } from '../shared/types';
 
 /** Anything that can turn a transcript chunk into a constrained 0..1 complexity score. */
@@ -50,6 +52,27 @@ export class NanoProvider implements ComplexityProvider {
     const r = await this.send({ kind: 'ai:score', text, context });
     if (r.ok && 'result' in r) return r.result;
     throw new Error(r.ok ? 'unexpected response' : r.error);
+  }
+}
+
+/** Goal Mode analysis via Gemini Nano in the extension service worker. */
+export class NanoGoalAnalyzer implements GoalAnalyzer {
+  constructor(private nano: NanoProvider) {}
+
+  async available(): Promise<boolean> {
+    return (await this.nano.status()) === 'available';
+  }
+
+  async rateBlock(goal: string, text: string, title?: string): Promise<BlockRating> {
+    const r = (await chrome.runtime.sendMessage({ kind: 'ai:goal-block', goal, text, title } satisfies AiRequest)) as AiResponse;
+    if (r.ok && 'goalBlock' in r) return r.goalBlock;
+    throw new Error(r.ok ? 'unexpected response' : r.error);
+  }
+
+  async groupSections(goal: string, parts: PartSummary[], first: number, last: number): Promise<SectionRange[] | null> {
+    const r = (await chrome.runtime.sendMessage({ kind: 'ai:goal-sections', goal, parts, first, last } satisfies AiRequest)) as AiResponse;
+    if (r.ok && 'sections' in r) return r.sections;
+    return null;
   }
 }
 

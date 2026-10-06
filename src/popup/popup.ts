@@ -2,7 +2,8 @@ import { PROFILES } from '../content/controller';
 import { formatRate } from '../content/badge';
 import { clearLog, readLog } from '../shared/log';
 import { clearStats, loadStats, summarize, type BetaSummary, type SummaryColumn } from '../shared/stats';
-import type { TabRequest, TabStatus } from '../shared/messages';
+import type { GoalTabRequest, TabRequest, TabStatus } from '../shared/messages';
+import type { GoalStatus } from '../content/goal/goal-session';
 import { nanoAvailability } from '../shared/nano';
 import { chooseMode, loadOnboarding } from '../shared/onboarding';
 import { SmartCard } from '../shared/smart-card';
@@ -125,6 +126,42 @@ function renderSummary(s: BetaSummary): void {
   $('summary-note').textContent = notes.join(' ');
 }
 
+// ---------- Goal Mode (experimental) ----------
+
+async function sendGoal(req: GoalTabRequest): Promise<GoalStatus | { error: string } | null | undefined> {
+  try {
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    if (tab?.id === undefined) return undefined;
+    return (await chrome.tabs.sendMessage(tab.id, req)) as GoalStatus | { error: string } | null;
+  } catch {
+    return undefined; // not a YouTube tab
+  }
+}
+
+function renderGoal(status: GoalStatus | { error: string } | null | undefined, onVideo: boolean): void {
+  const start = $<HTMLButtonElement>('goal-start');
+  const stop = $<HTMLButtonElement>('goal-stop');
+  const text = $('goal-status');
+  start.disabled = !onVideo;
+  if (status === undefined) {
+    if (!onVideo) text.textContent = 'Open a YouTube video to use Goal Mode.';
+    stop.hidden = true;
+    return;
+  }
+  if (status && 'error' in status) {
+    text.textContent = status.error;
+    return;
+  }
+  const running = status !== null && (status.phase === 'mapping' || status.phase === 'ready');
+  stop.hidden = !running;
+  start.textContent = running ? 'Restart with this goal' : 'Start Goal Mode';
+  if (status) text.textContent = status.message;
+}
+
+async function refreshGoal(onVideo: boolean): Promise<void> {
+  if ($<HTMLDetailsElement>('goal').open) renderGoal(await sendGoal({ kind: 'goal:status' }), onVideo);
+}
+
 // ---------- actions ----------
 
 function bind(): void {
@@ -160,6 +197,18 @@ function bind(): void {
     void render();
   });
 
+  $<HTMLButtonElement>('goal-start').addEventListener('click', async () => {
+    const goalText = $<HTMLTextAreaElement>('goal-text').value;
+    renderGoal(await sendGoal({ kind: 'goal:start', goal: goalText }), true);
+  });
+  $<HTMLButtonElement>('goal-stop').addEventListener('click', async () => {
+    await sendGoal({ kind: 'goal:stop' });
+    $('goal-status').textContent = 'Goal Mode stopped.';
+    $<HTMLButtonElement>('goal-stop').hidden = true;
+    $<HTMLButtonElement>('goal-start').textContent = 'Start Goal Mode';
+  });
+  $<HTMLDetailsElement>('goal').addEventListener('toggle', () => void activeTabStatus().then((s) => refreshGoal(Boolean(s?.onVideo))));
+
   // Remember whether Advanced was open (a per-browser convenience only).
   const adv = $<HTMLDetailsElement>('advanced');
   try {
@@ -179,7 +228,11 @@ function bind(): void {
 bind();
 void render();
 onSettingsChanged(() => void render());
-// Keep the live speed current while the popup is open.
+// Keep the live speed (and Goal Mode progress) current while the popup is open.
 setInterval(() => {
-  if (settings) void activeTabStatus().then(renderPace);
+  if (!settings) return;
+  void activeTabStatus().then((s) => {
+    renderPace(s);
+    void refreshGoal(Boolean(s?.onVideo));
+  });
 }, 1000);

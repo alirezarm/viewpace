@@ -44,19 +44,29 @@ export async function downloadNanoModel(onProgress?: (fraction: number) => void)
 
 const SCORE_TIMEOUT_MS = 10000;
 
-export class NanoComplexityEngine {
-  private base: Promise<LanguageModelSession> | null = null;
+/** The prompt (with its schema) would not fit the model's context window. */
+export class PromptTooLargeError extends Error {}
+
+/**
+ * Prompts Gemini Nano with a JSON-schema-constrained answer. One base session per system prompt
+ * (created lazily, re-created after a service-worker restart), cloned per prompt so earlier
+ * prompts never accumulate in context. All prompts share one queue: one on-device inference at a
+ * time, whichever feature asks.
+ */
+export class NanoPrompter {
+  private bases = new Map<string, Promise<LanguageModelSession>>();
   private chain: Promise<unknown> = Promise.resolve();
 
-  private async baseSession(): Promise<LanguageModelSession> {
+  private baseSession(systemPrompt: string): Promise<LanguageModelSession> {
     const LM = getLanguageModel();
-    if (!LM) throw new Error('Prompt API not present in this Chrome');
-    if (!this.base) {
+    if (!LM) return Promise.reject(new Error('Prompt API not present in this Chrome'));
+    let base = this.bases.get(systemPrompt);
+    if (!base) {
       const opts: LanguageModelCreateOptions = {
         ...LANGUAGE_OPTIONS,
-        initialPrompts: [{ role: 'system', content: SYSTEM_PROMPT }],
+        initialPrompts: [{ role: 'system', content: systemPrompt }],
       };
-      // Low temperature for repeatable scores; extensions may set sampling params (both are required together).
+      // Low temperature for repeatable answers; extensions may set sampling params (both are required together).
       const create = async () => {
         try {
           const p = await LM.params?.();
@@ -66,35 +76,30 @@ export class NanoComplexityEngine {
         }
         return LM.create(opts);
       };
-      this.base = create();
-      this.base.catch(() => (this.base = null));
+      base = create();
+      base.catch(() => this.bases.delete(systemPrompt));
+      this.bases.set(systemPrompt, base);
     }
-    return this.base;
+    return base;
   }
 
-  /** Scores are serialized: one on-device inference at a time. */
-  score(chunk: string, context?: ChunkContext): Promise<ComplexityResult> {
-    const run = async (): Promise<ComplexityResult> => {
-      const t0 = performance.now();
-      const base = await this.baseSession();
+  /** Resolves with the model's raw (schema-constrained) text. */
+  prompt(systemPrompt: string, userPrompt: string, schema: object, timeoutMs = SCORE_TIMEOUT_MS): Promise<string> {
+    const run = async (): Promise<string> => {
+      const base = await this.baseSession(systemPrompt);
       const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), SCORE_TIMEOUT_MS);
-      // Clone per prompt so earlier excerpts don't accumulate in context or bias later scores.
+      const timer = setTimeout(() => controller.abort(), timeoutMs);
       let session: LanguageModelSession;
       try {
         session = await base.clone({ signal: controller.signal });
       } catch (e) {
         clearTimeout(timer);
-        this.base = null; // base session unusable (e.g. destroyed by Chrome): re-create next time
+        this.bases.delete(systemPrompt); // base session unusable (e.g. destroyed by Chrome): re-create next time
         throw e;
       }
       try {
-        const out = await session.prompt(buildUserPrompt(chunk, context), {
-          responseConstraint: RESPONSE_SCHEMA,
-          signal: controller.signal,
-        });
-        const parsed = parseComplexity(out);
-        return { ...parsed, latencyMs: Math.round(performance.now() - t0) };
+        await assertFits(session, userPrompt, schema);
+        return await session.prompt(userPrompt, { responseConstraint: schema, signal: controller.signal });
       } finally {
         clearTimeout(timer);
         session.destroy();
@@ -103,5 +108,30 @@ export class NanoComplexityEngine {
     const next = this.chain.then(run, run);
     this.chain = next.catch(() => undefined);
     return next;
+  }
+}
+
+/**
+ * Refuse prompts that would overflow the context window (which would otherwise silently drop
+ * earlier context, including the instructions). Uses whichever measuring API this Chrome offers;
+ * if none, relies on the callers' own size caps.
+ */
+async function assertFits(session: LanguageModelSession, userPrompt: string, schema: object): Promise<void> {
+  const window = session.contextWindow ?? session.inputQuota;
+  const used = session.contextUsage ?? session.inputUsage ?? 0;
+  const measure = session.measureContextUsage ?? session.measureInputUsage;
+  if (!window || !measure) return;
+  const needed = await measure.call(session, userPrompt, { responseConstraint: schema });
+  if (used + needed > window * 0.9) throw new PromptTooLargeError(`prompt needs ${needed} of ${window - used} tokens left`);
+}
+
+export class NanoComplexityEngine {
+  constructor(private prompter: NanoPrompter) {}
+
+  /** Smart Pacing: score one transcript chunk (shares the prompter's queue). */
+  async score(chunk: string, context?: ChunkContext): Promise<ComplexityResult> {
+    const t0 = performance.now();
+    const out = await this.prompter.prompt(SYSTEM_PROMPT, buildUserPrompt(chunk, context), RESPONSE_SCHEMA);
+    return { ...parseComplexity(out), latencyMs: Math.round(performance.now() - t0) };
   }
 }

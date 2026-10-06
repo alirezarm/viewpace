@@ -3,17 +3,18 @@ import { PAGE_TAG, type ContentToPage, type PageToContent } from '../shared/mess
 import { loadSettings, onSettingsChanged, saveSettings, type Settings } from '../shared/settings';
 import type { AiAvailability, DecisionLogEntry, Feedback, SpeechFeatures, TimedWord } from '../shared/types';
 import { chooseMode, setUpSmartPacing } from '../shared/onboarding';
-import { ComplexityCache, DisabledProvider, NanoProvider, type ComplexityProvider } from './ai';
+import { ComplexityCache, DisabledProvider, NanoGoalAnalyzer, NanoProvider, type ComplexityProvider } from './ai';
 import type { ChunkContext } from '../shared/complexity-prompt';
 import { PROFILES, computeTarget, initialState, step, videoMean, type ControllerState } from './controller';
 import { computeFeatures, windowText } from './features';
 import { Overlay } from './overlay';
 import { Badge, type BadgeView } from './badge';
 import { describeChange } from './friendly';
-import type { TabRequest, TabStatus } from '../shared/messages';
+import type { GoalTabRequest, TabRequest, TabStatus } from '../shared/messages';
 import { TranscriptStore } from './transcript';
 import { RateOwner } from './rate-owner';
 import { toggleCaptionsForTrack } from './caption-toggle';
+import { GoalController, type GoalDecision } from './goal/goal-session';
 import { UsageMeter, addStats, analysisOf, type Analysis as ScoringKind } from '../shared/stats';
 import { CaptionAttempts, captionAttemptAllowed, captionPlan, hasEnoughData, transcriptPanelTarget, isExtensionAlive, type TranscriptKind } from './guards';
 
@@ -30,6 +31,9 @@ const store = new TranscriptStore();
 const nano = new NanoProvider();
 const disabled = new DisabledProvider();
 const ai = new ComplexityCache(disabled);
+// Goal Mode (experimental): per-video goal, map and analysis; in memory only.
+const goal = new GoalController();
+const goalAnalyzer = new NanoGoalAnalyzer(nano);
 let aiStatus: AiAvailability = 'disabled';
 
 let video: HTMLVideoElement | null = null;
@@ -140,9 +144,10 @@ async function downloadModel(): Promise<void> {
   void refreshAiStatus();
 }
 
-function applyRate(rate: number, analysis: ScoringKind): void {
+/** `analysis` null: a Goal Mode decision, kept out of the Beta statistics. */
+function applyRate(rate: number, analysis: ScoringKind | null): void {
   if (!video) return;
-  if (!owner.controlling && !adaptedThisVideo) {
+  if (analysis && !owner.controlling && !adaptedThisVideo) {
     adaptedThisVideo = true;
     meter.videoAdapted(analysis);
   }
@@ -171,6 +176,7 @@ function flushStats(): void {
 function shutdown(): void {
   if (shutDown) return;
   shutDown = true;
+  goal.stop();
   clearInterval(tickTimer);
   clearInterval(statusTimer);
   releaseControl();
@@ -358,6 +364,7 @@ function bindVideo(v: HTMLVideoElement | null): void {
 }
 
 function onVideoChange(id: string | null): void {
+  goal.onVideoChange(id); // goal, map and analysis belong to the previous video
   // Leaving a video (another video, the home page, the miniplayer, Shorts) gives the
   // user's own speed back; the next video starts from it until ViewPace is confident.
   releaseControl();
@@ -415,7 +422,7 @@ function analyze(id: string, t: number): Analysis {
       };
     };
     // Prefetch the next chunks so scores are ready before playback reaches them.
-    if (aiReady()) {
+    if (aiReady() && !goal.active(id)) {
       for (const j of [k + 1, k + 2]) {
         const c = chunkFor(j);
         ai.request(`${id}:${j}`, j, c.text, c.context);
@@ -519,11 +526,14 @@ function tick(): void {
   if (!live && video.readyState >= 2 && !video.paused) void ensureCaptionTrack(id);
 
   const a = analyze(id, video.currentTime);
-  const aiResult = aiReady() && a.aiKey ? ai.get(a.aiKey) : null;
+  const goalOn = goal.active(id);
+  const aiResult = aiReady() && !goalOn && a.aiKey ? ai.get(a.aiKey) : null;
   const aiScores = ai.scoresUpTo(a.aiIndex);
   const aiMean = videoMean(aiScores);
   ai.setPlayhead(a.aiIndex);
-  if (aiReady() && a.aiKey && !aiResult) ai.request(a.aiKey, a.aiIndex, a.aiText, a.aiContext);
+  if (aiReady() && !goalOn && a.aiKey && !aiResult) ai.request(a.aiKey, a.aiIndex, a.aiText, a.aiContext);
+  // Goal Mode supplies the target instead of speech/Smart Pacing, through the same controller.
+  const goalDecision: GoalDecision = goal.decide(id, video.currentTime, PROFILES[settings.profile], owner.suspended);
 
   let notice: string | null = captionNotice;
   let blocked = false;
@@ -537,7 +547,11 @@ function tick(): void {
   } else if (owner.suspended) {
     notice = `Manual speed ${video.playbackRate}× detected: ViewPace paused`;
     blocked = true;
-  } else if (!hasEnoughData(a.kind, a.liveCoverage, WINDOW_SEC)) {
+  } else if (goalDecision.kind === 'hold') {
+    // Goal Mode is on but has no decision here (still mapping, or unmapped): no data, no change.
+    notice = `Goal Mode: ${goalDecision.note}`;
+    blocked = true;
+  } else if (goalDecision.kind === 'off' && !hasEnoughData(a.kind, a.liveCoverage, WINDOW_SEC)) {
     // No transcript or not enough of it: leave the user's speed alone.
     if (!notice) notice = a.kind === 'live' ? 'Collecting live captions…' : 'Waiting for captions: speed unchanged';
     blocked = true;
@@ -546,26 +560,35 @@ function tick(): void {
   if (!owner.controlling) ctrl = { ...ctrl, current: video.playbackRate };
 
   if (!blocked && !video.paused && video.readyState >= 2) {
-    const target = computeTarget(
-      { features: a.features, complexity: aiResult?.score ?? null, complexityMean: aiMean },
-      settings.profile,
-      settings.mode,
-    );
+    const target =
+      goalDecision.kind === 'target'
+        ? {
+            rate: goalDecision.rate,
+            reason: `Goal: ${goalDecision.label} (relevance ${goalDecision.region.relevance}/10, attention ${goalDecision.region.attention}/10, "${goalDecision.region.topic}")`,
+          }
+        : computeTarget(
+            { features: a.features, complexity: aiResult?.score ?? null, complexityMean: aiMean },
+            settings.profile,
+            settings.mode,
+          );
     lastTargetRate = target.rate;
     const { state, decision } = step(ctrl, target.rate, performance.now());
     ctrl = state;
     if (decision) {
       if (decision.changed) {
-        applyRate(decision.rate, aiResult ? 'content' : 'speech');
-        flashText = describeChange({
-          previousRate: decision.previousRate,
-          rate: decision.rate,
-          mode: settings.mode,
-          aiScore: aiResult?.raw ?? null,
-          aiMean: aiResult ? aiMean * 10 : null,
-          pauseRatio: a.features?.pauseRatio ?? null,
-          littleSpeech: !a.features || a.features.words < 8,
-        });
+        applyRate(decision.rate, goalDecision.kind === 'target' ? null : aiResult ? 'content' : 'speech');
+        flashText =
+          goalDecision.kind === 'target'
+            ? goalDecision.label
+            : describeChange({
+                previousRate: decision.previousRate,
+                rate: decision.rate,
+                mode: settings.mode,
+                aiScore: aiResult?.raw ?? null,
+                aiMean: aiResult ? aiMean * 10 : null,
+                pauseRatio: a.features?.pauseRatio ?? null,
+                littleSpeech: !a.features || a.features.words < 8,
+              });
         flashUntil = performance.now() + FLASH_MS;
       }
       lastReason = `${target.reason} · ${decision.why}`;
@@ -598,6 +621,8 @@ function tick(): void {
   }
 
   let aiText = 'off (Baseline mode)';
+  const goalStatus = goal.status(id);
+  if (goalOn && goalStatus) aiText = `Goal Mode (Smart Pacing scoring paused): ${goalStatus.message}`;
   let aiAction: string | null = null;
   if (settings.mode === 'ai' && !aiReady()) {
     if (aiStatus === 'downloadable' || aiStatus === 'downloading') {
@@ -608,7 +633,7 @@ function tick(): void {
     } else {
       aiText = `Gemini Nano status: ${aiStatus} (using speech features only)`;
     }
-  } else if (settings.mode === 'ai') {
+  } else if (settings.mode === 'ai' && !goalOn) {
     if (aiResult) {
       const diff = aiResult.raw - aiMean * 10;
       const vs = Math.abs(diff) < 0.5 ? 'about average' : diff > 0 ? 'harder than avg' : 'easier than avg';
@@ -632,7 +657,7 @@ function tick(): void {
   });
 
   // Time-weighted speed: count playback only while ViewPace is choosing the speed.
-  const counting = owner.controlling && !video.paused && !ad && !live;
+  const counting = owner.controlling && !video.paused && !ad && !live && !goalOn;
   meter.tick(performance.now(), counting, video.playbackRate, aiResult ? 'content' : 'speech');
 
   const flashing = performance.now() < flashUntil;
@@ -640,7 +665,15 @@ function tick(): void {
     ...badgeBase,
     rate: video.playbackRate,
     state: owner.suspended ? 'paused-by-user' : 'active',
-    line: flashing ? flashText : a.source === 'none' || a.source.startsWith('live') ? captionHint(captionNotice) : null,
+    line: flashing
+      ? flashText
+      : goalDecision.kind === 'target'
+        ? goalDecision.label
+        : goalDecision.kind === 'hold'
+          ? goalDecision.note
+          : a.source === 'none' || a.source.startsWith('live')
+            ? captionHint(captionNotice)
+            : null,
     flash: flashing,
   });
   tabStatus = {
@@ -651,11 +684,49 @@ function tick(): void {
 }
 
 // The popup asks the active tab for its live status.
-chrome.runtime.onMessage.addListener((msg: TabRequest, _sender, sendResponse: (s: TabStatus) => void) => {
-  if (msg?.kind !== 'tab:status') return false;
-  sendResponse(tabStatus);
+chrome.runtime.onMessage.addListener((msg: TabRequest | GoalTabRequest, _sender, sendResponse: (s: unknown) => void) => {
+  if (msg?.kind === 'tab:status') {
+    sendResponse(tabStatus);
+    return false;
+  }
+  if (msg?.kind === 'goal:status') {
+    sendResponse(goal.status(currentVideoId()));
+    return false;
+  }
+  if (msg?.kind === 'goal:stop') {
+    goal.stop();
+    sendResponse(null);
+    return false;
+  }
+  if (msg?.kind === 'goal:start') {
+    void startGoal(msg.goal).then(sendResponse);
+    return true; // async response
+  }
   return false;
 });
+
+/** Goal Mode starts only on the user's explicit Start; nothing is analysed silently. */
+async function startGoal(text: string): Promise<{ error: string } | ReturnType<GoalController['status']>> {
+  const id = currentVideoId();
+  if (!id || !video) return { error: 'Open a YouTube video first.' };
+  if (!settings.enabled) return { error: 'Turn ViewPace on first.' };
+  if (!text.trim()) return { error: 'Tell ViewPace what you want from this video.' };
+  // Goal Mode needs the full caption track (live on-screen captions can't map what's ahead).
+  const track = store.track(id);
+  const words = track && track.words.length > 0 ? track.words : null;
+  const transcriptEnd = track ? Math.max(...track.cues.map((c) => c.end), track.words.at(-1)?.t ?? 0) : 0;
+  resumeAfterOverride(); // starting Goal Mode is an explicit choice: clear an earlier manual-speed pause
+  return goal.start({
+    videoId: id,
+    goal: text,
+    words,
+    transcriptEnd,
+    analyzer: goalAnalyzer,
+    isCurrent: () => currentVideoId() === id,
+    startAt: video.currentTime,
+    title: videoTitle(),
+  });
+}
 
 // ---------- boot ----------
 async function boot(): Promise<void> {

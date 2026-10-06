@@ -40,6 +40,19 @@
       <button class="primary" data-sp="action" hidden></button>
     </section>
 
+    <details id="goal" class="goal">
+      <summary>Goal Mode <span class="tag">experimental</span></summary>
+      <div class="goal-body">
+        <label for="goal-text">What do you want from this video?</label>
+        <textarea id="goal-text" rows="3" maxlength="300" placeholder="I want to understand how the agent was trained and evaluated."></textarea>
+        <div class="row">
+          <button class="primary" id="goal-start">Start Goal Mode</button>
+          <button class="ghost" id="goal-stop" hidden>Stop</button>
+        </div>
+        <p class="hint" id="goal-status" aria-live="polite">Paces this video by what matters for your goal. Uses Chrome's on-device AI and this video's captions; nothing leaves your computer.</p>
+      </div>
+    </details>
+
     <p class="shortcut">Turn on or off anytime with <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>S</kbd></p>
 
     <details id="advanced">

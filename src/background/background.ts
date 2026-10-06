@@ -1,5 +1,6 @@
 import type { AiRequest, AiResponse } from '../shared/messages';
-import { NanoComplexityEngine, nanoAvailability } from '../shared/nano';
+import { BLOCK_SCHEMA, BLOCK_SYSTEM_PROMPT, SECTION_SCHEMA, SECTION_SYSTEM_PROMPT, buildBlockPrompt, buildSectionPrompt, parseBlockRating, parseSections } from '../shared/goal-prompt';
+import { NanoComplexityEngine, NanoPrompter, nanoAvailability } from '../shared/nano';
 import { loadOnboarding, reconcileSmartPacing, saveOnboarding } from '../shared/onboarding';
 import { loadSettings, saveSettings } from '../shared/settings';
 
@@ -9,10 +10,14 @@ import { loadSettings, saveSettings } from '../shared/settings';
  * ~30 s idle, the session is lost; this module is re-evaluated on the next message and the
  * engine re-creates its session lazily on the first score request.
  */
-const engine = new NanoComplexityEngine();
+const prompter = new NanoPrompter(); // one queue: one on-device inference at a time
+const engine = new NanoComplexityEngine(prompter);
+const GOAL_TIMEOUT_MS = 30000;
 
 chrome.runtime.onMessage.addListener((msg: AiRequest, _sender, sendResponse: (r: AiResponse) => void) => {
-  if (msg?.kind !== 'ai:status' && msg?.kind !== 'ai:score') return false;
+  if (msg?.kind !== 'ai:status' && msg?.kind !== 'ai:score' && msg?.kind !== 'ai:goal-block' && msg?.kind !== 'ai:goal-sections') {
+    return false;
+  }
 
   (async (): Promise<AiResponse> => {
     // Status checks double as the moment to switch smart pacing on once the model is ready
@@ -23,6 +28,14 @@ chrome.runtime.onMessage.addListener((msg: AiRequest, _sender, sendResponse: (r:
     // started from the popup. Until then, report the status instead of trying to create.
     if (status !== 'available') return { ok: false, status, error: `Gemini Nano is ${status}` };
     try {
+      if (msg.kind === 'ai:goal-block') {
+        const raw = await prompter.prompt(BLOCK_SYSTEM_PROMPT, buildBlockPrompt(msg.goal, msg.text, msg.title), BLOCK_SCHEMA, GOAL_TIMEOUT_MS);
+        return { ok: true, goalBlock: parseBlockRating(raw) };
+      }
+      if (msg.kind === 'ai:goal-sections') {
+        const raw = await prompter.prompt(SECTION_SYSTEM_PROMPT, buildSectionPrompt(msg.goal, msg.parts), SECTION_SCHEMA, GOAL_TIMEOUT_MS);
+        return { ok: true, sections: parseSections(raw, msg.first, msg.last) };
+      }
       return { ok: true, result: await engine.score(msg.text, msg.context) };
     } catch (e) {
       return { ok: false, status, error: e instanceof Error ? e.message : String(e) };

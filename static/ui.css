@@ -87,6 +87,14 @@ details[open] summary { color: var(--ink); }
 .ghost:hover { background: var(--field); }
 @media (prefers-reduced-motion: reduce) { .dot, .switch span, .switch span::after { transition: none; } }
 
+/* Goal Mode (experimental) */
+.goal { margin-top: 16px; border-top: 1px solid var(--line); padding-top: 10px; }
+.goal summary { cursor: pointer; font-weight: 600; }
+.goal .tag { margin-left: 4px; padding: 1px 6px; border-radius: 6px; background: var(--field); color: var(--muted); font-size: 11px; font-weight: 500; }
+.goal-body { display: grid; gap: 8px; margin-top: 10px; }
+.goal-body label { font-weight: 500; }
+.goal-body textarea { width: 100%; padding: 7px 8px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--ink); font: inherit; resize: vertical; }
+
 /* Beta summary table (Advanced) */
 .summary { width: 100%; margin-top: 6px; border-collapse: collapse; font-size: 12px; font-variant-numeric: tabular-nums; }
 .summary th, .summary td { padding: 3px 0; text-align: right; font-weight: normal; }

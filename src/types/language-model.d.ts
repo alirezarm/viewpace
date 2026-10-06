@@ -31,6 +31,13 @@ interface LanguageModelPromptOptions {
 
 interface LanguageModelSession {
   prompt(input: string, options?: LanguageModelPromptOptions): Promise<string>;
+  /** Context budget (current names, and the older names some Chrome versions use). */
+  readonly contextWindow?: number;
+  readonly contextUsage?: number;
+  readonly inputQuota?: number;
+  readonly inputUsage?: number;
+  measureContextUsage?(input: string, options?: LanguageModelPromptOptions): Promise<number>;
+  measureInputUsage?(input: string, options?: LanguageModelPromptOptions): Promise<number>;
   clone(options?: { signal?: AbortSignal }): Promise<LanguageModelSession>;
   destroy(): void;
 }
