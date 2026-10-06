@@ -14,7 +14,7 @@ import type { TabRequest, TabStatus } from '../shared/messages';
 import { TranscriptStore } from './transcript';
 import { RateOwner } from './rate-owner';
 import { UsageMeter, addStats, analysisOf, type Analysis as ScoringKind } from '../shared/stats';
-import { CaptionAttempts, captionAttemptAllowed, hasEnoughData, isExtensionAlive, type TranscriptKind } from './guards';
+import { CaptionAttempts, captionAttemptAllowed, captionPlan, hasEnoughData, isExtensionAlive, type TranscriptKind } from './guards';
 
 const TICK_MS = 1000;
 const WINDOW_SEC = 20; // analysis window length (media seconds)
@@ -263,25 +263,28 @@ async function ensureCaptionTrack(id: string): Promise<void> {
   ) {
     return;
   }
+  const btn = document.querySelector<HTMLButtonElement>('#movie_player .ytp-subtitles-button');
+  const plan = captionPlan({
+    available: Boolean(btn && btn.offsetParent !== null && btn.getAttribute('aria-disabled') !== 'true'),
+    ccOn: btn?.getAttribute('aria-pressed') === 'true',
+    autoEnableCaptions: settings.autoEnableCaptions,
+  });
+  if (plan === 'needs-cc') {
+    // Nothing is tried, so no attempt is used up: turning the setting on later still loads them.
+    captionNotice = 'Turn on CC once to load the transcript';
+    return;
+  }
   captionAttempts.start(id, now);
   try {
-    await loadCaptionTrack(id);
+    if (plan === 'no-captions') captionNotice = 'This video has no captions';
+    else await loadCaptionTrack(id, btn!);
   } finally {
     captionAttempts.finish(id);
   }
 }
 
-async function loadCaptionTrack(id: string): Promise<void> {
-  const btn = document.querySelector<HTMLButtonElement>('#movie_player .ytp-subtitles-button');
-  if (!btn || btn.offsetParent === null || btn.getAttribute('aria-disabled') === 'true') {
-    captionNotice = 'This video has no captions';
-    return;
-  }
+async function loadCaptionTrack(id: string, btn: HTMLButtonElement): Promise<void> {
   const wasOn = btn.getAttribute('aria-pressed') === 'true';
-  if (!wasOn && !settings.autoEnableCaptions) {
-    captionNotice = 'Turn on CC once to load the transcript';
-    return;
-  }
   captionNotice = 'Loading caption track…';
   const before = store.responseCount(id);
   if (wasOn) {

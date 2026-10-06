@@ -81,3 +81,20 @@ export class CaptionAttempts {
     for (const key of [...this.attempts.keys()]) if (key !== videoId) this.attempts.delete(key);
   }
 }
+
+export interface CaptionButtonState {
+  /** The CC button exists, is visible and enabled (i.e. the video has captions). */
+  available: boolean;
+  ccOn: boolean;
+  autoEnableCaptions: boolean;
+}
+
+/**
+ * What a caption attempt would do. 'needs-cc' means nothing can be tried (CC is off and the user
+ * turned automatic loading off), so it must not use up one of the limited attempts.
+ */
+export function captionPlan(b: CaptionButtonState): 'no-captions' | 'needs-cc' | 'load' {
+  if (!b.available) return 'no-captions';
+  if (!b.ccOn && !b.autoEnableCaptions) return 'needs-cc';
+  return 'load';
+}

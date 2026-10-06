@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { CAPTION_MAX_ATTEMPTS, CaptionAttempts, captionAttemptAllowed } from '../src/content/guards';
+import { CAPTION_MAX_ATTEMPTS, CaptionAttempts, captionAttemptAllowed, captionPlan } from '../src/content/guards';
 import { TranscriptStore } from '../src/content/transcript';
 import { ReplayBuffer } from '../src/page/replay-buffer';
 
@@ -72,5 +72,18 @@ describe('page hook replay buffer', () => {
     b.push('A2', 'A');
     b.push('A3', 'A');
     expect(b.all()).toEqual(['A1', 'A2', 'A3']);
+  });
+});
+
+describe('caption attempts with automatic loading off', () => {
+  it('does not use up an attempt when nothing can be tried', () => {
+    expect(captionPlan({ available: true, ccOn: false, autoEnableCaptions: false })).toBe('needs-cc');
+  });
+  it('loads once the user turns the setting (or CC) on', () => {
+    expect(captionPlan({ available: true, ccOn: false, autoEnableCaptions: true })).toBe('load');
+    expect(captionPlan({ available: true, ccOn: true, autoEnableCaptions: false })).toBe('load');
+  });
+  it('reports a video without captions as such', () => {
+    expect(captionPlan({ available: false, ccOn: false, autoEnableCaptions: true })).toBe('no-captions');
   });
 });
