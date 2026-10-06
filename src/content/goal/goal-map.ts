@@ -132,3 +132,21 @@ export class GoalMap {
     return i === -1 ? (t <= 0 ? 0 : this.blocks.length - 1) : i;
   }
 }
+
+/** One row of the debug map: a mapped region, or an explicit gap that isn't mapped (yet). */
+export type TimelineEntry =
+  | { kind: 'region'; start: number; end: number; region: GoalRegion }
+  | { kind: 'gap'; start: number; end: number };
+
+/** The whole timeline [0, end) as regions plus explicit gaps, so unmapped time is visible. */
+export function mapTimeline(regions: GoalRegion[], end: number): TimelineEntry[] {
+  const out: TimelineEntry[] = [];
+  let t = 0;
+  for (const r of regions) {
+    if (r.start > t + 0.01) out.push({ kind: 'gap', start: t, end: r.start });
+    out.push({ kind: 'region', start: r.start, end: r.end, region: r });
+    t = r.end;
+  }
+  if (end > t + 0.01) out.push({ kind: 'gap', start: t, end });
+  return out;
+}

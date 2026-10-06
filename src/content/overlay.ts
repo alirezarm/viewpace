@@ -1,5 +1,17 @@
 import type { Feedback } from '../shared/types';
 
+/** One row of the Goal Mode map (debug only). */
+export interface GoalMapRow {
+  start: number;
+  end: number;
+  /** null for a stretch that isn't mapped (yet). */
+  topic: string | null;
+  relevance?: number;
+  attention?: number;
+  rate?: number;
+  current: boolean;
+}
+
 export interface OverlayView {
   enabled: boolean;
   mode: string;
@@ -16,6 +28,8 @@ export interface OverlayView {
   feedbackAck: string | null;
   /** Label for an action button under the AI row (e.g. model download), or null to hide it. */
   aiAction: string | null;
+  /** Goal Mode map rows (debug), or null when Goal Mode is off. */
+  goalMap: GoalMapRow[] | null;
 }
 
 export interface OverlayHandlers {
@@ -44,6 +58,13 @@ button:hover { background: rgba(255,255,255,.2); }
 .row { display: grid; grid-template-columns: 82px minmax(0,1fr); gap: 6px; margin-top: 3px; }
 .k { color: #999; }
 .v { overflow-wrap: anywhere; }
+.goalmap { margin-top: 6px; }
+.goalmap summary { cursor: pointer; color: #999; }
+.goalmap ol { list-style: none; margin: 4px 0 0; padding: 0; max-height: 180px; overflow-y: auto; }
+.goalmap li { display: grid; grid-template-columns: 78px 40px minmax(0, 1fr); gap: 6px; padding: 1px 2px; border-radius: 3px; }
+.goalmap li.gap { color: #777; }
+.goalmap li.current { background: rgba(124, 204, 255, .18); }
+.goalmap .scores { color: #7cf; }
 .chunk { color: #bbb; max-height: 4.2em; overflow: hidden; }
 .notice { margin-top: 6px; color: #fc6; }
 .fb { display: flex; gap: 6px; margin-top: 8px; }
@@ -79,6 +100,10 @@ export class Overlay {
           <div class="row"><span class="k">reason</span><span class="v" data-k="reason"></span></div>
           <div class="row"><span class="k">chunk</span><span class="v chunk" data-k="chunk"></span></div>
           <div class="notice" data-k="notice" hidden></div>
+          <details class="goalmap" data-k="goalmap" open hidden>
+            <summary data-k="goalmapTitle">Goal map</summary>
+            <ol data-k="goalmapList"></ol>
+          </details>
           <button data-a="resume" hidden>Resume ViewPace</button>
           <div class="fb">
             <button data-a="too_slow">Too Slow</button>
@@ -121,6 +146,43 @@ export class Overlay {
     this.host.style.display = v ? '' : 'none';
   }
 
+  private goalMapKey = '';
+
+  /** Rebuilt only when the map (or the current row) changes, so it doesn't flicker every tick. */
+  private renderGoalMap(rows: GoalMapRow[] | null): void {
+    const box = this.els.goalmap!;
+    box.hidden = !rows;
+    if (!rows) {
+      this.goalMapKey = '';
+      return;
+    }
+    const key = JSON.stringify(rows);
+    if (key === this.goalMapKey) return;
+    this.goalMapKey = key;
+    const time = (t: number) => `${Math.floor(t / 60)}:${String(Math.floor(t % 60)).padStart(2, '0')}`;
+    const mapped = rows.filter((r) => r.topic !== null).length;
+    this.els.goalmapTitle!.textContent = `Goal map (${mapped} regions, ${rows.length - mapped} unmapped)`;
+    const list = this.els.goalmapList!;
+    list.replaceChildren(
+      ...rows.map((r) => {
+        const li = document.createElement('li');
+        li.className = (r.topic === null ? 'gap' : '') + (r.current ? ' current' : '');
+        const range = document.createElement('span');
+        range.textContent = `${time(r.start)}–${time(r.end)}`;
+        const scores = document.createElement('span');
+        scores.className = 'scores';
+        scores.textContent = r.topic === null ? '' : `${r.rate?.toFixed(2)}×`;
+        const text = document.createElement('span');
+        text.textContent = r.topic === null ? 'not mapped' : `R${r.relevance} A${r.attention} · ${r.topic}`;
+        li.append(range, scores, text);
+        return li;
+      }),
+    );
+    // Keep the current row visible by scrolling the list only (never the YouTube page).
+    const cur = list.querySelector<HTMLElement>('.current');
+    if (cur) list.scrollTop = Math.max(0, cur.offsetTop - list.offsetTop - list.clientHeight / 3);
+  }
+
   update(v: OverlayView): void {
     this.mount();
     const set = (k: string, text: string) => {
@@ -143,6 +205,7 @@ export class Overlay {
     notice.hidden = !v.notice;
     set('notice', v.notice ?? '');
     this.els.btn_resume!.hidden = !v.canResume;
+    this.renderGoalMap(v.goalMap);
     const dl = this.els.btn_download!;
     dl.hidden = !v.aiAction;
     dl.parentElement!.parentElement!.hidden = !v.aiAction;

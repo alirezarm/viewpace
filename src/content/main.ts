@@ -15,6 +15,9 @@ import { TranscriptStore } from './transcript';
 import { RateOwner } from './rate-owner';
 import { toggleCaptionsForTrack } from './caption-toggle';
 import { GoalController, type GoalDecision } from './goal/goal-session';
+import { mapTimeline } from './goal/goal-map';
+import { goalTarget } from './goal/goal-pacing';
+import type { GoalMapRow } from './overlay';
 import { UsageMeter, addStats, analysisOf, type Analysis as ScoringKind } from '../shared/stats';
 import { CaptionAttempts, captionAttemptAllowed, captionPlan, hasEnoughData, transcriptPanelTarget, isExtensionAlive, type TranscriptKind } from './guards';
 
@@ -515,7 +518,7 @@ function tick(): void {
 
   if (!settings.enabled) {
     releaseControl();
-    overlay.update({ ...base, speech: '—', ai: '—', transcript: '—', chunk: '', reason: 'ViewPace disabled', notice: null });
+    overlay.update({ ...base, speech: '—', ai: '—', transcript: '—', chunk: '', reason: 'ViewPace disabled', notice: null, goalMap: null });
     badge.update({ ...badgeBase, state: 'off', line: null, flash: false });
     tabStatus = { onVideo: true, state: 'off', rate: video.playbackRate };
     meter.tick(performance.now(), false, 1, 'speech');
@@ -654,6 +657,7 @@ function tick(): void {
     notice,
     canResume: owner.suspended,
     aiAction,
+    goalMap: settings.debugOverlay && goalOn ? goalMapRows(video.currentTime) : null,
   });
 
   // Time-weighted speed: count playback only while ViewPace is choosing the speed.
@@ -707,6 +711,20 @@ chrome.runtime.onMessage.addListener((msg: TabRequest | GoalTabRequest, _sender,
   }
   return false;
 });
+
+/** Debug: the whole Goal Mode map, with unmapped gaps and the speed each region maps to. */
+function goalMapRows(t: number): GoalMapRow[] {
+  const s = goal.session;
+  if (!s || !video) return [];
+  const pace = PROFILES[settings.profile];
+  const end = s.map.blocks.at(-1)?.end ?? 0;
+  return mapTimeline(s.map.regions(), end).map((e) => {
+    const current = t >= e.start && t < e.end;
+    if (e.kind === 'gap') return { start: e.start, end: e.end, topic: null, current };
+    const r = e.region;
+    return { start: r.start, end: r.end, topic: r.topic, relevance: r.relevance, attention: r.attention, rate: goalTarget(r, pace).rate, current };
+  });
+}
 
 /** Goal Mode starts only on the user's explicit Start; nothing is analysed silently. */
 async function startGoal(text: string): Promise<{ error: string } | ReturnType<GoalController['status']>> {

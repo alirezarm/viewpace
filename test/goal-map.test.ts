@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { PROFILES } from '../src/content/controller';
 import { makeBlocks } from '../src/content/goal/blocks';
-import { GoalMap, SECTION_WINDOW } from '../src/content/goal/goal-map';
+import { GoalMap, SECTION_WINDOW, mapTimeline } from '../src/content/goal/goal-map';
 import { GOAL_PACING, goalTarget } from '../src/content/goal/goal-pacing';
 import type { TimedWord } from '../src/shared/types';
 
@@ -125,5 +125,24 @@ describe('video map', () => {
     const m = new GoalMap(many);
     expect(m.windowCount).toBe(3);
     expect(m.windowRange(2)).toEqual([SECTION_WINDOW * 2, SECTION_WINDOW * 2 + 4]);
+  });
+});
+
+describe('debug map timeline', () => {
+  const blocks = [0, 60, 120, 180].map((s, i) => ({ index: i, start: s, end: s + 60, text: '' }));
+  it('lists regions in order and shows unmapped stretches as explicit gaps', () => {
+    const m = new GoalMap(blocks);
+    m.setRating(1, rating(8));
+    m.setRating(2, rating(2));
+    const tl = mapTimeline(m.regions(), 240);
+    expect(tl.map((e) => [e.kind, e.start, e.end])).toEqual([
+      ['gap', 0, 60],
+      ['region', 60, 120],
+      ['region', 120, 180],
+      ['gap', 180, 240],
+    ]);
+  });
+  it('is a single gap before anything is mapped', () => {
+    expect(mapTimeline([], 300)).toEqual([{ kind: 'gap', start: 0, end: 300 }]);
   });
 });
