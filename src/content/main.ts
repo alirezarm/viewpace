@@ -15,7 +15,6 @@ import { TranscriptStore } from './transcript';
 import { RateOwner } from './rate-owner';
 import { toggleCaptionsForTrack } from './caption-toggle';
 import { GoalController, type GoalDecision } from './goal/goal-session';
-import { mapTimeline } from './goal/goal-map';
 import { goalTarget } from './goal/goal-pacing';
 import type { GoalMapRow } from './overlay';
 import { UsageMeter, addStats, analysisOf, type Analysis as ScoringKind } from '../shared/stats';
@@ -518,7 +517,7 @@ function tick(): void {
 
   if (!settings.enabled) {
     releaseControl();
-    overlay.update({ ...base, speech: '—', ai: '—', transcript: '—', chunk: '', reason: 'ViewPace disabled', notice: null, goalMap: null });
+    overlay.update({ ...base, speech: '—', ai: '—', transcript: '—', chunk: '', reason: 'ViewPace disabled', notice: null, goalMap: null, goalNow: null });
     badge.update({ ...badgeBase, state: 'off', line: null, flash: false });
     tabStatus = { onVideo: true, state: 'off', rate: video.playbackRate };
     meter.tick(performance.now(), false, 1, 'speech');
@@ -567,7 +566,7 @@ function tick(): void {
       goalDecision.kind === 'target'
         ? {
             rate: goalDecision.rate,
-            reason: `Goal: ${goalDecision.label} (relevance ${goalDecision.region.relevance}/10, attention ${goalDecision.region.attention}/10, "${goalDecision.region.topic}")`,
+            reason: `Goal: ${goalDecision.label} (block relevance ${goalDecision.block.relevance}/10, attention ${goalDecision.block.attention}/10)`,
           }
         : computeTarget(
             { features: a.features, complexity: aiResult?.score ?? null, complexityMean: aiMean },
@@ -658,6 +657,7 @@ function tick(): void {
     canResume: owner.suspended,
     aiAction,
     goalMap: settings.debugOverlay && goalOn ? goalMapRows(video.currentTime) : null,
+    goalNow: settings.debugOverlay && goalOn ? describeGoalNow(goalDecision) : null,
   });
 
   // Time-weighted speed: count playback only while ViewPace is choosing the speed.
@@ -712,17 +712,46 @@ chrome.runtime.onMessage.addListener((msg: TabRequest | GoalTabRequest, _sender,
   return false;
 });
 
-/** Debug: the whole Goal Mode map, with unmapped gaps and the speed each region maps to. */
+const clock = (t: number) => `${Math.floor(t / 60)}:${String(Math.floor(t % 60)).padStart(2, '0')}`;
+
+/** Debug: the current position's block decision (pacing) and its section (label only). */
+function describeGoalNow(d: GoalDecision): string {
+  if (d.kind === 'off') return '';
+  if (d.kind === 'hold') return d.note;
+  const b = d.block;
+  return [
+    `Block ${clock(b.start)}–${clock(b.end)}: relevance ${b.relevance}/10, attention ${b.attention}/10`,
+    `→ ${d.rate.toFixed(2)}× (${d.label})`,
+    `Why: ${b.reason || '—'}`,
+    `Block topic: ${b.topic || '—'}`,
+    `Section: ${d.section ? d.section.topic : '— (not grouped yet)'}`,
+  ].join('\n');
+}
+
+/** Debug: the whole map: section headings (labels only) and every block with its own pacing. */
 function goalMapRows(t: number): GoalMapRow[] {
   const s = goal.session;
-  if (!s || !video) return [];
+  if (!s) return [];
   const pace = PROFILES[settings.profile];
-  const end = s.map.blocks.at(-1)?.end ?? 0;
-  return mapTimeline(s.map.regions(), end).map((e) => {
+  return s.map.outline().map((e): GoalMapRow => {
+    if (e.kind === 'section') {
+      const sec = e.section;
+      return { kind: 'section', start: sec.start, end: sec.end, topic: sec.topic, current: t >= sec.start && t < sec.end };
+    }
     const current = t >= e.start && t < e.end;
-    if (e.kind === 'gap') return { start: e.start, end: e.end, topic: null, current };
-    const r = e.region;
-    return { start: r.start, end: r.end, topic: r.topic, relevance: r.relevance, attention: r.attention, rate: goalTarget(r, pace).rate, current };
+    if (!e.block) return { kind: 'block', start: e.start, end: e.end, status: e.failed ? 'failed' : 'pending', current };
+    const b = e.block;
+    return {
+      kind: 'block',
+      start: b.start,
+      end: b.end,
+      status: 'rated',
+      topic: b.topic,
+      relevance: b.relevance,
+      attention: b.attention,
+      rate: goalTarget(b, pace).rate,
+      current,
+    };
   });
 }
 

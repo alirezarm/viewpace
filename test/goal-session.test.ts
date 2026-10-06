@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { PROFILES } from '../src/content/controller';
 import { GoalController, type GoalAnalyzer } from '../src/content/goal/goal-session';
+import { goalTarget } from '../src/content/goal/goal-pacing';
 import type { TimedWord } from '../src/shared/types';
 
 const pace = PROFILES.normal;
@@ -125,6 +126,29 @@ describe('Goal Mode', () => {
     await g.start(baseStart(analyzer({ relevance: 0 })));
     await flush();
     expect(g.decide('A', 100, pace, true)).toEqual({ kind: 'hold', note: 'Paused: you chose the speed' });
+  });
+
+  it('targets the speed of the current block, with its section only as a label', async () => {
+    const g = new GoalController();
+    let n = 0;
+    const a: GoalAnalyzer = {
+      available: async () => true,
+      // Alternate low and high relevance per block.
+      rateBlock: async () => ({ topic: `part ${n}`, relevance: n++ % 2 ? 9 : 1, attention: 3, reason: n % 2 ? 'off-topic' : 'about training' }),
+      // One section spanning everything: must not change any block's speed.
+      groupSections: async (_g, _p, first, last) => [{ from: first, to: last, topic: 'The whole talk' }],
+    };
+    await g.start(baseStart(a));
+    await flush();
+    const blocks = g.session!.map.blocks;
+    const speeds = blocks.map((b) => {
+      const d = g.decide('A', (b.start + b.end) / 2, pace);
+      if (d.kind !== 'target') throw new Error('expected a target');
+      expect(d.section?.topic).toBe('The whole talk');
+      expect(d.rate).toBe(d.block.relevance >= 7 ? goalTarget(d.block, pace).rate : 2);
+      return d.rate;
+    });
+    expect(new Set(speeds).size).toBe(2); // fast and slow blocks both survive inside one section
   });
 
   it('stops on request', async () => {

@@ -1,16 +1,22 @@
 import type { Feedback } from '../shared/types';
 
-/** One row of the Goal Mode map (debug only). */
-export interface GoalMapRow {
-  start: number;
-  end: number;
-  /** null for a stretch that isn't mapped (yet). */
-  topic: string | null;
-  relevance?: number;
-  attention?: number;
-  rate?: number;
-  current: boolean;
-}
+/**
+ * One row of the Goal Mode map (debug only): a section heading (labels only, no scores) or a
+ * block with its own pacing decision. `status` 'pending'/'failed' = block not mapped.
+ */
+export type GoalMapRow =
+  | { kind: 'section'; start: number; end: number; topic: string; current: boolean }
+  | {
+      kind: 'block';
+      start: number;
+      end: number;
+      status: 'rated' | 'pending' | 'failed';
+      topic?: string;
+      relevance?: number;
+      attention?: number;
+      rate?: number;
+      current: boolean;
+    };
 
 export interface OverlayView {
   enabled: boolean;
@@ -30,6 +36,8 @@ export interface OverlayView {
   aiAction: string | null;
   /** Goal Mode map rows (debug), or null when Goal Mode is off. */
   goalMap: GoalMapRow[] | null;
+  /** Goal Mode details for the current position (debug), or null when Goal Mode is off. */
+  goalNow: string | null;
 }
 
 export interface OverlayHandlers {
@@ -62,7 +70,10 @@ button:hover { background: rgba(255,255,255,.2); }
 .goalmap summary { cursor: pointer; color: #999; }
 .goalmap ol { list-style: none; margin: 4px 0 0; padding: 0; max-height: 180px; overflow-y: auto; }
 .goalmap li { display: grid; grid-template-columns: 78px 40px minmax(0, 1fr); gap: 6px; padding: 1px 2px; border-radius: 3px; }
-.goalmap li.gap { color: #777; }
+.goalmap li.block { padding-left: 10px; }
+.goalmap li.section { margin-top: 4px; color: #ddd; font-weight: 700; grid-template-columns: 78px minmax(0, 1fr); }
+.goalmap li.unmapped { color: #777; }
+.goalnow { white-space: pre-line; }
 .goalmap li.current { background: rgba(124, 204, 255, .18); }
 .goalmap .scores { color: #7cf; }
 .chunk { color: #bbb; max-height: 4.2em; overflow: hidden; }
@@ -97,6 +108,7 @@ export class Overlay {
           <div class="row"><span class="k"></span><span class="v"><button data-a="download" hidden></button></span></div>
           <div class="row"><span class="k">Nano</span><span class="v" data-k="aiStatus"></span></div>
           <div class="row"><span class="k">transcript</span><span class="v" data-k="transcript"></span></div>
+          <div class="row" data-k="goalNowRow" hidden><span class="k">goal</span><span class="v goalnow" data-k="goalNow"></span></div>
           <div class="row"><span class="k">reason</span><span class="v" data-k="reason"></span></div>
           <div class="row"><span class="k">chunk</span><span class="v chunk" data-k="chunk"></span></div>
           <div class="notice" data-k="notice" hidden></div>
@@ -160,21 +172,31 @@ export class Overlay {
     if (key === this.goalMapKey) return;
     this.goalMapKey = key;
     const time = (t: number) => `${Math.floor(t / 60)}:${String(Math.floor(t % 60)).padStart(2, '0')}`;
-    const mapped = rows.filter((r) => r.topic !== null).length;
-    this.els.goalmapTitle!.textContent = `Goal map (${mapped} regions, ${rows.length - mapped} unmapped)`;
+    const blocks = rows.filter((r) => r.kind === 'block');
+    const rated = blocks.filter((r) => r.kind === 'block' && r.status === 'rated').length;
+    const sections = rows.length - blocks.length;
+    this.els.goalmapTitle!.textContent = `Goal map: ${rated}/${blocks.length} blocks paced, ${sections} sections (labels only)`;
     const list = this.els.goalmapList!;
     list.replaceChildren(
       ...rows.map((r) => {
         const li = document.createElement('li');
-        li.className = (r.topic === null ? 'gap' : '') + (r.current ? ' current' : '');
         const range = document.createElement('span');
         range.textContent = `${time(r.start)}–${time(r.end)}`;
-        const scores = document.createElement('span');
-        scores.className = 'scores';
-        scores.textContent = r.topic === null ? '' : `${r.rate?.toFixed(2)}×`;
+        if (r.kind === 'section') {
+          li.className = 'section';
+          const topic = document.createElement('span');
+          topic.textContent = `§ ${r.topic}`;
+          li.append(range, topic);
+          return li;
+        }
+        li.className = 'block' + (r.status !== 'rated' ? ' unmapped' : '') + (r.current ? ' current' : '');
+        const rate = document.createElement('span');
+        rate.className = 'scores';
+        rate.textContent = r.status === 'rated' ? `${r.rate?.toFixed(2)}×` : '';
         const text = document.createElement('span');
-        text.textContent = r.topic === null ? 'not mapped' : `R${r.relevance} A${r.attention} · ${r.topic}`;
-        li.append(range, scores, text);
+        text.textContent =
+          r.status === 'rated' ? `R${r.relevance} A${r.attention} · ${r.topic}` : r.status === 'failed' ? 'not mapped (failed)' : 'not mapped yet';
+        li.append(range, rate, text);
         return li;
       }),
     );
@@ -206,6 +228,8 @@ export class Overlay {
     set('notice', v.notice ?? '');
     this.els.btn_resume!.hidden = !v.canResume;
     this.renderGoalMap(v.goalMap);
+    this.els.goalNowRow!.hidden = !v.goalNow;
+    set('goalNow', v.goalNow ?? '');
     const dl = this.els.btn_download!;
     dl.hidden = !v.aiAction;
     dl.parentElement!.parentElement!.hidden = !v.aiAction;

@@ -4,7 +4,7 @@
  * so the user's pace preference still applies. Edit GOAL_PACING to tune after testing.
  */
 import type { Profile } from '../controller';
-import type { GoalRegion } from './goal-map';
+import type { PacingBlock } from './goal-map';
 
 export interface PacingCategory {
   /** Matches when relevance >= minRelevance and attention >= minAttention (first match wins). */
@@ -29,7 +29,8 @@ export interface GoalTarget {
   label: string;
 }
 
-export function goalTarget(region: Pick<GoalRegion, 'relevance' | 'attention'>, pace: Profile, table = GOAL_PACING): GoalTarget {
-  const c = table.find((x) => region.relevance >= x.minRelevance && region.attention >= x.minAttention) ?? table[table.length - 1]!;
+/** Pacing comes from a single block's own scores (never from a merged section). */
+export function goalTarget(block: Pick<PacingBlock, 'relevance' | 'attention'>, pace: Profile, table = GOAL_PACING): GoalTarget {
+  const c = table.find((x) => block.relevance >= x.minRelevance && block.attention >= x.minAttention) ?? table[table.length - 1]!;
   return { rate: pace.minRate + c.position * (pace.maxRate - pace.minRate), label: c.label };
 }

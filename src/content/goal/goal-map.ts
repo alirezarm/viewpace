@@ -1,12 +1,20 @@
 /**
- * Goal Mode: the video map. Holds the model's ratings per block and the (optional) validated
- * section grouping, and answers "which region contains time t?". Only analysed blocks produce
- * regions: unanalysed or failed parts stay unmapped, never invented.
+ * Goal Mode: the video map, at two deliberately separate levels.
+ *
+ *  - Blocks (pass 1): each rated block has relevance/attention for the user's goal. These block
+ *    scores are the ONLY input to playback pacing (`pacingBlockAt`).
+ *  - Sections (pass 2): validated groupings of consecutive blocks with a topic label. They are for
+ *    structure, labels and display only and intentionally carry no scores, so they cannot be used
+ *    for pacing (one relevant block must not make a whole long section slow).
+ *
+ * Only analysed blocks are mapped: unanalysed or failed parts stay unmapped, never invented.
  */
 import type { BlockRating, SectionRange } from '../../shared/goal-prompt';
 import type { Block } from './blocks';
 
-export interface GoalRegion {
+/** A rated block: the authoritative signal for playback pacing. */
+export interface PacingBlock {
+  index: number;
   start: number;
   end: number;
   topic: string;
@@ -15,6 +23,20 @@ export interface GoalRegion {
   reason: string;
 }
 
+/** A pass-2 section: labels/structure only. Has no relevance/attention by design; never pace from it. */
+export interface DisplaySection {
+  start: number;
+  end: number;
+  topic: string;
+  firstBlock: number;
+  lastBlock: number;
+}
+
+/** One row of the map outline for display: a section heading or a block (rated or not). */
+export type OutlineEntry =
+  | { kind: 'section'; section: DisplaySection }
+  | { kind: 'block'; start: number; end: number; index: number; block: PacingBlock | null; failed: boolean };
+
 /** Blocks are grouped into sections per window of this many blocks (bounds the pass-2 prompt). */
 export const SECTION_WINDOW = 40;
 
@@ -22,20 +44,17 @@ export class GoalMap {
   private ratings = new Map<number, BlockRating>();
   private failed = new Set<number>();
   /** Validated sections per window index. */
-  private sections = new Map<number, SectionRange[]>();
-  private cache: GoalRegion[] | null = null;
+  private validSections = new Map<number, SectionRange[]>();
 
   constructor(readonly blocks: Block[]) {}
 
   setRating(index: number, r: BlockRating): void {
     this.ratings.set(index, r);
     this.failed.delete(index);
-    this.cache = null;
   }
 
   setFailed(index: number): void {
     if (!this.ratings.has(index)) this.failed.add(index);
-    this.cache = null;
   }
 
   rating(index: number): BlockRating | undefined {
@@ -60,8 +79,7 @@ export class GoalMap {
   }
 
   setSections(w: number, sections: SectionRange[]): void {
-    this.sections.set(w, sections);
-    this.cache = null;
+    this.validSections.set(w, sections);
   }
 
   get rated(): number {
@@ -72,81 +90,66 @@ export class GoalMap {
     return this.failed.size;
   }
 
-  /**
-   * Non-overlapping regions in time order. A window with validated sections (and all its blocks
-   * rated) is merged into one region per section: relevance = the highest of its blocks (goal
-   * content is never sped through), attention = the rounded average. Otherwise each rated block
-   * is its own region.
-   */
-  regions(): GoalRegion[] {
-    if (this.cache) return this.cache;
-    const out: GoalRegion[] = [];
+  /** Index of the block containing time `t` (clamped to the first/last block). */
+  blockAt(t: number): number {
+    let lo = 0;
+    let hi = this.blocks.length - 1;
+    if (hi < 0) return 0;
+    if (t < this.blocks[0]!.start) return 0;
+    while (lo < hi) {
+      const mid = (lo + hi + 1) >>> 1;
+      if (this.blocks[mid]!.start <= t) lo = mid;
+      else hi = mid - 1;
+    }
+    return lo;
+  }
+
+  private pacingBlock(i: number): PacingBlock | null {
+    const r = this.ratings.get(i);
+    const b = this.blocks[i];
+    if (!r || !b) return null;
+    return { index: i, start: b.start, end: b.end, topic: r.topic, relevance: r.relevance, attention: r.attention, reason: r.reason };
+  }
+
+  /** PACING: the rated block containing time `t`, or null if that part isn't mapped (yet). */
+  pacingBlockAt(t: number): PacingBlock | null {
+    if (this.blocks.length === 0) return null;
+    const i = this.blockAt(t);
+    const b = this.blocks[i]!;
+    if (t < b.start || t >= b.end) return null; // outside the transcript
+    return this.pacingBlock(i);
+  }
+
+  /** DISPLAY: validated sections, in time order (only for windows whose blocks are all rated). */
+  sections(): DisplaySection[] {
+    const out: DisplaySection[] = [];
     for (let w = 0; w < this.windowCount; w++) {
-      const [first, last] = this.windowRange(w);
-      const sections = this.sections.get(w);
-      if (sections && this.windowRated(w)) {
-        for (const s of sections) {
-          const members = [];
-          for (let i = s.from; i <= s.to; i++) members.push(this.ratings.get(i)!);
-          const top = members.reduce((a, b) => (b.relevance > a.relevance ? b : a));
-          out.push({
-            start: this.blocks[s.from]!.start,
-            end: this.blocks[s.to]!.end,
-            topic: s.topic || top.topic,
-            relevance: top.relevance,
-            attention: Math.round(members.reduce((n, m) => n + m.attention, 0) / members.length),
-            reason: top.reason,
-          });
-        }
-      } else {
-        for (let i = first; i <= last; i++) {
-          const r = this.ratings.get(i);
-          if (!r) continue;
-          const b = this.blocks[i]!;
-          out.push({ start: b.start, end: b.end, topic: r.topic, relevance: r.relevance, attention: r.attention, reason: r.reason });
-        }
+      const ranges = this.validSections.get(w);
+      if (!ranges || !this.windowRated(w)) continue;
+      for (const s of ranges) {
+        out.push({ start: this.blocks[s.from]!.start, end: this.blocks[s.to]!.end, topic: s.topic, firstBlock: s.from, lastBlock: s.to });
       }
     }
-    this.cache = out;
     return out;
   }
 
-  /** The region containing time `t`, or null if that part is not mapped (yet). */
-  regionAt(t: number): GoalRegion | null {
-    const rs = this.regions();
-    let lo = 0;
-    let hi = rs.length - 1;
-    while (lo <= hi) {
-      const mid = (lo + hi) >>> 1;
-      const r = rs[mid]!;
-      if (t < r.start) hi = mid - 1;
-      else if (t >= r.end) lo = mid + 1;
-      else return r;
+  /** DISPLAY: the section containing time `t`, if sections are available there. */
+  sectionAt(t: number): DisplaySection | null {
+    return this.sections().find((s) => t >= s.start && t < s.end) ?? null;
+  }
+
+  /**
+   * DISPLAY: every block in time order (rated, failed or not yet analysed), preceded by a heading
+   * for each validated section it starts.
+   */
+  outline(): OutlineEntry[] {
+    const starts = new Map(this.sections().map((s) => [s.firstBlock, s]));
+    const out: OutlineEntry[] = [];
+    for (const b of this.blocks) {
+      const section = starts.get(b.index);
+      if (section) out.push({ kind: 'section', section });
+      out.push({ kind: 'block', start: b.start, end: b.end, index: b.index, block: this.pacingBlock(b.index), failed: this.failed.has(b.index) });
     }
-    return null;
+    return out;
   }
-
-  /** Index of the block containing time `t` (for ordering the analysis upcoming-first). */
-  blockAt(t: number): number {
-    const i = this.blocks.findIndex((b) => t >= b.start && t < b.end);
-    return i === -1 ? (t <= 0 ? 0 : this.blocks.length - 1) : i;
-  }
-}
-
-/** One row of the debug map: a mapped region, or an explicit gap that isn't mapped (yet). */
-export type TimelineEntry =
-  | { kind: 'region'; start: number; end: number; region: GoalRegion }
-  | { kind: 'gap'; start: number; end: number };
-
-/** The whole timeline [0, end) as regions plus explicit gaps, so unmapped time is visible. */
-export function mapTimeline(regions: GoalRegion[], end: number): TimelineEntry[] {
-  const out: TimelineEntry[] = [];
-  let t = 0;
-  for (const r of regions) {
-    if (r.start > t + 0.01) out.push({ kind: 'gap', start: t, end: r.start });
-    out.push({ kind: 'region', start: r.start, end: r.end, region: r });
-    t = r.end;
-  }
-  if (end > t + 0.01) out.push({ kind: 'gap', start: t, end });
-  return out;
 }

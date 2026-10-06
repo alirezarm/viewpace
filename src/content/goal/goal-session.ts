@@ -7,7 +7,7 @@ import type { BlockRating, PartSummary, SectionRange } from '../../shared/goal-p
 import type { TimedWord } from '../../shared/types';
 import type { Profile } from '../controller';
 import { makeBlocks, type Block } from './blocks';
-import { GoalMap, SECTION_WINDOW, type GoalRegion } from './goal-map';
+import { GoalMap, SECTION_WINDOW, type DisplaySection, type PacingBlock } from './goal-map';
 import { goalTarget } from './goal-pacing';
 
 /** On-device analysis used by Goal Mode (Gemini Nano in production, a fake in tests). */
@@ -101,7 +101,8 @@ export class GoalSession {
 export type GoalDecision =
   | { kind: 'off' } // Goal Mode not active for this video: normal ViewPace behaviour
   | { kind: 'hold'; note: string } // active, but no decision: leave the speed alone
-  | { kind: 'target'; rate: number; label: string; region: GoalRegion };
+  /** `block` drives the speed; `section` is only its label (may be null before grouping). */
+  | { kind: 'target'; rate: number; label: string; block: PacingBlock; section: DisplaySection | null };
 
 export class GoalController {
   session: GoalSession | null = null;
@@ -168,10 +169,11 @@ export class GoalController {
     if (!s || s.videoId !== videoId) return { kind: 'off' };
     if (suspended) return { kind: 'hold', note: 'Paused: you chose the speed' };
     if (s.phase === 'failed' || s.phase === 'stopped') return { kind: 'hold', note: "Goal Mode couldn't map this video" };
-    const region = s.map.regionAt(t);
-    if (!region) return { kind: 'hold', note: s.phase === 'mapping' ? 'Mapping this part for your goal…' : "This part isn't mapped" };
-    const target = goalTarget(region, pace);
-    return { kind: 'target', rate: target.rate, label: target.label, region };
+    // Pacing: the block containing t, by its own scores. The section is only a label.
+    const block = s.map.pacingBlockAt(t);
+    if (!block) return { kind: 'hold', note: s.phase === 'mapping' ? 'Mapping this part for your goal…' : "This part isn't mapped" };
+    const target = goalTarget(block, pace);
+    return { kind: 'target', rate: target.rate, label: target.label, block, section: s.map.sectionAt(t) };
   }
 
   status(videoId: string | null): GoalStatus | null {
