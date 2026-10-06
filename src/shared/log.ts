@@ -6,8 +6,8 @@ export const MAX_DECISION_ENTRIES = 1000;
 /** Feedback-only log (default): small entries, enough for many viewing sessions. */
 export const MAX_FEEDBACK_ENTRIES = 500;
 
-// Serialize read-modify-write cycles within this context. Concurrent tabs can still race;
-// acceptable for a single-user prototype.
+// Serialize read-modify-write cycles within this context. Concurrent tabs can still race; at worst
+// a feedback entry is lost, which is acceptable for local, bounded beta data.
 let queue: Promise<unknown> = Promise.resolve();
 function serial<T>(fn: () => Promise<T>): Promise<T> {
   const next = queue.then(fn, fn);

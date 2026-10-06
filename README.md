@@ -7,16 +7,38 @@ Chrome Web Store title (planned): **ViewPace — Smart YouTube Speed**.
 Manifest V3 Chrome extension that varies YouTube playback speed according to how carefully the
 upcoming content needs to be heard. Local only: no backend, no cloud LLM, no analytics.
 
-## Load it
+- **Speech pacing** (speaking speed and pauses) works on every computer, without the on-device model.
+- **Smart pacing** also scores what's being said with Chrome's on-device AI (Gemini Nano).
+  Availability depends on the Chrome version and the device; content analysis currently supports
+  English videos.
+
+See [PRIVACY.md](PRIVACY.md) for what ViewPace reads and stores (draft for review).
+
+## Develop
 
 ```bash
 npm install
-npm run check        # typecheck + unit tests + build → dist/
+npm run check        # typecheck + unit tests + development build → dist/ (inline source maps)
 npm run watch        # rebuild TS on change (re-copy static/ by restarting)
 ```
 
 `chrome://extensions` → Developer mode → **Load unpacked** → select `dist/`.
 After each rebuild: press reload on the extension card, then reload the YouTube tab.
+
+## Release
+
+```bash
+npm run package      # typecheck + tests + production build + release/viewpace-<version>.zip
+```
+
+- The production build (`npm run build:prod`) emits no source maps. Code is not minified, so it
+  stays readable for store review.
+- The ZIP contains only the files in `dist/`, with sorted entries and fixed timestamps, so the same
+  sources give byte-identical archives. `scripts/release.ts` refuses source maps, unexpected file
+  types and files referenced by the manifest or pages but missing; OS clutter (`.DS_Store`, `._*`,
+  `__MACOSX`) is never included.
+- `npm run package` leaves a production build in `dist/`; run `npm run build` to get source maps
+  back for development.
 
 Toggle instantly with **Alt+Shift+S**, the badge menu on the video, or the popup.
 
@@ -127,7 +149,8 @@ youtube.com tab
      └─ main.ts        1 s tick loop, video/ad/override handling, logging
 background.js (service worker)  Gemini Nano session (system prompt + responseConstraint), ai:* messages, Alt+Shift+S command
 popup.js                       mode, profile, Nano status/download, export/clear log
-chrome.storage.local           autospeed.settings, autospeed.log (≤5000 decisions)
+chrome.storage.local           autospeed.settings, .onboarding, .stats (fixed size),
+                               .log (feedback ≤500; opt-in decision log ≤1000)
 ```
 
 ### Rate mapping
@@ -154,11 +177,14 @@ it never picks a speed. If no score is ready, the decision falls back to speech 
 
 ## Log format
 
-Popup → **Export JSON**. One entry per decision (every ≥7 s, including "hold" decisions):
+Popup → Advanced → **Export JSON** saves `{ exportedAt, usage, log }`. `log` entries have
 `timestamp, videoId, videoTime, chunk, features{wpm, articulationWpm, pauseCount, pauseSec,
 pauseRatio, words, timing}, aiScore, aiLabel, aiMean, previousRate, selectedRate, targetRate, changed,
-mode, profile, reason, transcriptSource, feedback, feedbackAt`. Feedback buttons attach to the
-most recent decision.
+mode, profile, reason, transcriptSource, feedback, feedbackAt, kind`.
+
+- By default only feedback clicks are stored (`kind: 'feedback'`, `chunk` empty, `aiLabel` null).
+- With **Keep detailed decision log** on, every decision (every ≥7 s, including "hold" decisions)
+  is stored with its transcript excerpt, and feedback is attached to the latest decision.
 
 ## Tuning knobs
 

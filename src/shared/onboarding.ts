@@ -67,7 +67,9 @@ export interface SmartPacingCopy {
 export const SMART_PACING_COPY: Record<SmartPacingState, SmartPacingCopy> = {
   on: {
     title: 'Smart pacing is on',
-    body: "ViewPace also follows what's being said: it slows down when new ideas come up and speeds through small talk.",
+    body:
+      "ViewPace also follows what's being said, using Chrome's on-device AI: it slows down when new ideas come up " +
+      'and speeds through small talk. Works with English videos for now.',
     action: null,
   },
   'off-by-choice': {
@@ -79,7 +81,8 @@ export const SMART_PACING_COPY: Record<SmartPacingState, SmartPacingCopy> = {
     title: 'Make ViewPace smarter',
     body:
       "Smart pacing also follows what's being said, so it slows down when new ideas come up and speeds through " +
-      'small talk. It runs privately on your computer after a one-time download, and ViewPace keeps working meanwhile.',
+      "small talk. It uses Chrome's on-device AI, which runs privately on your computer after a one-time download. " +
+      'Works with English videos for now. ViewPace keeps working meanwhile.',
     action: 'Turn on smart pacing',
   },
   downloading: {
@@ -89,7 +92,9 @@ export const SMART_PACING_COPY: Record<SmartPacingState, SmartPacingCopy> = {
   },
   unavailable: {
     title: "Smart pacing isn't available on this computer",
-    body: 'ViewPace adjusts to how fast people talk instead. Everything else works the same.',
+    body:
+      'It depends on your Chrome version and device. ViewPace adjusts to how fast people talk instead; ' +
+      'everything else works the same.',
     action: null,
   },
 };

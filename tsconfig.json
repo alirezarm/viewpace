@@ -12,5 +12,7 @@
     "skipLibCheck": true,
     "noEmit": true
   },
-  "include": ["src", "test"]
+  "include": ["src", "test"],
+  // Release scripts and their test use Node types: see tsconfig.scripts.json.
+  "exclude": ["test/release.test.ts"]
 }
