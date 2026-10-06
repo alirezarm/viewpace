@@ -2,3 +2,6 @@ node_modules/
 dist/
 .DS_Store
 release/
+# Raw screenshot captures stay local (may contain personal details); edited versions live in store-assets/store/
+store-assets/raw/
+__pycache__/
