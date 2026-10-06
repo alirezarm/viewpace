@@ -27,6 +27,8 @@ export class RateOwner {
   suspended = false;
 
   private suspendedFrom: number | null = null;
+  /** The user's speed from before a suspension, restored if the change turns out to be temporary. */
+  private userRateBeforeSuspend: number | null = null;
   private suspendedAt = -Infinity;
   private settleUntil = -Infinity;
   private restoring: number | null = null;
@@ -64,6 +66,7 @@ export class RateOwner {
   resume(): void {
     this.suspended = false;
     this.suspendedFrom = null;
+    this.userRateBeforeSuspend = null;
   }
 
   /**
@@ -80,7 +83,10 @@ export class RateOwner {
 
     if (this.suspended) {
       if (this.suspendedFrom !== null && Math.abs(observed - this.suspendedFrom) < SAME && now - this.suspendedAt < TEMPORARY_MS) {
+        // A temporary change (e.g. press-and-hold 2×) is not the user's new speed: put back the
+        // speed they had before it, so turning ViewPace off later restores the right one.
         this.applied = this.suspendedFrom;
+        this.userRate = this.userRateBeforeSuspend;
         this.resume();
         return 'resume';
       }
@@ -96,6 +102,7 @@ export class RateOwner {
 
     // Not ViewPace, not an ad, not a known reset: the user (or another tool) chose this speed.
     this.suspendedFrom = this.applied;
+    this.userRateBeforeSuspend = this.userRate;
     this.suspendedAt = now;
     this.suspended = true;
     this.applied = null;

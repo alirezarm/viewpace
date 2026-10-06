@@ -33,7 +33,9 @@ function finish(cues: Cue[], words: TimedWord[] | null): ParsedCaptions {
     words.sort((a, b) => a.t - b.t);
     return { timing: 'word', words, cues };
   }
-  return { timing: 'cue', words: cues.flatMap(distribute), cues };
+  // Cues can overlap (e.g. two speakers), so words spread across them must be sorted again:
+  // lookups downstream binary-search by time.
+  return { timing: 'cue', words: cues.flatMap(distribute).sort((a, b) => a.t - b.t), cues };
 }
 
 // ---------- json3 (what the web player requests: fmt=json3) ----------

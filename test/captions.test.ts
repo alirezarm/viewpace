@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { parseCaptionBody, parseJson3, parseXml, transcriptFromTimedtext } from '../src/content/captions';
 import { newTokens } from '../src/content/transcript';
+import { wordsInRange } from '../src/content/features';
 
 const asrJson3 = JSON.stringify({
   events: [
@@ -30,6 +31,21 @@ describe('parseJson3', () => {
     const p = parseJson3(body);
     expect(p.timing).toBe('cue');
     expect(p.words.map((w) => w.t)).toEqual([10, 10.5, 11, 11.5]);
+  });
+});
+
+describe('overlapping uploaded captions', () => {
+  it('returns words in time order so window lookups find all of them', () => {
+    const body = JSON.stringify({
+      events: [
+        { tStartMs: 0, dDurationMs: 10000, segs: [{ utf8: 'a b c d' }] },
+        { tStartMs: 2000, dDurationMs: 2000, segs: [{ utf8: 'e f' }] },
+      ],
+    });
+    const words = parseJson3(body).words;
+    expect(words.map((w) => w.t)).toEqual([0, 2, 2.5, 3, 5, 7.5]);
+    // The window [2, 5) holds e (2 s), b (2.5 s) and f (3 s); unsorted, the binary search missed some.
+    expect(wordsInRange(words, 2, 5).map((w) => w.w).sort()).toEqual(['b', 'e', 'f']);
   });
 });
 

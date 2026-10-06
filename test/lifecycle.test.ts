@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { CAPTION_MAX_ATTEMPTS, CaptionAttempts, captionAttemptAllowed, captionPlan } from '../src/content/guards';
+import { CAPTION_MAX_ATTEMPTS, CaptionAttempts, captionAttemptAllowed, captionPlan, transcriptPanelTarget } from '../src/content/guards';
 import { TranscriptStore } from '../src/content/transcript';
 import { ReplayBuffer } from '../src/page/replay-buffer';
 
@@ -85,5 +85,18 @@ describe('caption attempts with automatic loading off', () => {
   });
   it('reports a video without captions as such', () => {
     expect(captionPlan({ available: false, ccOn: false, autoEnableCaptions: true })).toBe('no-captions');
+  });
+});
+
+describe('transcript-panel responses across navigation', () => {
+  it('belong to the video they were requested on', () => {
+    expect(transcriptPanelTarget('A', 'A')).toBe('A');
+  });
+  it('are dropped when they arrive after moving to another video', () => {
+    expect(transcriptPanelTarget('A', 'B')).toBeNull();
+  });
+  it('are dropped when the request video is unknown or there is no current video', () => {
+    expect(transcriptPanelTarget(null, 'B')).toBeNull();
+    expect(transcriptPanelTarget('A', null)).toBeNull();
   });
 });

@@ -16,12 +16,22 @@ type CaptureType = 'timedtext' | 'transcript-panel';
 const buffered = new ReplayBuffer<PageToContent>();
 
 /** The video a capture belongs to: the request's `v` for caption tracks, else the page's video. */
-function captureVideoId(type: CaptureType, url: string): string | null {
+/** The video the page shows right now (call when a request starts, not when it completes). */
+function pageVideoId(): string | null {
   try {
-    const fromUrl = type === 'timedtext' ? new URL(url, location.origin).searchParams.get('v') : null;
-    return fromUrl ?? new URLSearchParams(location.search).get('v');
+    return new URLSearchParams(location.search).get('v');
   } catch {
     return null;
+  }
+}
+
+/** The video a capture belongs to: the request's `v` for caption tracks, else the page's video at request time. */
+function captureVideoId(type: CaptureType, url: string, startedOn: string | null): string | null {
+  try {
+    const fromUrl = type === 'timedtext' ? new URL(url, location.origin).searchParams.get('v') : null;
+    return fromUrl ?? startedOn;
+  } catch {
+    return startedOn;
   }
 }
 
@@ -31,9 +41,14 @@ function classify(url: string): CaptureType | null {
   return null;
 }
 
-function emit(type: CaptureType, url: string, body: string): void {
-  const msg = { [PAGE_TAG]: true, type, url, body } as PageToContent;
-  buffered.push(msg, captureVideoId(type, url));
+function emit(type: CaptureType, url: string, body: string, startedOn: string | null): void {
+  const videoId = captureVideoId(type, url, startedOn);
+  const msg = (
+    type === 'transcript-panel'
+      ? { [PAGE_TAG]: true, type, url, body, videoId: startedOn }
+      : { [PAGE_TAG]: true, type, url, body }
+  ) as PageToContent;
+  buffered.push(msg, videoId);
   window.postMessage(msg, location.origin);
 }
 
@@ -55,12 +70,13 @@ XMLHttpRequest.prototype.send = function (this: XMLHttpRequest, body?: Document 
   const url = xhrUrl.get(this);
   const type = url ? classify(url) : null;
   if (url && type) {
+    const startedOn = pageVideoId();
     this.addEventListener('load', () => {
       try {
         let text = '';
         if (this.responseType === '' || this.responseType === 'text') text = this.responseText;
         else if (this.responseType === 'json') text = JSON.stringify(this.response);
-        emit(type, url, text);
+        emit(type, url, text, startedOn);
       } catch {
         /* never break the player */
       }
@@ -72,6 +88,7 @@ XMLHttpRequest.prototype.send = function (this: XMLHttpRequest, body?: Document 
 // --- fetch (get_transcript and possibly future player versions) ---
 const origFetch = window.fetch;
 window.fetch = async function (this: unknown, input: RequestInfo | URL, init?: RequestInit) {
+  const startedOn = pageVideoId();
   const response = await origFetch.call(this ?? window, input, init);
   try {
     const url = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url;
@@ -80,7 +97,7 @@ window.fetch = async function (this: unknown, input: RequestInfo | URL, init?: R
       response
         .clone()
         .text()
-        .then((text) => emit(type, url, text))
+        .then((text) => emit(type, url, text, startedOn))
         .catch(() => undefined);
     }
   } catch {

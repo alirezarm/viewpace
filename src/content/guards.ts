@@ -82,6 +82,14 @@ export class CaptionAttempts {
   }
 }
 
+/**
+ * Which video a transcript-panel response belongs to. It is accepted only for the video it was
+ * requested on, and only while that is still the current video (late responses are dropped).
+ */
+export function transcriptPanelTarget(requestedFor: string | null, current: string | null): string | null {
+  return requestedFor !== null && requestedFor === current ? requestedFor : null;
+}
+
 export interface CaptionButtonState {
   /** The CC button exists, is visible and enabled (i.e. the video has captions). */
   available: boolean;

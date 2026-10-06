@@ -13,8 +13,9 @@ import { describeChange } from './friendly';
 import type { TabRequest, TabStatus } from '../shared/messages';
 import { TranscriptStore } from './transcript';
 import { RateOwner } from './rate-owner';
+import { toggleCaptionsForTrack } from './caption-toggle';
 import { UsageMeter, addStats, analysisOf, type Analysis as ScoringKind } from '../shared/stats';
-import { CaptionAttempts, captionAttemptAllowed, captionPlan, hasEnoughData, isExtensionAlive, type TranscriptKind } from './guards';
+import { CaptionAttempts, captionAttemptAllowed, captionPlan, hasEnoughData, transcriptPanelTarget, isExtensionAlive, type TranscriptKind } from './guards';
 
 const TICK_MS = 1000;
 const WINDOW_SEC = 20; // analysis window length (media seconds)
@@ -45,6 +46,8 @@ let lastDecisionId: string | null = null;
 let lastDecision: DecisionLogEntry | null = null;
 let feedbackAck: string | null = null;
 const captionAttempts = new CaptionAttempts();
+/** Only one caption load at a time, across videos: they all toggle the same player CC button. */
+let captionLoadBusy = false;
 /** What YouTube's player API says it has loaded (from the MAIN-world hook). */
 let playerInfo = { videoId: null as string | null, isLive: false, at: -Infinity };
 let tickTimer: ReturnType<typeof setInterval> | undefined;
@@ -213,7 +216,8 @@ window.addEventListener('message', (ev: MessageEvent<PageToContent>) => {
       captionNotice = null;
     }
   } else if (msg.type === 'transcript-panel') {
-    const id = currentVideoId();
+    // Assign it to the video it was requested for; drop it if the user has moved on since.
+    const id = transcriptPanelTarget(msg.videoId, currentVideoId());
     if (id) store.ingestTranscriptPanel(id, msg.body);
   } else if (msg.type === 'player-info') {
     playerInfo = { videoId: msg.videoId, isLive: msg.isLive, at: performance.now() };
@@ -233,7 +237,7 @@ const captionObserver = new MutationObserver(() => {
 });
 
 // ---------- making the player fetch the caption track ----------
-const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
 
 /** The player's own video id, if the hook reported it recently. */
 function freshPlayerVideoId(): string | null {
@@ -251,6 +255,7 @@ async function ensureCaptionTrack(id: string): Promise<void> {
   const attempt = captionAttempts.get(id);
   const now = performance.now();
   if (
+    captionLoadBusy ||
     attempt.running ||
     !captionAttemptAllowed({
       inAd: adShowing(),
@@ -275,26 +280,31 @@ async function ensureCaptionTrack(id: string): Promise<void> {
     return;
   }
   captionAttempts.start(id, now);
+  captionLoadBusy = true;
   try {
     if (plan === 'no-captions') captionNotice = 'This video has no captions';
-    else await loadCaptionTrack(id, btn!);
+    else await loadCaptionTrack(id);
   } finally {
+    captionLoadBusy = false;
     captionAttempts.finish(id);
   }
 }
 
-async function loadCaptionTrack(id: string, btn: HTMLButtonElement): Promise<void> {
-  const wasOn = btn.getAttribute('aria-pressed') === 'true';
+async function loadCaptionTrack(id: string): Promise<void> {
   captionNotice = 'Loading caption track…';
   const before = store.responseCount(id);
-  if (wasOn) {
-    btn.click(); // off
-    await sleep(300);
-  }
-  btn.click(); // on → player fetches track
-  // Switch CC back off as soon as the player has an answer (even an empty one).
-  for (let waited = 0; waited < CAPTION_WAIT_MS && store.responseCount(id) === before; waited += 100) await sleep(100);
-  if (!wasOn && btn.getAttribute('aria-pressed') === 'true') btn.click(); // restore off
+  const result = await toggleCaptionsForTrack({
+    button: () => {
+      const b = document.querySelector<HTMLButtonElement>('#movie_player .ytp-subtitles-button');
+      return b ? { isOn: () => b.getAttribute('aria-pressed') === 'true', click: () => b.click() } : null;
+    },
+    sleep,
+    isCurrent: () => videoId === id,
+    responded: () => store.responseCount(id) !== before,
+    waitMs: CAPTION_WAIT_MS,
+  });
+  // After a navigation the next video has its own caption state: don't touch it.
+  if (result !== 'done') return;
   if (!store.track(id)) {
     captionNotice = store.lastCaptureEmpty
       ? 'YouTube returned an empty caption track; using live captions (CC must stay on)'

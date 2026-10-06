@@ -55,6 +55,21 @@ describe('Never fight a speed change ViewPace did not make', () => {
     expect(o.suspended).toBe(false);
   });
 
+  it('keeps the original user speed across a temporary change (press-and-hold, then turn off)', () => {
+    const o = controlling(1, 1.6); // user at 1×, ViewPace at 1.6×
+    o.onRateChange(2, LATER, false); // hold for 2×
+    o.onRateChange(1.6, LATER + 2000, false); // release: back to ViewPace's speed
+    expect(o.release()).toBe(1); // turning ViewPace off restores 1×, not 2×
+  });
+
+  it('adopts the new speed when a suspension is not temporary', () => {
+    const o = controlling(1, 1.6);
+    o.onRateChange(1.25, LATER, false); // the user really picked 1.25×
+    o.resume(); // later clicks Resume
+    o.take(1.5, 1.25);
+    expect(o.release()).toBe(1.25);
+  });
+
   it('does not resume if the return comes much later', () => {
     const o = controlling(1, 1.6);
     o.onRateChange(2, LATER, false);

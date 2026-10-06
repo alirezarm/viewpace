@@ -31,7 +31,8 @@ export const PAGE_TAG = '__autospeed';
 
 export type PageToContent =
   | { [PAGE_TAG]: true; type: 'timedtext'; url: string; body: string }
-  | { [PAGE_TAG]: true; type: 'transcript-panel'; url: string; body: string }
+  /** `videoId`: the page's video when the request started (the response may arrive after navigating). */
+  | { [PAGE_TAG]: true; type: 'transcript-panel'; url: string; body: string; videoId: string | null }
   /** What YouTube's player reports (via its own API) about the video it has loaded. */
   | { [PAGE_TAG]: true; type: 'player-info'; videoId: string | null; isLive: boolean };
 
