@@ -38,18 +38,24 @@ export async function toggleCaptionsForTrack(d: CaptionToggleDeps): Promise<Capt
     leftOn = !leftOn;
   };
   const stillHere = () => d.isCurrent() && btn.isConnected();
+  // Before every click: is CC still in the state ViewPace left it in? If the user (or YouTube)
+  // changed it meanwhile, ViewPace stops toggling and leaves CC as they set it.
+  const untouched = () => btn.isConnected() && btn.isOn() === leftOn;
 
   if (wasOn) {
     click(); // off, so that switching on again makes the player fetch the track
     await d.sleep(300);
   }
-  if (stillHere()) {
+  if (stillHere() && untouched()) {
     if (!leftOn) click(); // on: the player fetches the track
-    // Switch back as soon as the player has an answer (even an empty one), or the video changes.
-    for (let waited = 0; waited < d.waitMs && !d.responded() && stillHere(); waited += 100) await d.sleep(100);
+    // Switch back as soon as the player has an answer (even an empty one), the video changes, or
+    // someone else touches CC.
+    for (let waited = 0; waited < d.waitMs && !d.responded() && stillHere() && untouched(); waited += 100) {
+      await d.sleep(100);
+    }
   }
   // Undo only ViewPace's own change: on the same button (never on a replaced player), and only if
   // nobody else has changed CC since. Otherwise leave CC as it is.
-  if (leftOn !== wasOn && btn.isConnected() && btn.isOn() === leftOn) click();
+  if (leftOn !== wasOn && untouched()) click();
   return d.isCurrent() ? 'done' : 'navigated';
 }

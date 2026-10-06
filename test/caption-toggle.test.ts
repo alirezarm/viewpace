@@ -99,6 +99,14 @@ describe('toggling CC to load the caption track', () => {
     expect(p.current()).toBe(false);
   });
 
+  it('stops if the user switches CC back on during the first pause', async () => {
+    // CC was on; ViewPace switched it off; the user switched it back on at 100 ms (inside the 300 ms pause).
+    const p = fakePlayer({ ccOn: true, externalToggleAt: 100, respondAt: 2000 });
+    await toggleCaptionsForTrack(p.deps);
+    expect(p.clicks).toEqual(['off']); // no further clicks on top of the user's choice
+    expect(p.current()).toBe(true); // captions stay on, as the user set them
+  });
+
   it('does nothing without a CC button', async () => {
     const p = fakePlayer({ ccOn: false });
     expect(await toggleCaptionsForTrack({ ...p.deps, button: () => null })).toBe('no-button');
