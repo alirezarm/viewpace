@@ -11,7 +11,7 @@ describe('transient data is kept for the current video only', () => {
     const s = new TranscriptStore();
     s.ingestTimedtext(url('A'), json3('old video words'));
     s.observeLive('A', '', 'old live words', 10);
-    // The new video's track can arrive before AutoSpeed notices the navigation:
+    // The new video's track can arrive before ViewPace notices the navigation:
     s.ingestTimedtext(url('B'), json3('new video words'));
 
     s.retainOnly('B');

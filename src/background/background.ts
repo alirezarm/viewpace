@@ -31,7 +31,7 @@ chrome.runtime.onMessage.addListener((msg: AiRequest, _sender, sendResponse: (r:
   return true; // async response
 });
 
-// First run: AutoSpeed already works (speech-based); the welcome page offers smart pacing.
+// First run: ViewPace already works (speech-based); the welcome page offers smart pacing.
 chrome.runtime.onInstalled.addListener(async ({ reason }) => {
   if (reason === chrome.runtime.OnInstalledReason.INSTALL && !(await loadOnboarding()).welcomed) {
     await saveOnboarding({ welcomed: true });

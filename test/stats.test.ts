@@ -80,7 +80,7 @@ describe('summarize: usage counters', () => {
 });
 
 describe('UsageMeter', () => {
-  it('counts playback time only while AutoSpeed is in control', () => {
+  it('counts playback time only while ViewPace is in control', () => {
     const m = new UsageMeter();
     m.tick(0, true, 1.5, 'speech'); // first tick only sets the clock
     m.tick(1000, true, 1.5, 'speech');

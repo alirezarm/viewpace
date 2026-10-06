@@ -1,8 +1,8 @@
 {
-  "name": "autospeed",
+  "name": "viewpace",
   "version": "0.1.0",
   "private": true,
-  "description": "Experimental Chrome extension that adapts YouTube playback speed to content difficulty.",
+  "description": "ViewPace: Automatically speeds up easy parts and slows down when content needs more attention.",
   "type": "module",
   "scripts": {
     "build": "node build.mjs",

@@ -1,4 +1,8 @@
-# AutoSpeed (prototype)
+# ViewPace
+
+Automatically speeds up easy parts and slows down when content needs more attention.
+
+Chrome Web Store title (planned): **ViewPace — Smart YouTube Speed**.
 
 Manifest V3 Chrome extension that varies YouTube playback speed according to how carefully the
 upcoming content needs to be heard. Local only: no backend, no cloud LLM, no analytics.
@@ -18,7 +22,7 @@ Toggle instantly with **Alt+Shift+S**, the badge menu on the video, or the popup
 
 ## First run and smart pacing setup
 
-- On install, AutoSpeed opens a welcome page. It already works in speech-only (Baseline) mode, with
+- On install, ViewPace opens a welcome page. It already works in speech-only (Baseline) mode, with
   no setup needed.
 - "Smart pacing" is the user-facing name for AI mode. Its states are: on, needs a one-time download
   (one button: *Turn on smart pacing*), downloading, unavailable. The logic is in
@@ -28,25 +32,25 @@ Toggle instantly with **Alt+Shift+S**, the badge menu on the video, or the popup
   present), AI mode is switched on automatically, unless the user picked an analysis mode
   themselves in Advanced (`modeChosenByUser`). The check runs on install, at browser startup, and on
   every availability check from a YouTube tab.
-- If unavailable, AutoSpeed says so once on the welcome page and is silent everywhere else. Raw
+- If unavailable, ViewPace says so once on the welcome page and is silent everywhere else. Raw
   status and the last setup error are shown under Advanced.
 - State is stored in `chrome.storage.local` under `autospeed.onboarding`.
 
 ## Robustness rules
 
-AutoSpeed should never make YouTube worse:
+ViewPace should never make YouTube worse:
 
-- **Never fight** (`src/content/rate-owner.ts`): a speed change AutoSpeed didn't make pauses
-  adaptation for that video (Resume from the badge). Exceptions: AutoSpeed re-applies its own speed
-  only during known YouTube resets (3 s after a media load); changes during ads or while AutoSpeed
-  is off are ignored; a change that returns to AutoSpeed's speed within 15 s (e.g. press-and-hold
+- **Never fight** (`src/content/rate-owner.ts`): a speed change ViewPace didn't make pauses
+  adaptation for that video (Resume from the badge). Exceptions: ViewPace re-applies its own speed
+  only during known YouTube resets (3 s after a media load); changes during ads or while ViewPace
+  is off are ignored; a change that returns to ViewPace's speed within 15 s (e.g. press-and-hold
   2×) resumes automatically.
 - **No data, no change** (`src/content/guards.ts`): without a transcript, or before live captions
-  cover a full 20 s window, AutoSpeed leaves the speed alone. Pauses and music *inside* a caption
+  cover a full 20 s window, ViewPace leaves the speed alone. Pauses and music *inside* a caption
   track are still handled by the speed algorithm.
 - **Give the speed back**: leaving a video (another video, home, miniplayer, Shorts), an ad
-  starting, a live stream, or turning AutoSpeed off restores the user's own speed, captured once
-  before AutoSpeed's first change.
+  starting, a live stream, or turning ViewPace off restores the user's own speed, captured once
+  before ViewPace's first change.
 - **Orphaned tabs**: after an extension update/reload, old content scripts detect it, restore the
   user's speed, remove their UI and stop.
 - **Captions**: loading is only attempted when no ad is on screen and the player has switched to
@@ -63,14 +67,14 @@ AutoSpeed should never make YouTube worse:
 
 ## Beta summary (Advanced)
 
-A local-only summary built from data AutoSpeed already keeps. There's no backend or account, and
+A local-only summary built from data ViewPace already keeps. There's no backend or account, and
 no transcript text by default.
 
 - **Ratings and Just right / Too slow / Too fast %**: from the bounded feedback log.
 - **Avg speed, time watched, videos, overrides**: from `autospeed.stats`, a fixed-size counter
   record (`src/shared/stats.ts`) written by the content script every 30 s and on video change or
-  tab hide. Speed is time-weighted over playback while AutoSpeed was choosing the speed.
-  Overrides count only user speed changes while AutoSpeed was in control, minus temporary ones
+  tab hide. Speed is time-weighted over playback while ViewPace was choosing the speed.
+  Overrides count only user speed changes while ViewPace was in control, minus temporary ones
   that returned by themselves (e.g. press-and-hold).
 - **Speech vs Content columns**: split by whether the decision actually used an AI content score
   (AI mode without a ready score counts as Speech). It's not a controlled comparison.
@@ -86,7 +90,7 @@ no transcript text by default.
   feedback log (export/clear).
 - **Speed badge** (default): a small badge in the player's bottom-right corner. It follows YouTube's
   control visibility and appears for 4 s after each speed change with a plain-language reason. Click
-  it to rate the speed (Too slow / Just right / Too fast) or turn AutoSpeed off.
+  it to rate the speed (Too slow / Just right / Too fast) or turn ViewPace off.
 - **Debug overlay** (Advanced): the detailed research panel with speech rate, AI scores, transcript
   chunk and decision reasons. It replaces the badge while enabled.
 
@@ -94,12 +98,12 @@ no transcript text by default.
 
 | Spec item | Verdict | What V1 does |
 |---|---|---|
-| Fetch timed captions from the extension | **Does not work.** The caption `baseUrl` (`exp=xpe`) returns an empty `200`. YouTube requires a proof-of-origin token (`pot`) minted by the player's BotGuard. Re-fetching the player's own URL, `pot` included, also returned empty: the token looks single-use. | A MAIN-world script at `document_start` wraps XHR/fetch and **copies the response body of the player's own `/api/timedtext` request**. The player only makes that request when CC turns on, so AutoSpeed briefly toggles CC (then restores it) once per video. It also captures `get_transcript` if the user opens "Show transcript". |
+| Fetch timed captions from the extension | **Does not work.** The caption `baseUrl` (`exp=xpe`) returns an empty `200`. YouTube requires a proof-of-origin token (`pot`) minted by the player's BotGuard. Re-fetching the player's own URL, `pot` included, also returned empty: the token looks single-use. | A MAIN-world script at `document_start` wraps XHR/fetch and **copies the response body of the player's own `/api/timedtext` request**. The player only makes that request when CC turns on, so ViewPace briefly toggles CC (then restores it) once per video. It also captures `get_transcript` if the user opens "Show transcript". |
 | Captions always available | No. Some videos have none, and YouTube can still return an empty track. | Fallback: read the live on-screen caption DOM. This is **reactive only** (past 20 s, no lookahead) and needs CC left on. The overlay shows which source is active. |
 | Pause detection from transcript | Approximate. Auto-generated (ASR) tracks have per-word onsets, so gaps ≈ silences. Uploaded captions have only cue timing, so only gaps between cues register. | Both are supported; `timing: word/cue` is logged with every decision. Audio-based VAD is out of scope for V1. |
 | Gemini Nano via Prompt API | Works in extensions on Chrome 138+ (no manifest permission; remove the old `aiLanguageModelOriginTrial`). Hardware gate: ≥22 GB free disk, GPU >4 GB VRAM or 16 GB RAM + 4 cores; macOS 13+/Win 10+/Linux. Not exposed to web-page workers, but Chrome enables it for **extension service workers** (`chrome_content_renderer_client.cc` → `EnableAIPromptAPIForWorkers` in extension processes; Google's own samples call it from `background.js`). The first download needs a user gesture. Languages: en/es/ja (+ de/fr in newer builds). | Runs in the **service worker**; the session is re-created lazily after Chrome stops the worker (~30 s idle). The model download is triggered from the popup button (user gesture). Constrained JSON output `{complexity: 0–10, reason}` is clamped and validated. Scores are fetched ahead per 20 s chunk and cached, so the control loop never waits on inference. |
 | "Every 7 s", no oscillation | Feasible. | Decisions every ≥7 s wall-clock, 0.1× hysteresis (0.2× to reverse within 21 s), max −0.5× / +0.25× per change (slow down fast, speed up gradually), 0.05× quantization. No extra smoothing: the 20 s window already smooths. |
-| User changes speed | YouTube also resets `playbackRate` itself (ads, quality changes, new video). | A rate change within 1.5 s of the user touching YouTube's speed menu or Shift+</> counts as **manual override**: AutoSpeed pauses and shows a Resume button. Other unexpected resets are re-applied. |
+| User changes speed | YouTube also resets `playbackRate` itself (ads, quality changes, new video). | A rate change within 1.5 s of the user touching YouTube's speed menu or Shift+</> counts as **manual override**: ViewPace pauses and shows a Resume button. Other unexpected resets are re-applied. |
 | Ads, live streams, Shorts | Not meaningful targets. | Paused during ads (`.ad-showing`); live streams and Shorts are skipped. |
 | Other speed extensions | They will fight over `playbackRate`. | Disable them while testing. |
 | Non-English | Word counting assumes space-separated words; Nano is configured for `en`. | Works best on English. CJK speech-rate numbers will be wrong. |

@@ -9,7 +9,7 @@ function controlling(user = 1, rate = 1.6): RateOwner {
 }
 const LATER = 100_000;
 
-describe('Never fight a speed change AutoSpeed did not make', () => {
+describe('Never fight a speed change ViewPace did not make', () => {
   it('recognizes its own change', () => {
     expect(controlling().onRateChange(1.6, LATER, false)).toBe('own');
   });
@@ -22,7 +22,7 @@ describe('Never fight a speed change AutoSpeed did not make', () => {
     expect(o.userRate).toBe(1.25);
   });
 
-  it('suspends even when AutoSpeed was not in control yet', () => {
+  it('suspends even when ViewPace was not in control yet', () => {
     const o = new RateOwner();
     expect(o.onRateChange(1.5, LATER, false)).toBe('suspend');
   });
@@ -34,7 +34,7 @@ describe('Never fight a speed change AutoSpeed did not make', () => {
     expect(o.userRate).toBe(1.75);
   });
 
-  it('ignores changes during ads or while AutoSpeed is off', () => {
+  it('ignores changes during ads or while ViewPace is off', () => {
     const o = controlling();
     expect(o.onRateChange(1, LATER, true)).toBe('ignore');
     expect(o.suspended).toBe(false);
@@ -47,7 +47,7 @@ describe('Never fight a speed change AutoSpeed did not make', () => {
     expect(o.onRateChange(1, LATER + SETTLE_MS + 1, false)).toBe('suspend');
   });
 
-  it('treats a quick return to AutoSpeed speed as a temporary change (press-and-hold)', () => {
+  it('treats a quick return to ViewPace speed as a temporary change (press-and-hold)', () => {
     const o = controlling(1, 1.6);
     expect(o.onRateChange(2, LATER, false)).toBe('suspend');
     expect(o.onRateChange(1.6, LATER + 2000, false)).toBe('resume');
@@ -71,12 +71,12 @@ describe('Giving the speed back', () => {
     expect(o.controlling).toBe(false);
   });
 
-  it('restores the original user speed after moving to another video (not AutoSpeed\'s old speed)', () => {
+  it('restores the original user speed after moving to another video (not ViewPace\'s old speed)', () => {
     const o = controlling(1, 1.6);
     expect(o.release()).toBe(1); // leaving video A
     o.onRateChange(1, LATER, false); // our own restore
     o.newVideo(LATER);
-    o.take(1.4, 1); // video B: AutoSpeed takes over from the restored speed
+    o.take(1.4, 1); // video B: ViewPace takes over from the restored speed
     expect(o.release()).toBe(1);
   });
 

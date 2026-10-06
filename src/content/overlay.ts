@@ -64,7 +64,7 @@ export class Overlay {
       <style>${CSS}</style>
       <div class="box" part="box">
         <div class="head">
-          <span class="title">AutoSpeed</span>
+          <span class="title">ViewPace</span>
           <span class="rate" data-k="rate">–</span>
           <button data-a="toggle" title="Enable/disable (Alt+Shift+S)">On</button>
           <button data-a="collapse" title="Collapse">–</button>
@@ -79,7 +79,7 @@ export class Overlay {
           <div class="row"><span class="k">reason</span><span class="v" data-k="reason"></span></div>
           <div class="row"><span class="k">chunk</span><span class="v chunk" data-k="chunk"></span></div>
           <div class="notice" data-k="notice" hidden></div>
-          <button data-a="resume" hidden>Resume AutoSpeed</button>
+          <button data-a="resume" hidden>Resume ViewPace</button>
           <div class="fb">
             <button data-a="too_slow">Too Slow</button>
             <button data-a="good">Good</button>

@@ -1,4 +1,4 @@
-/** Small pure checks that decide when AutoSpeed may act at all. */
+/** Small pure checks that decide when ViewPace may act at all. */
 
 /**
  * After the extension is updated or reloaded, content scripts already running in open tabs
@@ -15,10 +15,10 @@ export function isExtensionAlive(): boolean {
 export type TranscriptKind = 'track' | 'live' | 'none';
 
 /**
- * May AutoSpeed make a speed decision from this data? A full caption track is enough data
+ * May ViewPace make a speed decision from this data? A full caption track is enough data
  * everywhere, including genuine pauses or music inside it (handled by the speed algorithm).
  * Live on-screen captions only count once they cover a full analysis window; before that, and
- * with no transcript at all, AutoSpeed leaves the speed alone.
+ * with no transcript at all, ViewPace leaves the speed alone.
  */
 export function hasEnoughData(kind: TranscriptKind, liveCoverageSec: number, windowSec: number): boolean {
   if (kind === 'track') return true;

@@ -42,8 +42,8 @@ function renderPace(status: TabStatus | null): void {
     dot.classList.toggle('paused', status.state === 'paused-by-user');
   }
 
-  if (!settings.enabled) now.textContent = 'AutoSpeed is off.';
-  else if (!status?.onVideo) now.textContent = 'Open a YouTube video to see AutoSpeed at work.';
+  if (!settings.enabled) now.textContent = 'ViewPace is off.';
+  else if (!status?.onVideo) now.textContent = 'Open a YouTube video to see ViewPace at work.';
   else if (status.state === 'paused-by-user')
     now.textContent = `Paused because you chose ${formatRate(status.rate ?? 1)}. Resume from the badge on the video.`;
   else if (status.state === 'ad') now.textContent = 'Waiting for the ad to finish.';
@@ -119,7 +119,7 @@ function renderSummary(s: BetaSummary): void {
   );
   const notes: string[] = [];
   if (s.since) notes.push(`Usage counted since ${new Date(s.since).toLocaleDateString()}.`);
-  notes.push('Avg speed and overrides cover time when AutoSpeed was choosing the speed.');
+  notes.push('Avg speed and overrides cover time when ViewPace was choosing the speed.');
   if (cols.slice(0, 2).some((c) => c.feedback < FEW_RATINGS)) notes.push(`Under ${FEW_RATINGS} ratings in a column is too few to compare.`);
   notes.push('Not a controlled comparison: the two columns cover different videos and moments.');
   $('summary-note').textContent = notes.join(' ');
@@ -149,7 +149,7 @@ function bind(): void {
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = `autospeed-log-${new Date().toISOString().replace(/[:.]/g, '-')}.json`;
+    a.download = `viewpace-log-${new Date().toISOString().replace(/[:.]/g, '-')}.json`;
     a.click();
     setTimeout(() => URL.revokeObjectURL(a.href), 5000);
   });

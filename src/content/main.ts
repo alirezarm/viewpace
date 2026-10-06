@@ -35,7 +35,7 @@ let video: HTMLVideoElement | null = null;
 let videoId: string | null = null;
 let videoChangedAt = 0;
 let ctrl: ControllerState = initialState(1);
-/** Who owns the playback speed; AutoSpeed never fights changes it didn't make. */
+/** Who owns the playback speed; ViewPace never fights changes it didn't make. */
 const owner = new RateOwner();
 let lastAdSeenAt = -Infinity;
 let wasAd = false;
@@ -87,7 +87,7 @@ function resumeAfterOverride(): void {
 function captionHint(notice: string | null): string | null {
   if (!notice || notice.startsWith('Loading')) return null;
   if (notice.startsWith('This video has no captions')) return 'No captions, so the pace stays steady';
-  if (notice.startsWith('Turn on CC')) return 'Turn on captions (CC) so AutoSpeed can follow along';
+  if (notice.startsWith('Turn on CC')) return 'Turn on captions (CC) so ViewPace can follow along';
   return 'Couldn\'t read the captions. Keep CC on to help';
 }
 
@@ -132,7 +132,7 @@ async function downloadModel(): Promise<void> {
     await setUpSmartPacing((f) => (downloadProgress = `downloading ${Math.round(f * 100)}%`));
     downloadProgress = null;
   } catch (e) {
-    downloadProgress = `download failed (${e instanceof Error ? e.message : String(e)}): try the AutoSpeed popup`;
+    downloadProgress = `download failed (${e instanceof Error ? e.message : String(e)}): try the ViewPace popup`;
   }
   void refreshAiStatus();
 }
@@ -147,7 +147,7 @@ function applyRate(rate: number, analysis: ScoringKind): void {
   video.playbackRate = rate;
 }
 
-/** Give the speed back to the user (their own speed), if AutoSpeed was in control. */
+/** Give the speed back to the user (their own speed), if ViewPace was in control. */
 function releaseControl(): void {
   const restore = owner.release();
   if (video && restore !== null) video.playbackRate = restore;
@@ -307,10 +307,10 @@ function inAdOrJustAfter(): boolean {
   return adShowing() || performance.now() - lastAdSeenAt < AD_SETTLE_MS;
 }
 
-/** Never fight a speed change AutoSpeed didn't make. */
+/** Never fight a speed change ViewPace didn't make. */
 function onRateChange(): void {
   if (!video) return;
-  // While AutoSpeed is off, the user's speed changes are simply theirs: nothing to pause.
+  // While ViewPace is off, the user's speed changes are simply theirs: nothing to pause.
   const wasControlling = owner.controlling;
   const action = owner.onRateChange(video.playbackRate, performance.now(), inAdOrJustAfter() || !settings.enabled);
   if (action === 'reapply' && owner.applied !== null) video.playbackRate = owner.applied;
@@ -318,7 +318,7 @@ function onRateChange(): void {
     ctrl = initialState(video.playbackRate);
     meter.temporaryOverride(suspendAnalysis);
   } else if (action === 'suspend' && wasControlling) {
-    // Only a change while AutoSpeed was choosing the speed counts as overriding it.
+    // Only a change while ViewPace was choosing the speed counts as overriding it.
     suspendAnalysis = lastDecision ? analysisOf(lastDecision) : 'speech';
     meter.override(suspendAnalysis);
   }
@@ -344,7 +344,7 @@ function bindVideo(v: HTMLVideoElement | null): void {
 
 function onVideoChange(id: string | null): void {
   // Leaving a video (another video, the home page, the miniplayer, Shorts) gives the
-  // user's own speed back; the next video starts from it until AutoSpeed is confident.
+  // user's own speed back; the next video starts from it until ViewPace is confident.
   releaseControl();
   flushStats();
   adaptedThisVideo = false;
@@ -493,7 +493,7 @@ function tick(): void {
 
   if (!settings.enabled) {
     releaseControl();
-    overlay.update({ ...base, speech: '—', ai: '—', transcript: '—', chunk: '', reason: 'AutoSpeed disabled', notice: null });
+    overlay.update({ ...base, speech: '—', ai: '—', transcript: '—', chunk: '', reason: 'ViewPace disabled', notice: null });
     badge.update({ ...badgeBase, state: 'off', line: null, flash: false });
     tabStatus = { onVideo: true, state: 'off', rate: video.playbackRate };
     meter.tick(performance.now(), false, 1, 'speech');
@@ -513,21 +513,21 @@ function tick(): void {
   let notice: string | null = captionNotice;
   let blocked = false;
   if (live) {
-    releaseControl(); // in case the live signal arrived after AutoSpeed had already acted
+    releaseControl(); // in case the live signal arrived after ViewPace had already acted
     notice = 'Live stream: not supported';
     blocked = true;
   } else if (ad) {
     notice = 'Ad playing: paused';
     blocked = true;
   } else if (owner.suspended) {
-    notice = `Manual speed ${video.playbackRate}× detected: AutoSpeed paused`;
+    notice = `Manual speed ${video.playbackRate}× detected: ViewPace paused`;
     blocked = true;
   } else if (!hasEnoughData(a.kind, a.liveCoverage, WINDOW_SEC)) {
     // No transcript or not enough of it: leave the user's speed alone.
     if (!notice) notice = a.kind === 'live' ? 'Collecting live captions…' : 'Waiting for captions: speed unchanged';
     blocked = true;
   }
-  // While AutoSpeed isn't in control, its controller starts from whatever speed is playing.
+  // While ViewPace isn't in control, its controller starts from whatever speed is playing.
   if (!owner.controlling) ctrl = { ...ctrl, current: video.playbackRate };
 
   if (!blocked && !video.paused && video.readyState >= 2) {
@@ -616,7 +616,7 @@ function tick(): void {
     aiAction,
   });
 
-  // Time-weighted speed: count playback only while AutoSpeed is choosing the speed.
+  // Time-weighted speed: count playback only while ViewPace is choosing the speed.
   const counting = owner.controlling && !video.paused && !ad && !live;
   meter.tick(performance.now(), counting, video.playbackRate, aiResult ? 'content' : 'speech');
 
@@ -649,7 +649,7 @@ async function boot(): Promise<void> {
   void refreshAiStatus();
   onSettingsChanged((s) => {
     const modeChanged = s.mode !== settings.mode;
-    if (s.enabled && !settings.enabled) resumeAfterOverride(); // turning AutoSpeed on starts fresh
+    if (s.enabled && !settings.enabled) resumeAfterOverride(); // turning ViewPace on starts fresh
     settings = s;
     if (modeChanged) {
       ai.setProvider(providerFor(s));

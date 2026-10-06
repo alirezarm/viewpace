@@ -9,15 +9,15 @@ export type Analysis = 'speech' | 'content';
 export const ANALYSES: Analysis[] = ['speech', 'content'];
 
 export interface AnalysisCounters {
-  /** Wall-clock seconds of playback while AutoSpeed was in control of the speed. */
+  /** Wall-clock seconds of playback while ViewPace was in control of the speed. */
   playSec: number;
   /** Sum of playbackRate × seconds over that time (for a time-weighted average speed). */
   rateSec: number;
-  /** Videos on which AutoSpeed changed the speed at least once. */
+  /** Videos on which ViewPace changed the speed at least once. */
   videos: number;
-  /** Speed changes by the user (or another tool) while AutoSpeed was in control. */
+  /** Speed changes by the user (or another tool) while ViewPace was in control. */
   overrides: number;
-  /** Of those, how many went back to AutoSpeed's speed by themselves (e.g. press-and-hold). */
+  /** Of those, how many went back to ViewPace's speed by themselves (e.g. press-and-hold). */
   temporary: number;
 }
 
@@ -56,7 +56,7 @@ export class UsageMeter {
   private delta: Record<Analysis, AnalysisCounters> = { speech: emptyCounters(), content: emptyCounters() };
   private lastTick: number | null = null;
 
-  /** Call every tick. Counts time only while playing with AutoSpeed in control. */
+  /** Call every tick. Counts time only while playing with ViewPace in control. */
   tick(now: number, counting: boolean, rate: number, analysis: Analysis): void {
     const prev = this.lastTick;
     this.lastTick = now;

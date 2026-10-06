@@ -43,7 +43,7 @@ export type SmartPacingState =
   | 'off-by-choice' // ready, but the user picked "Speech only"
   | 'offer' // needs a one-time download
   | 'downloading'
-  | 'unavailable'; // not supported here, or failed: AutoSpeed carries on without it
+  | 'unavailable'; // not supported here, or failed: ViewPace carries on without it
 
 export function smartPacingState(availability: AiAvailability, mode: Mode): SmartPacingState {
   if (availability === 'available') return mode === 'ai' ? 'on' : 'off-by-choice';
@@ -67,29 +67,29 @@ export interface SmartPacingCopy {
 export const SMART_PACING_COPY: Record<SmartPacingState, SmartPacingCopy> = {
   on: {
     title: 'Smart pacing is on',
-    body: "AutoSpeed also follows what's being said: it slows down when new ideas come up and speeds through small talk.",
+    body: "ViewPace also follows what's being said: it slows down when new ideas come up and speeds through small talk.",
     action: null,
   },
   'off-by-choice': {
     title: 'Smart pacing is off',
-    body: 'AutoSpeed adjusts to how fast people talk. You can turn smart pacing on under Advanced.',
+    body: 'ViewPace adjusts to how fast people talk. You can turn smart pacing on under Advanced.',
     action: null,
   },
   offer: {
-    title: 'Make AutoSpeed smarter',
+    title: 'Make ViewPace smarter',
     body:
       "Smart pacing also follows what's being said, so it slows down when new ideas come up and speeds through " +
-      'small talk. It runs privately on your computer after a one-time download, and AutoSpeed keeps working meanwhile.',
+      'small talk. It runs privately on your computer after a one-time download, and ViewPace keeps working meanwhile.',
     action: 'Turn on smart pacing',
   },
   downloading: {
     title: 'Setting up smart pacing',
-    body: "It turns on by itself when it's ready. AutoSpeed keeps working meanwhile.",
+    body: "It turns on by itself when it's ready. ViewPace keeps working meanwhile.",
     action: null,
   },
   unavailable: {
     title: "Smart pacing isn't available on this computer",
-    body: 'AutoSpeed adjusts to how fast people talk instead. Everything else works the same.',
+    body: 'ViewPace adjusts to how fast people talk instead. Everything else works the same.',
     action: null,
   },
 };

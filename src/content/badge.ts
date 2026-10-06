@@ -84,7 +84,7 @@ export class Badge {
     this.root.innerHTML = `
       <style>${CSS}</style>
       <div class="wrap">
-        <div class="panel" data-k="panel" hidden role="dialog" aria-label="AutoSpeed">
+        <div class="panel" data-k="panel" hidden role="dialog" aria-label="ViewPace">
           <p class="q" data-k="q">How's the speed?</p>
           <div class="fb" data-k="fb">
             <button data-f="too_slow">Too slow</button>
@@ -94,8 +94,8 @@ export class Badge {
           <p class="ack" data-k="ack" aria-live="polite"></p>
           <button class="secondary" data-k="toggle"></button>
         </div>
-        <button class="resume" data-k="resume" hidden>Resume AutoSpeed</button>
-        <button class="pill" data-k="pill" aria-expanded="false" aria-label="AutoSpeed: show options">
+        <button class="resume" data-k="resume" hidden>Resume ViewPace</button>
+        <button class="pill" data-k="pill" aria-expanded="false" aria-label="ViewPace: show options">
           <span class="track" aria-hidden="true"><span class="dot" data-k="dot"></span></span>
           <span class="rate" data-k="rate"></span>
           <span class="line" data-k="line" hidden></span>
@@ -156,19 +156,19 @@ export class Badge {
     const pos = Math.min(1, Math.max(0, (v.rate - v.minRate) / span));
     this.el.dot!.style.left = `${(pos * 100).toFixed(1)}%`;
 
-    if (v.state === 'off') set('rate', 'AutoSpeed off');
+    if (v.state === 'off') set('rate', 'ViewPace off');
     else if (v.state === 'paused-by-user') set('rate', `Paused: you chose ${formatRate(v.rate)}`);
     else set('rate', formatRate(v.rate));
 
     this.el.line!.hidden = !v.line;
     set('line', v.line ?? '');
     set('ack', v.ack ?? '');
-    // Rating only makes sense while AutoSpeed is choosing the speed.
+    // Rating only makes sense while ViewPace is choosing the speed.
     const rating = v.state === 'active';
     this.el.q!.hidden = !rating;
     this.el.fb!.hidden = !rating;
     this.el.ack!.hidden = !rating || !v.ack;
-    set('toggle', v.state === 'off' ? 'Turn on AutoSpeed' : 'Turn off AutoSpeed');
+    set('toggle', v.state === 'off' ? 'Turn on ViewPace' : 'Turn off ViewPace');
     this.el.resume!.hidden = v.state !== 'paused-by-user';
     this.host.toggleAttribute('data-flash', v.flash || v.state === 'paused-by-user');
   }

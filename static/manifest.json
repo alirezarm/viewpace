@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "AutoSpeed",
+  "name": "ViewPace",
   "version": "0.1.0",
-  "description": "Speeds up YouTube when it's easy to follow and slows down when it isn't.",
+  "description": "Automatically speeds up easy parts and slows down when content needs more attention.",
   "minimum_chrome_version": "138",
   "permissions": ["storage"],
   "background": { "service_worker": "background.js" },
@@ -19,11 +19,11 @@
       "run_at": "document_start"
     }
   ],
-  "action": { "default_popup": "popup.html", "default_title": "AutoSpeed" },
+  "action": { "default_popup": "popup.html", "default_title": "ViewPace" },
   "commands": {
     "toggle-autospeed": {
       "suggested_key": { "default": "Alt+Shift+S" },
-      "description": "Turn AutoSpeed on or off"
+      "description": "Turn ViewPace on or off"
     }
   }
 }

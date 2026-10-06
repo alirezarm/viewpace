@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>AutoSpeed</title>
+    <title>ViewPace</title>
     <link rel="stylesheet" href="ui.css" />
     <style>
       body { width: 300px; padding: 16px; }
@@ -10,13 +10,13 @@
   </head>
   <body>
     <header>
-      <h1>AutoSpeed</h1>
-      <label class="switch" title="Turn AutoSpeed on or off">
-        <input type="checkbox" id="enabled" role="switch" aria-label="AutoSpeed on" />
+      <h1>ViewPace</h1>
+      <label class="switch" title="Turn ViewPace on or off">
+        <input type="checkbox" id="enabled" role="switch" aria-label="ViewPace on" />
         <span></span>
       </label>
     </header>
-    <p class="intro">Speeds up YouTube when it's easy to follow and slows down when it isn't.</p>
+    <p class="intro">Automatically speeds up easy parts and slows down when content needs more attention.</p>
 
     <section aria-labelledby="pace-h">
       <h2 id="pace-h">Pace</h2>
@@ -56,7 +56,7 @@
 
         <label class="check"><input type="checkbox" id="overlay" /><span>Speed badge on the video</span></label>
         <label class="check"><input type="checkbox" id="debug" /><span>Detailed debug overlay<br /><span class="hint">Shows speech rate, AI scores, transcript and decision reasons.</span></span></label>
-        <label class="check"><input type="checkbox" id="autocc" /><span>Read captions automatically<br /><span class="hint">Briefly turns CC on and off when a video starts, so AutoSpeed can read the transcript.</span></span></label>
+        <label class="check"><input type="checkbox" id="autocc" /><span>Read captions automatically<br /><span class="hint">Briefly turns CC on and off when a video starts, so ViewPace can read the transcript.</span></span></label>
 
         <div>
           <h2>On-device model</h2>

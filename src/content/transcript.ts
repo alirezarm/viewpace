@@ -118,7 +118,7 @@ export class TranscriptStore {
 
   /**
    * Keep transient data only for the current video (null = no video). Data already captured for
-   * that video is kept, e.g. a caption track the player fetched just before AutoSpeed noticed
+   * that video is kept, e.g. a caption track the player fetched just before ViewPace noticed
    * the navigation.
    */
   retainOnly(videoId: string | null): void {

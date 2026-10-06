@@ -53,7 +53,7 @@ export class SmartCard {
     const copy = SMART_PACING_COPY[state];
     if (this.failed && state === 'offer') {
       this.title.textContent = "Smart pacing couldn't be set up";
-      this.body.textContent = 'AutoSpeed keeps adjusting to how fast people talk. You can try again anytime.';
+      this.body.textContent = 'ViewPace keeps adjusting to how fast people talk. You can try again anytime.';
       this.action.textContent = 'Try again';
       this.action.hidden = false;
     } else {
