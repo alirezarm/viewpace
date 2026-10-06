@@ -699,7 +699,10 @@ chrome.runtime.onMessage.addListener((msg: TabRequest | GoalTabRequest, _sender,
     return false;
   }
   if (msg?.kind === 'goal:start') {
-    void startGoal(msg.goal).then(sendResponse);
+    // Always answer, even on an unexpected error, so the popup can show what went wrong.
+    void startGoal(msg.goal).then(sendResponse, (e: unknown) =>
+      sendResponse({ error: `Goal Mode couldn't start: ${e instanceof Error ? e.message : String(e)}` }),
+    );
     return true; // async response
   }
   return false;

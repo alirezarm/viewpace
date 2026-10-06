@@ -129,12 +129,18 @@ function renderSummary(s: BetaSummary): void {
 // ---------- Goal Mode (experimental) ----------
 
 async function sendGoal(req: GoalTabRequest): Promise<GoalStatus | { error: string } | null | undefined> {
+  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  if (tab?.id === undefined) return undefined;
   try {
-    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-    if (tab?.id === undefined) return undefined;
-    return (await chrome.tabs.sendMessage(tab.id, req)) as GoalStatus | { error: string } | null;
-  } catch {
-    return undefined; // not a YouTube tab
+    const reply = (await chrome.tabs.sendMessage(tab.id, req)) as GoalStatus | { error: string } | null | undefined;
+    // A ViewPace tab that predates Goal Mode receives the message but doesn't answer it.
+    if (reply === undefined && req.kind !== 'goal:status') {
+      return { error: 'This tab is running an older ViewPace. Close it and open the video in a new tab.' };
+    }
+    return reply;
+  } catch (e) {
+    if (req.kind === 'goal:status') return undefined; // not a YouTube tab (polled every second)
+    return { error: `This tab didn't respond (${e instanceof Error ? e.message : String(e)}). Reload the YouTube tab and try again.` };
   }
 }
 
@@ -199,13 +205,7 @@ function bind(): void {
 
   $<HTMLButtonElement>('goal-start').addEventListener('click', async () => {
     const goalText = $<HTMLTextAreaElement>('goal-text').value;
-    const result = await sendGoal({ kind: 'goal:start', goal: goalText });
-    // No answer: the tab is running an older ViewPace (or isn't a YouTube page). Say so instead of doing nothing.
-    if (result === undefined) {
-      $('goal-status').textContent = "This tab didn't respond. Reload the YouTube tab and try again.";
-      return;
-    }
-    renderGoal(result, true);
+    renderGoal(await sendGoal({ kind: 'goal:start', goal: goalText }), true);
   });
   $<HTMLButtonElement>('goal-stop').addEventListener('click', async () => {
     await sendGoal({ kind: 'goal:stop' });
