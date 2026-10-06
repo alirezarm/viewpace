@@ -1,18 +1,18 @@
 # ViewPace Privacy Policy
 
-> **Draft for review.** Fill in the placeholders marked `[TODO]` before publishing.
+**Effective date:** October 6, 2026
+**Contact:** [VIEWPACE_CONTACT_EMAIL_REQUIRED]
 
-**Effective date:** [TODO]
-**Contact:** [TODO: contact email]
-
-ViewPace is a Chrome extension that automatically adjusts YouTube playback speed: it speeds up easy
-parts and slows down when content needs more attention. This policy explains what data ViewPace
+ViewPace (listed in the Chrome Web Store as "ViewPace — Smart YouTube Speed") is a Chrome extension
+that automatically adjusts YouTube playback speed: it speeds up easy parts and slows down when
+content needs more attention. This policy explains what data ViewPace
 uses, where it is processed and stored, and how you can delete it.
 
 ## Summary
 
-- ViewPace works entirely on your computer. It has **no backend server, no account, no advertising,
-  no analytics SDK, and no telemetry service**.
+- ViewPace does all of its processing on your computer. It has **no backend server**, **no ViewPace
+  account is required**, it uses **no advertising service**, and **no analytics or telemetry service
+  receives your viewing data**.
 - ViewPace **does not send** transcripts, captions, video content, viewing history, or any other
   data to the developer or to any third party.
 - Settings, bounded beta statistics, and your feedback are stored **locally in Chrome** and can be
@@ -38,14 +38,15 @@ move to another video or close the tab.
 ## Smart Pacing (on-device AI)
 
 Smart Pacing is optional. Speech-based pacing works without it. When it is enabled and available,
-ViewPace sends short transcript excerpts (about 20 seconds of speech, with the preceding excerpt
-and the video title as context) to **Gemini Nano, the AI model built into Chrome, which runs on your
-device**. The model returns a difficulty score that ViewPace uses to adjust the speed. This
-processing happens locally in Chrome; ViewPace does not send these excerpts anywhere.
+ViewPace passes short transcript excerpts (about 20 seconds of speech, with the preceding excerpt
+and the video title as context) to **Gemini Nano, the on-device AI model built into Chrome**, using
+Chrome's built-in AI interface. The model returns a difficulty score that ViewPace uses to adjust
+the speed. ViewPace itself does not send these excerpts to any server.
 
-Smart Pacing requires a one-time download of the model, which **Chrome performs** when you choose
-"Turn on smart pacing". That download is handled by Chrome and governed by Google's terms, not by
-ViewPace. Availability depends on your Chrome version and device, and content analysis currently
+Gemini Nano is provided and run by Chrome, not by ViewPace. If it is not already on your device,
+Chrome downloads it once when you choose "Turn on smart pacing". The model, its download and its
+availability are controlled by Chrome and depend on your Chrome version and device; Google's own
+terms and documentation for Chrome apply to them. Smart Pacing's content analysis currently
 supports English videos.
 
 ## What ViewPace stores
@@ -55,7 +56,7 @@ storage). Nothing is synced or uploaded by ViewPace.
 
 | Data | Contents | Limit |
 |---|---|---|
-| Settings | On/off, pace, analysis mode, display options | One small record |
+| Settings | On/off, pace, analysis mode, display options, whether to read captions automatically, whether to keep the detailed decision log | One small record |
 | Setup state | Whether the welcome page was shown, whether you chose the analysis mode yourself, the last setup error | One small record |
 | Feedback | For each Too slow / Just right / Too fast click: the time, YouTube video ID, position in the video, the speeds involved, speech measurements (e.g. words per minute, pauses), the Smart Pacing score if one was used, the pace and mode, and which caption track was used (language, auto-generated or uploaded). **No transcript text.** | Most recent 500 entries |
 | Beta statistics | Totals per analysis type: seconds watched while ViewPace set the speed, average speed, number of videos adapted, number of manual speed changes | One fixed-size record |
@@ -84,7 +85,7 @@ The use of information received by ViewPace complies with the
 [Chrome Web Store User Data Policy](https://developer.chrome.com/docs/webstore/program-policies/user-data-faq),
 including the **Limited Use** requirements. ViewPace uses data only to provide its single purpose
 (adjusting YouTube playback speed), does not transfer it to third parties, does not use it for
-advertising, and does not allow humans to read it. All processing happens on your device.
+advertising, and does not allow humans to read it. ViewPace processes this data only on your device.
 
 ## Permissions
 

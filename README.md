@@ -2,7 +2,7 @@
 
 Automatically speeds up easy parts and slows down when content needs more attention.
 
-Chrome Web Store title (planned): **ViewPace — Smart YouTube Speed**.
+Chrome Web Store title: **ViewPace — Smart YouTube Speed** (manifest `name`; `short_name` is `ViewPace`).
 
 Manifest V3 Chrome extension that varies YouTube playback speed according to how carefully the
 upcoming content needs to be heard. Local only: no backend, no cloud LLM, no analytics.

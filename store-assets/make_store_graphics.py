@@ -1,4 +1,5 @@
-"""Compose the Chrome Web Store screenshot graphics (1280x800, full bleed, square corners).
+"""Compose the Chrome Web Store graphics: screenshots (1280x800, full bleed, square corners) and
+the small promo tile (440x280).
 
     python3 store-assets/make_store_graphics.py    # run from the repo root; needs Pillow
 
@@ -13,6 +14,7 @@ from PIL import Image, ImageDraw, ImageFont
 RAW = Path("store-assets/raw")
 OUT = Path("store-assets/final")
 ICON = Path("static/icons/icon-128.png")
+ICON_MASTER = Path("assets/viewpace-icon-source.png")
 FONT = "store-assets/fonts/PlusJakartaSans-Variable.ttf"
 
 W, H = 1280, 800
@@ -110,12 +112,50 @@ def compose(spec: dict) -> Image.Image:
     return canvas
 
 
+def gradient(size: tuple[int, int]) -> Image.Image:
+    """Diagonal blue-to-violet gradient (same brand colours as the screenshot band)."""
+    w, h = size
+    g = Image.new("RGB", size)
+    px = g.load()
+    for y in range(h):
+        for x in range(w):
+            t = (x / (w - 1)) * 0.75 + (y / (h - 1)) * 0.25
+            px[x, y] = tuple(round(a + (b - a) * t) for a, b in zip(BG_LEFT, BG_RIGHT))
+    return g
+
+
+def promo_tile() -> Image.Image:
+    """Small promo tile (440x280): icon, name and positioning on the brand gradient. No UI."""
+    tw, th = 440, 280
+    tile = gradient((tw, th))
+    icon_size = 104
+    icon = Image.open(ICON_MASTER).convert("RGBA").resize((icon_size, icon_size), Image.Resampling.LANCZOS)
+    left = 36
+    text_x = left + icon_size + 22
+    max_text = tw - text_x - 24
+    name, tagline = "ViewPace", "Smart YouTube Speed"
+    f_name = fitted(name, max_text, 46, 800)
+    f_tag = fitted(tagline, max_text, 22, 600)
+    h_name = f_name.getbbox(name)[3]
+    h_tag = f_tag.getbbox(tagline)[3]
+    gap = 10
+    top = (th - (h_name + gap + h_tag)) // 2
+    draw = ImageDraw.Draw(tile)
+    draw.text((text_x, top), name, font=f_name, fill=HEADLINE)
+    draw.text((text_x, top + h_name + gap), tagline, font=f_tag, fill=SUPPORT)
+    tile.paste(icon, (left, (th - icon_size) // 2), icon)
+    return tile
+
+
 def main() -> None:
     OUT.mkdir(parents=True, exist_ok=True)
     for spec in GRAPHICS:
         img = compose(spec)
         img.save(OUT / spec["out"], optimize=True)
         print(OUT / spec["out"], img.size)
+    tile = promo_tile()
+    tile.save(OUT / "small-promo-tile-440x280.png", optimize=True)
+    print(OUT / "small-promo-tile-440x280.png", tile.size)
 
 
 if __name__ == "__main__":

@@ -1,6 +1,7 @@
 {
   "manifest_version": 3,
-  "name": "ViewPace",
+  "name": "ViewPace — Smart YouTube Speed",
+  "short_name": "ViewPace",
   "version": "0.1.0",
   "description": "Automatically speeds up easy parts and slows down when content needs more attention.",
   "minimum_chrome_version": "138",

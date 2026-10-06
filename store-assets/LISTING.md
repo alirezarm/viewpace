@@ -11,8 +11,7 @@ Submission-ready copy. Fields marked **(manifest)** are taken by the Web Store f
 ViewPace — Smart YouTube Speed
 ```
 
-> The manifest `name` is currently `ViewPace`. Change it to the title above before packaging if
-> the store should show the full title (it is also the name Chrome shows on the extensions page).
+> Set in the manifest (`name`), with `short_name: "ViewPace"` for places where space is tight.
 
 ## Short description (manifest `description`, max 132 characters)
 
