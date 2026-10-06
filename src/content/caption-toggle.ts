@@ -6,13 +6,15 @@
 export interface CaptionButton {
   isOn(): boolean;
   click(): void;
+  /** Still in the page? False once YouTube has replaced the player. */
+  isConnected(): boolean;
 }
 
 export interface CaptionToggleDeps {
-  /** The player's CC button, looked up fresh each time (YouTube may rebuild the player). */
+  /** The player's CC button at the start of the operation. */
   button(): CaptionButton | null;
   sleep(ms: number): Promise<void>;
-  /** Still on the video this load was started for? */
+  /** Still on the video (and player) this load was started for? Must read live state. */
   isCurrent(): boolean;
   /** Has the player received a caption response for that video since the load started? */
   responded(): boolean;
@@ -21,8 +23,8 @@ export interface CaptionToggleDeps {
 }
 
 /**
- * 'done': finished on the same video. 'navigated': the user moved to another video meanwhile; CC
- * was still restored, but the caller must not update per-video state. 'no-button': nothing done.
+ * 'done': finished on the same video. 'navigated': the user moved to another video (or YouTube
+ * replaced the player) meanwhile; the caller must not update per-video state. 'no-button': nothing done.
  */
 export type CaptionToggleResult = 'done' | 'navigated' | 'no-button';
 
@@ -30,18 +32,24 @@ export async function toggleCaptionsForTrack(d: CaptionToggleDeps): Promise<Capt
   const btn = d.button();
   if (!btn) return 'no-button';
   const wasOn = btn.isOn();
+  let leftOn = wasOn; // the state ViewPace has put this button in
+  const click = () => {
+    btn.click();
+    leftOn = !leftOn;
+  };
+  const stillHere = () => d.isCurrent() && btn.isConnected();
+
   if (wasOn) {
-    btn.click(); // off, so that switching on again makes the player fetch the track
+    click(); // off, so that switching on again makes the player fetch the track
     await d.sleep(300);
   }
-  if (d.isCurrent()) {
-    d.button()?.click(); // on: the player fetches the track
+  if (stillHere()) {
+    if (!leftOn) click(); // on: the player fetches the track
     // Switch back as soon as the player has an answer (even an empty one), or the video changes.
-    for (let waited = 0; waited < d.waitMs && !d.responded() && d.isCurrent(); waited += 100) await d.sleep(100);
+    for (let waited = 0; waited < d.waitMs && !d.responded() && stillHere(); waited += 100) await d.sleep(100);
   }
-  // CC on/off is a player-wide preference: always leave it the way ViewPace found it, even if the
-  // user moved to another video in the meantime.
-  const now = d.button();
-  if (now && now.isOn() !== wasOn) now.click();
+  // Undo only ViewPace's own change: on the same button (never on a replaced player), and only if
+  // nobody else has changed CC since. Otherwise leave CC as it is.
+  if (leftOn !== wasOn && btn.isConnected() && btn.isOn() === leftOn) click();
   return d.isCurrent() ? 'done' : 'navigated';
 }

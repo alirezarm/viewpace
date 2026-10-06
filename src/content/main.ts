@@ -293,13 +293,18 @@ async function ensureCaptionTrack(id: string): Promise<void> {
 async function loadCaptionTrack(id: string): Promise<void> {
   captionNotice = 'Loading caption track…';
   const before = store.responseCount(id);
+  // Identity is checked live after every wait: the URL (not the per-second cached id) and the
+  // player element itself (YouTube may replace it).
+  const player = document.getElementById('movie_player');
   const result = await toggleCaptionsForTrack({
     button: () => {
-      const b = document.querySelector<HTMLButtonElement>('#movie_player .ytp-subtitles-button');
-      return b ? { isOn: () => b.getAttribute('aria-pressed') === 'true', click: () => b.click() } : null;
+      const b = player?.querySelector<HTMLButtonElement>('.ytp-subtitles-button');
+      return b
+        ? { isOn: () => b.getAttribute('aria-pressed') === 'true', click: () => b.click(), isConnected: () => b.isConnected }
+        : null;
     },
     sleep,
-    isCurrent: () => videoId === id,
+    isCurrent: () => currentVideoId() === id && document.getElementById('movie_player') === player,
     responded: () => store.responseCount(id) !== before,
     waitMs: CAPTION_WAIT_MS,
   });
