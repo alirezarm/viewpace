@@ -199,7 +199,13 @@ function bind(): void {
 
   $<HTMLButtonElement>('goal-start').addEventListener('click', async () => {
     const goalText = $<HTMLTextAreaElement>('goal-text').value;
-    renderGoal(await sendGoal({ kind: 'goal:start', goal: goalText }), true);
+    const result = await sendGoal({ kind: 'goal:start', goal: goalText });
+    // No answer: the tab is running an older ViewPace (or isn't a YouTube page). Say so instead of doing nothing.
+    if (result === undefined) {
+      $('goal-status').textContent = "This tab didn't respond. Reload the YouTube tab and try again.";
+      return;
+    }
+    renderGoal(result, true);
   });
   $<HTMLButtonElement>('goal-stop').addEventListener('click', async () => {
     await sendGoal({ kind: 'goal:stop' });
