@@ -1,7 +1,7 @@
 # ViewPace Privacy Policy
 
 **Effective date:** October 6, 2026
-**Contact:** [VIEWPACE_CONTACT_EMAIL_REQUIRED]
+**Contact:** [viewpace.support@gmail.com](mailto:viewpace.support@gmail.com)
 
 ViewPace (listed in the Chrome Web Store as "ViewPace — Smart YouTube Speed") is a Chrome extension
 that automatically adjusts YouTube playback speed: it speeds up easy parts and slows down when
@@ -96,5 +96,9 @@ advertising, and does not allow humans to read it. ViewPace processes this data 
 ## Changes
 
 If this policy changes, the updated version will be published with a new effective date.
+
+## Contact
+
+Questions about this policy or about ViewPace: [viewpace.support@gmail.com](mailto:viewpace.support@gmail.com).
 
 ViewPace is not affiliated with or endorsed by YouTube or Google.
