@@ -28,7 +28,18 @@ describe('reference checks', () => {
   const manifest = JSON.parse(readFileSync('static/manifest.json', 'utf8'));
 
   it('finds every file the real manifest needs', () => {
-    expect(manifestReferences(manifest).sort()).toEqual(['background.js', 'content.js', 'hook.js', 'popup.html']);
+    expect(manifestReferences(manifest).sort()).toEqual([
+      'background.js',
+      'content.js',
+      'hook.js',
+      'icons/icon-128.png',
+      'icons/icon-16.png',
+      'icons/icon-16.png', // listed under both icons and action.default_icon
+      'icons/icon-32.png',
+      'icons/icon-32.png',
+      'icons/icon-48.png',
+      'popup.html',
+    ]);
   });
 
   it('finds local scripts and stylesheets in the real pages, ignoring external links', () => {
