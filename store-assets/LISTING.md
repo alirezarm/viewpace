@@ -56,7 +56,7 @@ PRIVATE BY DESIGN
 • Your settings and feedback stay in your browser, and you can clear your feedback anytime
 
 Support: viewpace.support@gmail.com
-Privacy policy: [TODO: privacy policy URL]
+Privacy policy: https://alirezarm.github.io/viewpace-site/PRIVACY.html
 
 Screenshot credits: Video content from "Lesson 1 - Lecture 1 - Astronomy and Science" and "Lesson 1 - Lecture 2 - Numbers and Light Travel Time" by Robert Wagner (Introduction to Astronomy, OpenStax lecture series), youtube.com/watch?v=D5GDztHsL3U and youtube.com/watch?v=MPjJ8KaqBf0, licensed under CC BY 3.0 (creativecommons.org/licenses/by/3.0/). Screenshots cropped and resized.
 ```
