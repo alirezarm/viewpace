@@ -1,16 +1,17 @@
 /**
- * Evaluation-only: POC 1.1 (old relevance prompt) vs POC 1.2 (stricter relevance prompt) on the
- * same transcripts, blocks, goals and saved judge scores.
+ * Evaluation-only: the POC 1.1 baseline vs a later variant ($EVAL_NEW, default POC 1.2) on the same
+ * transcripts, blocks, goals and saved judge scores.
  *
- *   npx esbuild eval/goal-mode/compare.ts --bundle --platform=node --format=esm --outfile=/tmp/compare.mjs && node /tmp/compare.mjs
+ *   EVAL_NEW=eval-results/goal-mode-poc1.3a npx esbuild eval/goal-mode/compare.ts --bundle --platform=node --format=esm --outfile=/tmp/compare.mjs && node /tmp/compare.mjs
  *
  * Needs metrics.json in both result folders (run analyze.ts with EVAL_RUNS/EVAL_METRICS_OUT first).
- * Writes eval-results/goal-mode-poc1.2/compare.json and compare.md.
+ * Writes $EVAL_NEW/compare.json and compare.md. For a categorical scorer it also reports what
+ * category Nano chose (relevanceCategory in the raw runs).
  */
 import { readFileSync, writeFileSync } from 'node:fs';
 
 const OLD = 'eval-results/goal-mode-poc1';
-const NEW = 'eval-results/goal-mode-poc1.2';
+const NEW = process.env.EVAL_NEW ?? 'eval-results/goal-mode-poc1.2';
 const GOALS = ['A', 'B', 'C'] as const;
 type G = (typeof GOALS)[number];
 
@@ -25,6 +26,7 @@ interface Block {
   reason: string;
   targetRate: number | null;
   calls: number;
+  relevanceCategory?: string | null;
 }
 interface Run {
   blocks: Block[];
@@ -242,11 +244,89 @@ const examples = {
   judgeMidDroppedToLow: judgeMidDrop.map(ex),
 };
 
-writeFileSync(`${NEW}/compare.json`, JSON.stringify({ old, new: neu, perRun, transitions, counts: Object.fromEntries(Object.entries(examples).map(([k, v]) => [k, v.length])), examples }, null, 2));
+// Categorical scorer: what Nano chose, overall and per run, and how categories change with the goal.
+const CATS = ['irrelevant', 'background', 'useful', 'important', 'essential'];
+const catRows = rows.filter((r) => r.neu.relevanceCategory);
+const catCount = (rs: Row[]) => Object.fromEntries(CATS.map((c) => [c, rs.filter((r) => r.neu.relevanceCategory === c).length]));
+const categories = catRows.length
+  ? {
+      rated: catRows.length,
+      overall: catCount(catRows),
+      overallPct: Object.fromEntries(CATS.map((c) => [c, pct(catRows.filter((r) => r.neu.relevanceCategory === c).length, catRows.length)])),
+      perRun: Object.fromEntries(videos.flatMap((v) => GOALS.map((g) => [`${v.video}-${g}`, catCount(catRows.filter((r) => r.video === v.video && r.goal === g))]))),
+      // Judge score distribution within each chosen category.
+      judgeByCategory: Object.fromEntries(
+        CATS.map((c) => {
+          const js = catRows.filter((r) => r.neu.relevanceCategory === c).map((r) => r.j);
+          return [c, { n: js.length, judgeMean: js.length ? r2(mean(js)) : null, judgeLe3: js.filter((x) => x <= 3).length, judgeGe7: js.filter((x) => x >= 7).length }];
+        }),
+      ),
+      // Same block, different goals: does the chosen category change?
+      blocksChangingCategoryPct: (() => {
+        let changed = 0;
+        let pairs = 0;
+        for (const v of videos) {
+          const n = rows.filter((r) => r.video === v.video && r.goal === 'A').length;
+          for (let i = 0; i < n; i++) {
+            const cs = GOALS.map((g) => rows.find((r) => r.video === v.video && r.goal === g && r.index === i)!.neu.relevanceCategory);
+            for (const [a, b] of [[0, 1], [0, 2], [1, 2]] as const) {
+              if (!cs[a] || !cs[b]) continue;
+              pairs++;
+              if (cs[a] !== cs[b]) changed++;
+            }
+          }
+        }
+        return pct(changed, pairs);
+      })(),
+      // Jaccard of the important|essential block sets between goals of the same video.
+      highSetJaccard: (() => {
+        const out: number[] = [];
+        for (const v of videos) {
+          const set = (g: G) => new Set(rows.filter((r) => r.video === v.video && r.goal === g && (r.neu.relevance ?? 0) >= 7).map((r) => r.index));
+          for (const [a, b] of [['A', 'B'], ['A', 'C'], ['B', 'C']] as [G, G][]) {
+            const x = set(a);
+            const y = set(b);
+            const inter = [...x].filter((i) => y.has(i)).length;
+            const uni = new Set([...x, ...y]).size;
+            out.push(uni ? inter / uni : 0);
+          }
+        }
+        return { mean: r2(mean(out)), max: r2(Math.max(...out)), perPair: out.map(r2) };
+      })(),
+    }
+  : null;
+// Same high-set Jaccard for the baseline (numeric >= 7), for comparison.
+const oldHighSetJaccard = (() => {
+  const out: number[] = [];
+  for (const v of videos) {
+    const set = (g: G) => new Set(rows.filter((r) => r.video === v.video && r.goal === g && (r.old.relevance ?? 0) >= 7).map((r) => r.index));
+    for (const [a, b] of [['A', 'B'], ['A', 'C'], ['B', 'C']] as [G, G][]) {
+      const x = set(a);
+      const y = set(b);
+      const inter = [...x].filter((i) => y.has(i)).length;
+      const uni = new Set([...x, ...y]).size;
+      out.push(uni ? inter / uni : 0);
+    }
+  }
+  return { mean: r2(mean(out)), max: r2(Math.max(...out)) };
+})();
+// Blocks whose category spans >= 3 levels across the three goals (e.g. irrelevant for one goal, important for another).
+const goalSwings = catRows.length
+  ? videos.flatMap((v) => {
+      const n = rows.filter((r) => r.video === v.video && r.goal === 'A').length;
+      return Array.from({ length: n }, (_, i) => GOALS.map((g) => rows.find((r) => r.video === v.video && r.goal === g && r.index === i)!)).filter((rs) => {
+        const lv = rs.map((r) => CATS.indexOf(r.neu.relevanceCategory ?? ''));
+        return Math.max(...lv) - Math.min(...lv) >= 3 && lv.every((x) => x >= 0);
+      });
+    })
+  : [];
 
-const md: string[] = ['# POC 1.1 vs POC 1.2 (generated by eval/goal-mode/compare.ts)', ''];
+writeFileSync(`${NEW}/compare.json`, JSON.stringify({ old, new: neu, categories, oldHighSetJaccard, perRun, transitions, counts: Object.fromEntries(Object.entries(examples).map(([k, v]) => [k, v.length])), examples }, null, 2));
+
+const label = NEW.split('/').pop()!.replace('goal-mode-poc', 'POC ');
+const md: string[] = [`# POC 1.1 vs ${label} (generated by eval/goal-mode/compare.ts)`, ''];
 const line = (label: string, a: unknown, b: unknown) => md.push(`| ${label} | ${a} | ${b} |`);
-md.push('| Metric | POC 1.1 | POC 1.2 |', '|---|---|---|');
+md.push(`| Metric | POC 1.1 | ${label} |`, '|---|---|---|');
 line('Precision (GM ≥7 that judge ≥7)', `${old.precisionHigh} (${old.bothHigh}/${old.gmHigh})`, `${neu.precisionHigh} (${neu.bothHigh}/${neu.gmHigh})`);
 line('Recall (judge ≥7 that GM ≥7)', `${old.recallHigh} (${old.bothHigh}/${old.judgeHigh})`, `${neu.recallHigh} (${neu.bothHigh}/${neu.judgeHigh})`);
 line('False-high (GM ≥7, J ≤3)', `${old.falseHigh} (${old.falseHighPctOfGmHigh}% of GM-high, ${old.falseHighPctOfAll}% of all)`, `${neu.falseHigh} (${neu.falseHighPctOfGmHigh}% of GM-high, ${neu.falseHighPctOfAll}% of all)`);
@@ -263,6 +343,18 @@ for (const k of Object.keys(old.latency) as (keyof typeof old.latency)[]) line(`
 md.push('', '| Run | judge ≥7 | old GM ≥7 | old prec | old rec | old FH | new GM ≥7 | new prec | new rec | new FH |', '|---|---|---|---|---|---|---|---|---|---|');
 for (const r of perRun) md.push(`| ${r.video}-${r.goal} | ${r.judgeHigh} | ${r.old.gmHigh} | ${r.old.prec ?? '–'} | ${r.old.rec ?? '–'} | ${r.old.fh} | ${r.neu.gmHigh} | ${r.neu.prec ?? '–'} | ${r.neu.rec ?? '–'} | ${r.neu.fh} |`);
 md.push('', `Transitions: ${JSON.stringify(transitions)}`, '');
+if (categories) {
+  md.push('## Categories chosen by Nano', '', '| Category | count | % | judge mean | judge ≤3 | judge ≥7 |', '|---|---|---|---|---|---|');
+  for (const c of CATS) {
+    const j = (categories.judgeByCategory as any)[c];
+    md.push(`| ${c} | ${(categories.overall as any)[c]} | ${(categories.overallPct as any)[c]} | ${j.judgeMean ?? '–'} | ${j.judgeLe3} | ${j.judgeGe7} |`);
+  }
+  md.push('', '| Run | ' + CATS.join(' | ') + ' |', '|---|' + CATS.map(() => '---').join('|') + '|');
+  for (const [k, c] of Object.entries(categories.perRun)) md.push(`| ${k} | ${CATS.map((x) => (c as any)[x]).join(' | ')} |`);
+  md.push('', `Blocks changing category between goals: ${categories.blocksChangingCategoryPct}%`, `High-set (important|essential) Jaccard between goals: mean ${categories.highSetJaccard.mean}, max ${categories.highSetJaccard.max} (baseline numeric ≥7: mean ${oldHighSetJaccard.mean}, max ${oldHighSetJaccard.max})`, '');
+  md.push(`\n## goalSwings (${goalSwings.length})\n`);
+  for (const rs of goalSwings) md.push(`- ${rs[0]!.video} #${rs[0]!.index} (${rs[0]!.time}): ${rs.map((r) => `${r.goal}=${r.neu.relevanceCategory} (J${r.j}, old R${r.old.relevance})`).join(', ')}. Text: "${excerpt(rs[0]!.old.text, 160)}"`);
+}
 for (const [k, list] of Object.entries(examples)) {
   md.push(`\n## ${k} (${list.length})\n`);
   for (const e of list) md.push(`- ${e.video}-${e.goal} #${e.index} (${e.time}) judge ${e.judge}: old R${e.old.relevance} "${e.old.reason}" → new R${e.new.relevance}/A${e.new.attention} ${e.new.speed}× "${e.new.reason}". Text: "${e.text}"`);

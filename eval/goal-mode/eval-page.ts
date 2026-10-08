@@ -87,6 +87,7 @@ async function runGoalEval(key: string, capture: { url: string; body: string }, 
       text: b.text,
       topic: r?.topic ?? null,
       relevance: r?.relevance ?? null,
+      relevanceCategory: r?.relevanceCategory ?? null, // set when the scorer is categorical (POC 1.3A+)
       attention: r?.attention ?? null,
       reason: r?.reason ?? null,
       category: target?.label ?? null,

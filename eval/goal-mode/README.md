@@ -25,3 +25,16 @@ kept under `eval-results/goal-mode-poc1/transcripts/` for reproducibility.
 5. `npx esbuild eval/goal-mode/analyze.ts --bundle --platform=node --format=esm --outfile=/tmp/a.mjs && node /tmp/a.mjs`
 
 Report: `docs/goal-mode-poc1-evaluation.md`.
+
+### Gotchas (learned the hard way)
+
+- **Stale service worker:** after a browser restart, `install_extension` of the same unpacked path
+  (same version) can keep running Chrome's cached copy of the *previous* background worker. Reading
+  `background.js` from disk proves nothing. Always `reload_extension` after installing, or install
+  from a never-used path, and verify behaviourally (e.g. a test call whose output only the new code
+  produces). This silently invalidated the first POC 1.2 run; see docs/goal-mode-poc1.3a-evaluation.md.
+- **CLI reconnects:** the chrome-devtools CLI daemon occasionally reconnects mid-run and closes the
+  pages it opened. `run-cdp.ts` talks to the DevTools port directly and is the preferred runner:
+  `npx esbuild eval/goal-mode/run-cdp.ts --bundle --platform=node --format=esm --outfile=/tmp/run-cdp.mjs && EVAL_EXT_ID=<id> EVAL_OUT=<dir>/runs node /tmp/run-cdp.mjs`
+- Comparing a variant with the POC 1.1 baseline: run `analyze.ts` with `EVAL_RUNS`/`EVAL_METRICS_OUT`
+  for the variant, then `EVAL_NEW=<variant folder> compare.ts`.

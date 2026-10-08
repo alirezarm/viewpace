@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { PROFILES } from '../src/content/controller';
 import { GoalController, type GoalAnalyzer } from '../src/content/goal/goal-session';
 import { goalTarget } from '../src/content/goal/goal-pacing';
+import { parseBlockRating, type RelevanceCategory } from '../src/shared/goal-prompt';
 import type { TimedWord } from '../src/shared/types';
 
 const pace = PROFILES.normal;
@@ -12,7 +13,10 @@ for (let t = 1, i = 0; t < 600; t += 0.4, i++) {
   if (i % 120 === 119) t += 3;
 }
 
-function analyzer(opts: Partial<{ available: boolean; fail: (n: number) => boolean; relevance: number; gate: Promise<void> }> = {}) {
+/** The model's raw structured output for a block, as the background worker parses it. */
+const modelOutput = (relevance: string, attention = 3) => parseBlockRating(JSON.stringify({ topic: 'training details', relevance, attention, reason: 'about training' }));
+
+function analyzer(opts: Partial<{ available: boolean; fail: (n: number) => boolean; category: RelevanceCategory; gate: Promise<void> }> = {}) {
   let calls = 0;
   const a: GoalAnalyzer & { calls: () => number } = {
     available: async () => opts.available ?? true,
@@ -20,7 +24,7 @@ function analyzer(opts: Partial<{ available: boolean; fail: (n: number) => boole
       const n = calls++;
       if (opts.gate) await opts.gate;
       if (opts.fail?.(n)) throw new Error('model error');
-      return { topic: 'training details', relevance: opts.relevance ?? 8, attention: 3, reason: 'about training' };
+      return modelOutput(opts.category ?? 'important');
     },
     groupSections: async () => null,
     calls: () => calls,
@@ -38,7 +42,7 @@ const baseStart = (a: GoalAnalyzer, isCurrent = () => true) => ({
 describe('Goal Mode', () => {
   it('maps the video and then targets the deterministic speed for the current region', async () => {
     const g = new GoalController();
-    const a = analyzer({ relevance: 1 });
+    const a = analyzer({ category: 'irrelevant' });
     await g.start(baseStart(a));
     await flush();
     expect(g.status('A')!.phase).toBe('ready');
@@ -123,7 +127,7 @@ describe('Goal Mode', () => {
 
   it('never overrides a speed the user chose', async () => {
     const g = new GoalController();
-    await g.start(baseStart(analyzer({ relevance: 0 })));
+    await g.start(baseStart(analyzer({ category: 'irrelevant' })));
     await flush();
     expect(g.decide('A', 100, pace, true)).toEqual({ kind: 'hold', note: 'Paused: you chose the speed' });
   });
@@ -149,6 +153,42 @@ describe('Goal Mode', () => {
       return d.rate;
     });
     expect(new Set(speeds).size).toBe(2); // fast and slow blocks both survive inside one section
+  });
+
+  it('paces each relevance category through the unchanged speed table', async () => {
+    const expected: [RelevanceCategory, number, string][] = [
+      ['irrelevant', 2, 'Not relevant to your goal'],
+      ['background', 1.75, 'Less relevant to your goal'],
+      ['useful', 1.4, 'Relevant background'],
+      ['important', 1.15, 'Important for your goal'],
+    ];
+    for (const [category, rate, label] of expected) {
+      const g = new GoalController();
+      await g.start(baseStart(analyzer({ category })));
+      await flush();
+      const d = g.decide('A', 100, pace);
+      if (d.kind !== 'target') throw new Error('expected a target');
+      expect(d.rate).toBeCloseTo(rate);
+      expect(d.label).toBe(label);
+      expect(d.block.relevance).toBe(modelOutput(category).relevance);
+    }
+  });
+
+  it('retries a block whose category is invalid, then leaves it unmapped', async () => {
+    const g = new GoalController();
+    let calls = 0;
+    const a: GoalAnalyzer = {
+      available: async () => true,
+      // The first block's two attempts return an unknown category (the parser rejects it); the rest are fine.
+      rateBlock: async () => modelOutput(calls++ < 2 ? 'very relevant' : 'essential', 8),
+      groupSections: async () => null,
+    };
+    await g.start(baseStart(a));
+    await flush();
+    const st = g.status('A')!;
+    expect(st.failed).toBe(1);
+    expect(g.decide('A', 5, pace).kind).toBe('hold'); // no invented speed for the failed block
+    expect(g.decide('A', 300, pace)).toMatchObject({ kind: 'target', rate: 1, label: 'Key part for your goal' });
   });
 
   it('stops on request', async () => {
