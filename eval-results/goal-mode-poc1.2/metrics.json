@@ -1,0 +1,1623 @@
+{
+  "zjkBMFhNj_g": {
+    "title": "[1hr Talk] Intro to Large Language Models",
+    "distributions": {
+      "A": {
+        "relevance": {
+          "n": 50,
+          "mean": 5.76,
+          "median": 7,
+          "sd": 3.08,
+          "min": 0,
+          "max": 10,
+          "hist": [
+            4,
+            1,
+            6,
+            5,
+            0,
+            3,
+            0,
+            20,
+            2,
+            1,
+            8
+          ],
+          "pctGe7": 62,
+          "pctGe8": 22
+        },
+        "attention": {
+          "n": 50,
+          "mean": 6.48,
+          "median": 7,
+          "sd": 1,
+          "min": 3,
+          "max": 8,
+          "hist": [
+            0,
+            0,
+            0,
+            2,
+            1,
+            3,
+            10,
+            33,
+            1,
+            0,
+            0
+          ],
+          "pctGe7": 68,
+          "pctGe8": 2
+        },
+        "highBunched": true
+      },
+      "B": {
+        "relevance": {
+          "n": 50,
+          "mean": 4.38,
+          "median": 3,
+          "sd": 3.32,
+          "min": 0,
+          "max": 10,
+          "hist": [
+            2,
+            0,
+            17,
+            16,
+            0,
+            2,
+            0,
+            1,
+            0,
+            0,
+            12
+          ],
+          "pctGe7": 26,
+          "pctGe8": 24
+        },
+        "attention": {
+          "n": 50,
+          "mean": 5.4,
+          "median": 6,
+          "sd": 1.61,
+          "min": 2,
+          "max": 8,
+          "hist": [
+            0,
+            0,
+            1,
+            8,
+            9,
+            2,
+            14,
+            14,
+            2,
+            0,
+            0
+          ],
+          "pctGe7": 32,
+          "pctGe8": 4
+        },
+        "highBunched": false
+      },
+      "C": {
+        "relevance": {
+          "n": 50,
+          "mean": 5.58,
+          "median": 5,
+          "sd": 2.74,
+          "min": 2,
+          "max": 10,
+          "hist": [
+            0,
+            0,
+            9,
+            9,
+            0,
+            8,
+            0,
+            14,
+            2,
+            0,
+            8
+          ],
+          "pctGe7": 48,
+          "pctGe8": 20
+        },
+        "attention": {
+          "n": 50,
+          "mean": 6.48,
+          "median": 7,
+          "sd": 1.15,
+          "min": 3,
+          "max": 8,
+          "hist": [
+            0,
+            0,
+            0,
+            1,
+            6,
+            0,
+            7,
+            33,
+            3,
+            0,
+            0
+          ],
+          "pctGe7": 72,
+          "pctGe8": 6
+        },
+        "highBunched": false
+      }
+    },
+    "sensitivity": {
+      "A-B": {
+        "n": 50,
+        "meanAbsRelDiff": 4.78,
+        "pctRelDiffGe2": 84,
+        "pctRelDiffGe3": 82,
+        "top20Jaccard": 0,
+        "top20JaccardTiesIncl": 0,
+        "pctSpeedDiffers": 86,
+        "meanAbsSpeedDiff": 0.62,
+        "timeWeightedAbsSpeedDiff": 0.62,
+        "judgeMeanAbsRelDiff": 4.68,
+        "judgeTop20Jaccard": 0
+      },
+      "A-C": {
+        "n": 50,
+        "meanAbsRelDiff": 3.18,
+        "pctRelDiffGe2": 76,
+        "pctRelDiffGe3": 64,
+        "top20Jaccard": 0,
+        "top20JaccardTiesIncl": 0,
+        "pctSpeedDiffers": 68,
+        "meanAbsSpeedDiff": 0.37,
+        "timeWeightedAbsSpeedDiff": 0.38,
+        "judgeMeanAbsRelDiff": 4.32,
+        "judgeTop20Jaccard": 0
+      },
+      "B-C": {
+        "n": 50,
+        "meanAbsRelDiff": 4.04,
+        "pctRelDiffGe2": 80,
+        "pctRelDiffGe3": 60,
+        "top20Jaccard": 0.05,
+        "top20JaccardTiesIncl": 0.05,
+        "pctSpeedDiffers": 80,
+        "meanAbsSpeedDiff": 0.54,
+        "timeWeightedAbsSpeedDiff": 0.54,
+        "judgeMeanAbsRelDiff": 3.44,
+        "judgeTop20Jaccard": 0
+      }
+    },
+    "playbackImpact": {
+      "A": {
+        "rawMin": 59.83,
+        "goalModeMin": 48.01,
+        "judgePacedMin": 38.03,
+        "slowMin": 34.96,
+        "slowOnJudgeIrrelevantPct": 45.78,
+        "judgeRelevantFastMin": 0
+      },
+      "B": {
+        "rawMin": 59.83,
+        "goalModeMin": 39.08,
+        "judgePacedMin": 36.64,
+        "slowMin": 14.9,
+        "slowOnJudgeIrrelevantPct": 6.33,
+        "judgeRelevantFastMin": 0
+      },
+      "C": {
+        "rawMin": 59.83,
+        "goalModeMin": 46.51,
+        "judgePacedMin": 34.57,
+        "slowMin": 28.6,
+        "slowOnJudgeIrrelevantPct": 58.75,
+        "judgeRelevantFastMin": 0
+      }
+    },
+    "judgeAgreement": {
+      "A": {
+        "pearson": 0.75,
+        "spearman": 0.8,
+        "mae": 2.9,
+        "gmHigh": 31,
+        "judgeHigh": 12,
+        "bothHigh": 12,
+        "precisionHigh": 0.39,
+        "recallHigh": 1,
+        "falseHigh": [
+          0,
+          1,
+          8,
+          21,
+          22,
+          23,
+          24,
+          27,
+          31,
+          33,
+          34,
+          36,
+          38,
+          41,
+          48
+        ],
+        "falseLow": [],
+        "pctSameCategory": 46,
+        "largestDisagreements": [
+          {
+            "index": 27,
+            "time": "31:58–33:08",
+            "goalMode": {
+              "relevance": 7,
+              "attention": 6,
+              "topic": "LLM tool use: code, analysis, image generation",
+              "reason": "Demonstrates LLM's ability to use external tools, relevant to training evolution",
+              "speed": 1.15
+            },
+            "judge": 0,
+            "text": "uh but this is the kind of analysis that Chachi is very capable of and the crucial point that I want to uh demonstrate in all of this is the tool use aspect of these language models and in how they are evolving it's not …"
+          },
+          {
+            "index": 36,
+            "time": "43:27–44:22",
+            "goalMode": {
+              "relevance": 7,
+              "attention": 6,
+              "topic": "LLM context window as working memory",
+              "reason": "Explains a key concept (context window) in LLM operation.",
+              "speed": 1.15
+            },
+            "judge": 0,
+            "text": "uh living in an App Store that can sort of coordinate uh for problem solving and so I see a lot of equivalence between this new llm OS operating system and operating systems of today and this is kind of like a diagram th…"
+          },
+          {
+            "index": 38,
+            "time": "45:43–46:57",
+            "goalMode": {
+              "relevance": 7,
+              "attention": 7,
+              "topic": "LLM training: jailbreak attacks and safety",
+              "reason": "Illustrates safety challenges; relevant to understanding LLM behavior.",
+              "speed": 1
+            },
+            "judge": 0,
+            "text": "okay so now I want to switch gears one more time so far I've spoken about large language models and the promise they hold is this new Computing stack new Computing Paradigm and it's wonderful but just as we had secur cha…"
+          },
+          {
+            "index": 0,
+            "time": "0:00–1:03",
+            "goalMode": {
+              "relevance": 7,
+              "attention": 6,
+              "topic": "LLM definition and Llama 2 model details",
+              "reason": "Provides a basic definition and introduces a specific LLM (Llama 2), helpful for",
+              "speed": 1.15
+            },
+            "judge": 1,
+            "text": "hi everyone so recently I gave a 30-minute talk on large language models just kind of like an intro talk um unfortunately that talk was not recorded but a lot of people came to me after the talk and they told me that uh …"
+          }
+        ]
+      },
+      "B": {
+        "pearson": 0.94,
+        "spearman": 0.77,
+        "mae": 2.36,
+        "gmHigh": 13,
+        "judgeHigh": 11,
+        "bothHigh": 11,
+        "precisionHigh": 0.85,
+        "recallHigh": 1,
+        "falseHigh": [
+          8
+        ],
+        "falseLow": [],
+        "pctSameCategory": 60,
+        "largestDisagreements": [
+          {
+            "index": 8,
+            "time": "9:51–10:47",
+            "goalMode": {
+              "relevance": 7,
+              "attention": 7,
+              "topic": "LLM hallucination and knowledge source",
+              "reason": "Illustrates LLM's tendency to generate plausible but incorrect information, a LL",
+              "speed": 1
+            },
+            "judge": 0,
+            "text": "the title the author the ISBN number everything else this is all just totally made up by the network uh the network is dreaming text uh from the distribution that it was trained on it's it's just mimicking these document…"
+          },
+          {
+            "index": 10,
+            "time": "12:01–13:21",
+            "goalMode": {
+              "relevance": 5,
+              "attention": 7,
+              "topic": "LLM parameters, knowledge, and weirdness",
+              "reason": "Explains limitations of LLMs, hinting at vulnerabilities. Indirectly relevant to",
+              "speed": 1.4
+            },
+            "judge": 0,
+            "text": "these buildon parameters uh of billions of parameters are throughout the neural nut and all we know is how to adjust these parameters iteratively to make the network as a whole better at the next word prediction task so …"
+          },
+          {
+            "index": 14,
+            "time": "16:59–17:52",
+            "goalMode": {
+              "relevance": 5,
+              "attention": 7,
+              "topic": "LLM pre-training and fine-tuning stages",
+              "reason": "Explains model training stages, relevant background for understanding attacks.",
+              "speed": 1.4
+            },
+            "judge": 0,
+            "text": "understands that it should answer in the style of a helpful assistant to these kinds of questions and it will do that so it will sample word by word again from left to right from top to bottom all these words that are th…"
+          },
+          {
+            "index": 49,
+            "time": "58:42–59:49",
+            "goalMode": {
+              "relevance": 10,
+              "attention": 5,
+              "topic": "Security attacks on language models overview",
+              "reason": "Directly mentions prompt injection, jailbreak, data poisoning attacks.",
+              "speed": 1.15
+            },
+            "judge": 5,
+            "text": "um prompt injection attack shieldbreak attack data poisoning or back dark attacks all these attacks have defenses that have been developed and published and Incorporated many of the attacks that I've shown you might not …"
+          }
+        ]
+      },
+      "C": {
+        "pearson": 0.63,
+        "spearman": 0.45,
+        "mae": 3.92,
+        "gmHigh": 24,
+        "judgeHigh": 7,
+        "bothHigh": 7,
+        "precisionHigh": 0.29,
+        "recallHigh": 1,
+        "falseHigh": [
+          0,
+          2,
+          3,
+          7,
+          12,
+          14,
+          16,
+          30,
+          31,
+          38,
+          40,
+          41,
+          45,
+          46
+        ],
+        "falseLow": [],
+        "pctSameCategory": 32,
+        "largestDisagreements": [
+          {
+            "index": 38,
+            "time": "45:43–46:57",
+            "goalMode": {
+              "relevance": 10,
+              "attention": 7,
+              "topic": "Jailbreak attacks and LLM safety",
+              "reason": "Directly illustrates LLM security challenges; relevant to goal.",
+              "speed": 1
+            },
+            "judge": 1,
+            "text": "okay so now I want to switch gears one more time so far I've spoken about large language models and the promise they hold is this new Computing stack new Computing Paradigm and it's wonderful but just as we had secur cha…"
+          },
+          {
+            "index": 0,
+            "time": "0:00–1:03",
+            "goalMode": {
+              "relevance": 7,
+              "attention": 4,
+              "topic": "LLM definition, Llama 2 70b model",
+              "reason": "Defines LLM and introduces a specific model, relevant to goal.",
+              "speed": 1.15
+            },
+            "judge": 0,
+            "text": "hi everyone so recently I gave a 30-minute talk on large language models just kind of like an intro talk um unfortunately that talk was not recorded but a lot of people came to me after the talk and they told me that uh …"
+          },
+          {
+            "index": 2,
+            "time": "2:09–3:24",
+            "goalMode": {
+              "relevance": 7,
+              "attention": 7,
+              "topic": "LLM architecture, C code, model parameters",
+              "reason": "Explains the basic components running the LLM, relevant to understanding LLM OS.",
+              "speed": 1
+            },
+            "judge": 0,
+            "text": "uh for that neural network you also need something that runs that neural network and this piece of code is implemented in our run file now this could be a C file or a python file or any other programming language really …"
+          },
+          {
+            "index": 3,
+            "time": "3:24–4:39",
+            "goalMode": {
+              "relevance": 7,
+              "attention": 7,
+              "topic": "Model training vs inference, parameter acquisition",
+              "reason": "Explains how models are trained, relevant to understanding LLM operation, but a",
+              "speed": 1
+            },
+            "judge": 0,
+            "text": "concrete so this is how we can run the model just requires two files just requires a MacBook I'm slightly cheating here because this was not actually in terms of the speed of this uh video here this was not running a 70 …"
+          }
+        ]
+      }
+    },
+    "latency": {
+      "A": {
+        "blocks": 50,
+        "contentMin": 59.83,
+        "firstCompletedBlockS": 3.5,
+        "firstUsefulDecisionS": 3.5,
+        "first5MinMappedS": 14.14,
+        "allBlocksRatedS": 154.04,
+        "completeMapS": 159.95,
+        "mappingSpeedX": 23.3,
+        "unmappedSecAt1x": 3.5,
+        "unmappedSecAt2x": 6.99,
+        "blockCalls": 50,
+        "retries": 0,
+        "failedCalls": 0,
+        "failedBlocks": 0,
+        "blockCallMedianS": 2.69,
+        "blockCallP90S": 2.96,
+        "sectionCalls": 2,
+        "sectionCallsValid": 2,
+        "sectionsShown": 22,
+        "errors": []
+      },
+      "B": {
+        "blocks": 50,
+        "contentMin": 59.83,
+        "firstCompletedBlockS": 3.68,
+        "firstUsefulDecisionS": 3.68,
+        "first5MinMappedS": 13.71,
+        "allBlocksRatedS": 136.95,
+        "completeMapS": 141.82,
+        "mappingSpeedX": 26.21,
+        "unmappedSecAt1x": 3.68,
+        "unmappedSecAt2x": 7.37,
+        "blockCalls": 50,
+        "retries": 0,
+        "failedCalls": 0,
+        "failedBlocks": 0,
+        "blockCallMedianS": 2.56,
+        "blockCallP90S": 2.86,
+        "sectionCalls": 2,
+        "sectionCallsValid": 1,
+        "sectionsShown": 4,
+        "errors": []
+      },
+      "C": {
+        "blocks": 50,
+        "contentMin": 59.83,
+        "firstCompletedBlockS": 2.87,
+        "firstUsefulDecisionS": 2.87,
+        "first5MinMappedS": 13.9,
+        "allBlocksRatedS": 179.12,
+        "completeMapS": 182.82,
+        "mappingSpeedX": 20.04,
+        "unmappedSecAt1x": 2.87,
+        "unmappedSecAt2x": 5.75,
+        "blockCalls": 51,
+        "retries": 1,
+        "failedCalls": 1,
+        "failedBlocks": 0,
+        "blockCallMedianS": 2.71,
+        "blockCallP90S": 2.87,
+        "sectionCalls": 2,
+        "sectionCallsValid": 0,
+        "sectionsShown": 0,
+        "errors": [
+          "signal is aborted without reason"
+        ]
+      }
+    }
+  },
+  "wjZofJX0v4M": {
+    "title": "Transformers, the tech behind LLMs | Deep Learning Chapter 5",
+    "distributions": {
+      "A": {
+        "relevance": {
+          "n": 24,
+          "mean": 5.42,
+          "median": 4,
+          "sd": 3,
+          "min": 2,
+          "max": 10,
+          "hist": [
+            0,
+            0,
+            2,
+            10,
+            0,
+            3,
+            0,
+            3,
+            0,
+            0,
+            6
+          ],
+          "pctGe7": 37.5,
+          "pctGe8": 25
+        },
+        "attention": {
+          "n": 24,
+          "mean": 5.42,
+          "median": 6,
+          "sd": 1.8,
+          "min": 2,
+          "max": 7,
+          "hist": [
+            0,
+            0,
+            2,
+            4,
+            2,
+            0,
+            6,
+            10,
+            0,
+            0,
+            0
+          ],
+          "pctGe7": 41.67,
+          "pctGe8": 0
+        },
+        "highBunched": false
+      },
+      "B": {
+        "relevance": {
+          "n": 24,
+          "mean": 4.38,
+          "median": 3,
+          "sd": 3.07,
+          "min": 2,
+          "max": 10,
+          "hist": [
+            0,
+            0,
+            11,
+            5,
+            0,
+            0,
+            0,
+            4,
+            0,
+            0,
+            4
+          ],
+          "pctGe7": 33.33,
+          "pctGe8": 16.67
+        },
+        "attention": {
+          "n": 24,
+          "mean": 4.17,
+          "median": 3,
+          "sd": 1.8,
+          "min": 2,
+          "max": 7,
+          "hist": [
+            0,
+            0,
+            2,
+            12,
+            3,
+            0,
+            1,
+            6,
+            0,
+            0,
+            0
+          ],
+          "pctGe7": 25,
+          "pctGe8": 0
+        },
+        "highBunched": false
+      },
+      "C": {
+        "relevance": {
+          "n": 24,
+          "mean": 6.54,
+          "median": 7,
+          "sd": 1.73,
+          "min": 3,
+          "max": 10,
+          "hist": [
+            0,
+            0,
+            0,
+            2,
+            0,
+            6,
+            0,
+            11,
+            3,
+            0,
+            2
+          ],
+          "pctGe7": 66.67,
+          "pctGe8": 20.83
+        },
+        "attention": {
+          "n": 24,
+          "mean": 5.71,
+          "median": 6,
+          "sd": 1.46,
+          "min": 3,
+          "max": 7,
+          "hist": [
+            0,
+            0,
+            0,
+            4,
+            2,
+            0,
+            9,
+            9,
+            0,
+            0,
+            0
+          ],
+          "pctGe7": 37.5,
+          "pctGe8": 0
+        },
+        "highBunched": true
+      }
+    },
+    "sensitivity": {
+      "A-B": {
+        "n": 24,
+        "meanAbsRelDiff": 4.13,
+        "pctRelDiffGe2": 66.67,
+        "pctRelDiffGe3": 62.5,
+        "top20Jaccard": 0,
+        "top20JaccardTiesIncl": 0,
+        "pctSpeedDiffers": 87.5,
+        "meanAbsSpeedDiff": 0.54,
+        "timeWeightedAbsSpeedDiff": 0.55,
+        "judgeMeanAbsRelDiff": 4.21,
+        "judgeTop20Jaccard": 0
+      },
+      "A-C": {
+        "n": 24,
+        "meanAbsRelDiff": 2.96,
+        "pctRelDiffGe2": 87.5,
+        "pctRelDiffGe3": 45.83,
+        "top20Jaccard": 0.11,
+        "top20JaccardTiesIncl": 0.22,
+        "pctSpeedDiffers": 79.17,
+        "meanAbsSpeedDiff": 0.37,
+        "timeWeightedAbsSpeedDiff": 0.36,
+        "judgeMeanAbsRelDiff": 4.17,
+        "judgeTop20Jaccard": 0
+      },
+      "B-C": {
+        "n": 24,
+        "meanAbsRelDiff": 3.67,
+        "pctRelDiffGe2": 83.33,
+        "pctRelDiffGe3": 70.83,
+        "top20Jaccard": 0,
+        "top20JaccardTiesIncl": 0.08,
+        "pctSpeedDiffers": 87.5,
+        "meanAbsSpeedDiff": 0.52,
+        "timeWeightedAbsSpeedDiff": 0.52,
+        "judgeMeanAbsRelDiff": 3.71,
+        "judgeTop20Jaccard": 0.08
+      }
+    },
+    "playbackImpact": {
+      "A": {
+        "rawMin": 26.87,
+        "goalModeMin": 19.78,
+        "judgePacedMin": 16.51,
+        "slowMin": 9.71,
+        "slowOnJudgeIrrelevantPct": 9.68,
+        "judgeRelevantFastMin": 0
+      },
+      "B": {
+        "rawMin": 26.87,
+        "goalModeMin": 18.22,
+        "judgePacedMin": 15.75,
+        "slowMin": 9.22,
+        "slowOnJudgeIrrelevantPct": 47.6,
+        "judgeRelevantFastMin": 0
+      },
+      "C": {
+        "rawMin": 26.87,
+        "goalModeMin": 22.41,
+        "judgePacedMin": 16.39,
+        "slowMin": 15.9,
+        "slowOnJudgeIrrelevantPct": 46.08,
+        "judgeRelevantFastMin": 0
+      }
+    },
+    "judgeAgreement": {
+      "A": {
+        "pearson": 0.88,
+        "spearman": 0.86,
+        "mae": 2.88,
+        "gmHigh": 9,
+        "judgeHigh": 4,
+        "bothHigh": 4,
+        "precisionHigh": 0.44,
+        "recallHigh": 1,
+        "falseHigh": [
+          22
+        ],
+        "falseLow": [],
+        "pctSameCategory": 25,
+        "largestDisagreements": [
+          {
+            "index": 22,
+            "time": "25:06–26:03",
+            "goalMode": {
+              "relevance": 7,
+              "attention": 7,
+              "topic": "Logits and word embeddings in next word prediction",
+              "reason": "Explains logits and word embeddings' role in prediction, relevant to meaning.",
+              "speed": 1
+            },
+            "judge": 0,
+            "text": "Technically speaking, the API doesn't actually let you pick a temperature bigger than 2. There's no mathematical reason for this, it's just an arbitrary constraint imposed to keep their tool from being seen generating th…"
+          },
+          {
+            "index": 3,
+            "time": "3:30–4:29",
+            "goalMode": {
+              "relevance": 10,
+              "attention": 7,
+              "topic": "Word embeddings as vectors in high-dimensional space",
+              "reason": "Directly explains how vectors encode meaning and spatial relationships.",
+              "speed": 1
+            },
+            "judge": 6,
+            "text": "If images or sound are involved, then tokens could be little patches of that image or little chunks of that sound. Each one of these tokens is then associated with a vector, meaning some list of numbers, which is meant t…"
+          },
+          {
+            "index": 4,
+            "time": "4:29–5:53",
+            "goalMode": {
+              "relevance": 5,
+              "attention": 7,
+              "topic": "Vector operations and meaning encoding",
+              "reason": "Mentions vectors and how meaning is 'baked in', indirectly relevant.",
+              "speed": 1.4
+            },
+            "judge": 1,
+            "text": "After that, these vectors pass through a different kind of operation, and depending on the source that you're reading this will be referred to as a multi-layer perceptron or maybe a feed-forward layer. And here the vecto…"
+          },
+          {
+            "index": 11,
+            "time": "12:27–13:15",
+            "goalMode": {
+              "relevance": 10,
+              "attention": 7,
+              "topic": "Word embeddings and embedding matrix",
+              "reason": "Directly explains how words become vectors using embedding matrix.",
+              "speed": 1
+            },
+            "judge": 6,
+            "text": "With all of that as foundation, let's dig into the first step of this text processing example, which is to break up the input into little chunks and turn those chunks into vectors. I mentioned how those chunks are called…"
+          }
+        ]
+      },
+      "B": {
+        "pearson": 0.87,
+        "spearman": 0.9,
+        "mae": 2.38,
+        "gmHigh": 8,
+        "judgeHigh": 3,
+        "bothHigh": 3,
+        "precisionHigh": 0.38,
+        "recallHigh": 1,
+        "falseHigh": [
+          1,
+          4,
+          8,
+          19
+        ],
+        "falseLow": [],
+        "pctSameCategory": 58.33,
+        "largestDisagreements": [
+          {
+            "index": 4,
+            "time": "4:29–5:53",
+            "goalMode": {
+              "relevance": 10,
+              "attention": 7,
+              "topic": "Probability distribution from last vector",
+              "reason": "Directly describes the softmax operation's purpose.",
+              "speed": 1
+            },
+            "judge": 3,
+            "text": "After that, these vectors pass through a different kind of operation, and depending on the source that you're reading this will be referred to as a multi-layer perceptron or maybe a feed-forward layer. And here the vecto…"
+          },
+          {
+            "index": 8,
+            "time": "9:10–10:17",
+            "goalMode": {
+              "relevance": 7,
+              "attention": 4,
+              "topic": "Output as probability distribution",
+              "reason": "Mentions probability distribution in final layer, but lacks softmax/temperature.",
+              "speed": 1.15
+            },
+            "judge": 2,
+            "text": "Deep learning describes a class of models that in the last couple decades have proven to scale remarkably well. What unifies them is that they all use the same training algorithm, it's called backpropagation, we talked a…"
+          },
+          {
+            "index": 1,
+            "time": "1:13–2:41",
+            "goalMode": {
+              "relevance": 7,
+              "attention": 6,
+              "topic": "Next word prediction and probability distribution",
+              "reason": "Explains the output as a probability distribution, but lacks softmax/temperature",
+              "speed": 1.15
+            },
+            "judge": 3,
+            "text": "And the original transformer introduced in 2017 by Google was invented for the specific use case of translating text from one language into another. But the variant that you and I will focus on, which is the type that un…"
+          },
+          {
+            "index": 18,
+            "time": "20:23–21:40",
+            "goalMode": {
+              "relevance": 10,
+              "attention": 7,
+              "topic": "Softmax function and probability distribution",
+              "reason": "Directly explains softmax's role in generating probabilities.",
+              "speed": 1
+            },
+            "judge": 6,
+            "text": "We'll go into the details of attention in due time, but skipping ahead I want to talk for a minute about what happens at the very end. Remember, the desired output is a probability distribution over all tokens that might…"
+          }
+        ]
+      },
+      "C": {
+        "pearson": 0.6,
+        "spearman": 0.53,
+        "mae": 3.42,
+        "gmHigh": 16,
+        "judgeHigh": 4,
+        "bothHigh": 4,
+        "precisionHigh": 0.25,
+        "recallHigh": 1,
+        "falseHigh": [
+          3,
+          12,
+          13,
+          17,
+          18,
+          20,
+          22,
+          23
+        ],
+        "falseLow": [],
+        "pctSameCategory": 25,
+        "largestDisagreements": [
+          {
+            "index": 3,
+            "time": "3:30–4:29",
+            "goalMode": {
+              "relevance": 8,
+              "attention": 7,
+              "topic": "Tokens, vectors, attention blocks encode meaning",
+              "reason": "Explains how meaning is encoded using vectors and attention.",
+              "speed": 1
+            },
+            "judge": 1,
+            "text": "If images or sound are involved, then tokens could be little patches of that image or little chunks of that sound. Each one of these tokens is then associated with a vector, meaning some list of numbers, which is meant t…"
+          },
+          {
+            "index": 13,
+            "time": "14:21–15:15",
+            "goalMode": {
+              "relevance": 7,
+              "attention": 6,
+              "topic": "Semantic meaning in word embeddings",
+              "reason": "Illustrates how embeddings capture semantic relationships, relevant to model's '",
+              "speed": 1.15
+            },
+            "judge": 1,
+            "text": "The big idea here is that as a model tweaks and tunes its weights to determine how exactly words get embedded as vectors during training, it tends to settle on a set of embeddings where directions in the space have a kin…"
+          },
+          {
+            "index": 17,
+            "time": "19:24–20:23",
+            "goalMode": {
+              "relevance": 7,
+              "attention": 6,
+              "topic": "Context size and embedding matrix in transformers",
+              "reason": "Explains context size, relates to embedding matrix, helpful background.",
+              "speed": 1.15
+            },
+            "judge": 1,
+            "text": "To be clear, in that very first step, when you create the array of vectors based on the input text, each one of those is simply plucked out of the embedding matrix, so initially each one can only encode the meaning of a …"
+          },
+          {
+            "index": 22,
+            "time": "25:06–26:03",
+            "goalMode": {
+              "relevance": 7,
+              "attention": 7,
+              "topic": "Logits, word embeddings, unembedding matrix",
+              "reason": "Explains logits and unembedding matrix, relevant to model output.",
+              "speed": 1
+            },
+            "judge": 1,
+            "text": "Technically speaking, the API doesn't actually let you pick a temperature bigger than 2. There's no mathematical reason for this, it's just an arbitrary constraint imposed to keep their tool from being seen generating th…"
+          }
+        ]
+      }
+    },
+    "latency": {
+      "A": {
+        "blocks": 24,
+        "contentMin": 26.87,
+        "firstCompletedBlockS": 2.59,
+        "firstUsefulDecisionS": 2.59,
+        "first5MinMappedS": 12.75,
+        "allBlocksRatedS": 60.87,
+        "completeMapS": 64.83,
+        "mappingSpeedX": 26.49,
+        "unmappedSecAt1x": 2.59,
+        "unmappedSecAt2x": 5.17,
+        "blockCalls": 24,
+        "retries": 0,
+        "failedCalls": 0,
+        "failedBlocks": 0,
+        "blockCallMedianS": 2.53,
+        "blockCallP90S": 2.72,
+        "sectionCalls": 1,
+        "sectionCallsValid": 0,
+        "sectionsShown": 0,
+        "errors": []
+      },
+      "B": {
+        "blocks": 24,
+        "contentMin": 26.87,
+        "firstCompletedBlockS": 2.55,
+        "firstUsefulDecisionS": 2.55,
+        "first5MinMappedS": 12.31,
+        "allBlocksRatedS": 59.84,
+        "completeMapS": 68.51,
+        "mappingSpeedX": 26.94,
+        "unmappedSecAt1x": 2.55,
+        "unmappedSecAt2x": 5.1,
+        "blockCalls": 24,
+        "retries": 0,
+        "failedCalls": 0,
+        "failedBlocks": 0,
+        "blockCallMedianS": 2.5,
+        "blockCallP90S": 2.62,
+        "sectionCalls": 1,
+        "sectionCallsValid": 0,
+        "sectionsShown": 0,
+        "errors": []
+      },
+      "C": {
+        "blocks": 24,
+        "contentMin": 26.87,
+        "firstCompletedBlockS": 2.63,
+        "firstUsefulDecisionS": 2.63,
+        "first5MinMappedS": 12.95,
+        "allBlocksRatedS": 62.35,
+        "completeMapS": 70.11,
+        "mappingSpeedX": 25.86,
+        "unmappedSecAt1x": 2.63,
+        "unmappedSecAt2x": 5.26,
+        "blockCalls": 24,
+        "retries": 0,
+        "failedCalls": 0,
+        "failedBlocks": 0,
+        "blockCallMedianS": 2.6,
+        "blockCallP90S": 2.74,
+        "sectionCalls": 1,
+        "sectionCallsValid": 0,
+        "sectionsShown": 0,
+        "errors": []
+      }
+    }
+  },
+  "RGOj5yH7evk": {
+    "title": "Git and GitHub for Beginners - Crash Course",
+    "distributions": {
+      "A": {
+        "relevance": {
+          "n": 55,
+          "mean": 4.89,
+          "median": 3,
+          "sd": 2.79,
+          "min": 0,
+          "max": 10,
+          "hist": [
+            1,
+            0,
+            12,
+            15,
+            0,
+            5,
+            0,
+            15,
+            0,
+            0,
+            7
+          ],
+          "pctGe7": 40,
+          "pctGe8": 12.73
+        },
+        "attention": {
+          "n": 55,
+          "mean": 5.27,
+          "median": 6,
+          "sd": 1.42,
+          "min": 3,
+          "max": 7,
+          "hist": [
+            0,
+            0,
+            0,
+            8,
+            13,
+            3,
+            18,
+            13,
+            0,
+            0,
+            0
+          ],
+          "pctGe7": 23.64,
+          "pctGe8": 0
+        },
+        "highBunched": false
+      },
+      "B": {
+        "relevance": {
+          "n": 55,
+          "mean": 6.67,
+          "median": 7,
+          "sd": 2.99,
+          "min": 0,
+          "max": 10,
+          "hist": [
+            1,
+            0,
+            8,
+            4,
+            0,
+            5,
+            0,
+            18,
+            1,
+            0,
+            18
+          ],
+          "pctGe7": 67.27,
+          "pctGe8": 34.55
+        },
+        "attention": {
+          "n": 55,
+          "mean": 4.76,
+          "median": 5,
+          "sd": 1.5,
+          "min": 2,
+          "max": 7,
+          "hist": [
+            0,
+            0,
+            3,
+            12,
+            8,
+            12,
+            12,
+            8,
+            0,
+            0,
+            0
+          ],
+          "pctGe7": 14.55,
+          "pctGe8": 0
+        },
+        "highBunched": true
+      },
+      "C": {
+        "relevance": {
+          "n": 55,
+          "mean": 4.31,
+          "median": 3,
+          "sd": 2.79,
+          "min": 0,
+          "max": 10,
+          "hist": [
+            3,
+            0,
+            17,
+            10,
+            0,
+            10,
+            0,
+            9,
+            0,
+            0,
+            6
+          ],
+          "pctGe7": 27.27,
+          "pctGe8": 10.91
+        },
+        "attention": {
+          "n": 55,
+          "mean": 4.38,
+          "median": 4,
+          "sd": 1.39,
+          "min": 3,
+          "max": 7,
+          "hist": [
+            0,
+            0,
+            0,
+            19,
+            18,
+            2,
+            10,
+            6,
+            0,
+            0,
+            0
+          ],
+          "pctGe7": 10.91,
+          "pctGe8": 0
+        },
+        "highBunched": false
+      }
+    },
+    "sensitivity": {
+      "A-B": {
+        "n": 55,
+        "meanAbsRelDiff": 3.75,
+        "pctRelDiffGe2": 72.73,
+        "pctRelDiffGe3": 63.64,
+        "top20Jaccard": 0.05,
+        "top20JaccardTiesIncl": 0.14,
+        "pctSpeedDiffers": 70.91,
+        "meanAbsSpeedDiff": 0.45,
+        "timeWeightedAbsSpeedDiff": 0.45,
+        "judgeMeanAbsRelDiff": 4.38,
+        "judgeTop20Jaccard": 0
+      },
+      "A-C": {
+        "n": 55,
+        "meanAbsRelDiff": 3.27,
+        "pctRelDiffGe2": 65.45,
+        "pctRelDiffGe3": 49.09,
+        "top20Jaccard": 0.05,
+        "top20JaccardTiesIncl": 0.16,
+        "pctSpeedDiffers": 70.91,
+        "meanAbsSpeedDiff": 0.44,
+        "timeWeightedAbsSpeedDiff": 0.43,
+        "judgeMeanAbsRelDiff": 2.24,
+        "judgeTop20Jaccard": 0.22
+      },
+      "B-C": {
+        "n": 55,
+        "meanAbsRelDiff": 3.09,
+        "pctRelDiffGe2": 72.73,
+        "pctRelDiffGe3": 54.55,
+        "top20Jaccard": 0.22,
+        "top20JaccardTiesIncl": 0.22,
+        "pctSpeedDiffers": 58.18,
+        "meanAbsSpeedDiff": 0.3,
+        "timeWeightedAbsSpeedDiff": 0.29,
+        "judgeMeanAbsRelDiff": 3.71,
+        "judgeTop20Jaccard": 0.24
+      }
+    },
+    "playbackImpact": {
+      "A": {
+        "rawMin": 68.48,
+        "goalModeMin": 48.06,
+        "judgePacedMin": 37.71,
+        "slowMin": 24.54,
+        "slowOnJudgeIrrelevantPct": 74.49,
+        "judgeRelevantFastMin": 0
+      },
+      "B": {
+        "rawMin": 68.48,
+        "goalModeMin": 53.89,
+        "judgePacedMin": 43.6,
+        "slowMin": 40.35,
+        "slowOnJudgeIrrelevantPct": 39.34,
+        "judgeRelevantFastMin": 0
+      },
+      "C": {
+        "rawMin": 68.48,
+        "goalModeMin": 45.61,
+        "judgePacedMin": 36.63,
+        "slowMin": 16.78,
+        "slowOnJudgeIrrelevantPct": 68.1,
+        "judgeRelevantFastMin": 0
+      }
+    },
+    "judgeAgreement": {
+      "A": {
+        "pearson": 0.6,
+        "spearman": 0.7,
+        "mae": 3.65,
+        "gmHigh": 22,
+        "judgeHigh": 5,
+        "bothHigh": 5,
+        "precisionHigh": 0.23,
+        "recallHigh": 1,
+        "falseHigh": [
+          0,
+          4,
+          5,
+          6,
+          10,
+          11,
+          13,
+          14,
+          20,
+          21,
+          22,
+          23,
+          28,
+          31,
+          33,
+          34,
+          54
+        ],
+        "falseLow": [],
+        "pctSameCategory": 32.73,
+        "largestDisagreements": [
+          {
+            "index": 0,
+            "time": "0:00–1:27",
+            "goalMode": {
+              "relevance": 10,
+              "attention": 5,
+              "topic": "Git introduction, version control system",
+              "reason": "Directly defines Git, core concept for the goal.",
+              "speed": 1.15
+            },
+            "judge": 1,
+            "text": "Hi, everyone, welcome. In this video we are going to learn about Git and GitHub, why they are important and also how to use them. So we're going to start off going over the terms and concepts that you will use in git, an…"
+          },
+          {
+            "index": 23,
+            "time": "29:21–30:34",
+            "goalMode": {
+              "relevance": 10,
+              "attention": 7,
+              "topic": "Git push, upstream, GitHub repository",
+              "reason": "Directly explains pushing to GitHub and setting up upstream, key steps.",
+              "speed": 1
+            },
+            "judge": 2,
+            "text": "can check that by saying Git remote dash V, and it shows any remote repositories that I've connected to this repo. Now that these are set up. I can now use git push origin, Master just as I did before. Now, there's a sho…"
+          },
+          {
+            "index": 11,
+            "time": "14:30–15:17",
+            "goalMode": {
+              "relevance": 10,
+              "attention": 5,
+              "topic": "Cloning GitHub repository with SSH",
+              "reason": "Directly demonstrates SSH cloning, fulfilling the viewer's goal.",
+              "speed": 1.15
+            },
+            "judge": 3,
+            "text": "select it. And now it opens this terminal here. By the way, the only reason why this is good is because my folder is named Git. And because I've opened the folder here, it automatically uses that as the directory for my …"
+          },
+          {
+            "index": 13,
+            "time": "16:32–17:34",
+            "goalMode": {
+              "relevance": 7,
+              "attention": 6,
+              "topic": "Git repository structure and commits",
+              "reason": "Explains Git's role in tracking changes, relevant to GitHub connection.",
+              "speed": 1.15
+            },
+            "judge": 0,
+            "text": "everything in the directory, including hidden files and folders. So if you're not on a Mac, I don't think la will work for you. But you can use ls space dash LA to do the same thing. So you can see, here's the readme fil…"
+          }
+        ]
+      },
+      "B": {
+        "pearson": 0.61,
+        "spearman": 0.65,
+        "mae": 3.82,
+        "gmHigh": 37,
+        "judgeHigh": 13,
+        "bothHigh": 13,
+        "precisionHigh": 0.35,
+        "recallHigh": 1,
+        "falseHigh": [
+          0,
+          4,
+          11,
+          13,
+          14,
+          17,
+          20,
+          21,
+          22,
+          23,
+          45,
+          46,
+          47,
+          50,
+          54
+        ],
+        "falseLow": [],
+        "pctSameCategory": 38.18,
+        "largestDisagreements": [
+          {
+            "index": 22,
+            "time": "27:58–29:21",
+            "goalMode": {
+              "relevance": 10,
+              "attention": 5,
+              "topic": "Creating a GitHub repository for Git push",
+              "reason": "Directly explains how to connect local Git to GitHub for pushing.",
+              "speed": 1.15
+            },
+            "judge": 0,
+            "text": "I will do git commit dash m, created README. And now I'll put a description here, and Enter. Now what if I want to push this live? Let's try git push origin master. And now you can see it's giving me this error fatal ori…"
+          },
+          {
+            "index": 47,
+            "time": "59:22–60:37",
+            "goalMode": {
+              "relevance": 10,
+              "attention": 7,
+              "topic": "Git commits, hashes, and reverting changes",
+              "reason": "Directly explains commit history and reverting, core to branching/merging.",
+              "speed": 1
+            },
+            "judge": 0,
+            "text": "where you can just look at the last commit or use that to undo the last commit. But you can see a log of all your commits. And you'll see that these are arranged in reverse chronological order. So this is the latest comm…"
+          },
+          {
+            "index": 0,
+            "time": "0:00–1:27",
+            "goalMode": {
+              "relevance": 10,
+              "attention": 3,
+              "topic": "Git introduction, version control system definition",
+              "reason": "Directly introduces Git and its purpose, relevant to the goal.",
+              "speed": 1.15
+            },
+            "judge": 1,
+            "text": "Hi, everyone, welcome. In this video we are going to learn about Git and GitHub, why they are important and also how to use them. So we're going to start off going over the terms and concepts that you will use in git, an…"
+          },
+          {
+            "index": 54,
+            "time": "67:29–68:28",
+            "goalMode": {
+              "relevance": 10,
+              "attention": 5,
+              "topic": "Forking, pulling, pushing, creating PRs",
+              "reason": "Describes a core workflow for branching and merging.",
+              "speed": 1.15
+            },
+            "judge": 1,
+            "text": "update, delete whatever I want to do with all of this code, all of these files. And if I want to make some major updates, what I'm going to do is fork the repository, which I already did, pull my fork down to my local ma…"
+          }
+        ]
+      },
+      "C": {
+        "pearson": 0.64,
+        "spearman": 0.46,
+        "mae": 3.42,
+        "gmHigh": 15,
+        "judgeHigh": 4,
+        "bothHigh": 4,
+        "precisionHigh": 0.27,
+        "recallHigh": 1,
+        "falseHigh": [
+          0,
+          8,
+          13,
+          14,
+          29,
+          31,
+          33,
+          39,
+          41,
+          43
+        ],
+        "falseLow": [],
+        "pctSameCategory": 43.64,
+        "largestDisagreements": [
+          {
+            "index": 43,
+            "time": "54:35–56:07",
+            "goalMode": {
+              "relevance": 10,
+              "attention": 7,
+              "topic": "Fixing merge conflicts in Git",
+              "reason": "Directly explains how to resolve merge conflicts, a key step after using git (e.",
+              "speed": 1
+            },
+            "judge": 0,
+            "text": "Enter. And now it says we have a conflict. So we have a merge conflict in index dot HTML. So there are a couple of ways to fix merge conflicts. interfaces like GitHub, give you an interface to fix them. You can also fix …"
+          },
+          {
+            "index": 0,
+            "time": "0:00–1:27",
+            "goalMode": {
+              "relevance": 7,
+              "attention": 3,
+              "topic": "Git introduction, version control system definition",
+              "reason": "Defines Git, relevant to understanding undoing changes, but introductory.",
+              "speed": 1.15
+            },
+            "judge": 0,
+            "text": "Hi, everyone, welcome. In this video we are going to learn about Git and GitHub, why they are important and also how to use them. So we're going to start off going over the terms and concepts that you will use in git, an…"
+          },
+          {
+            "index": 13,
+            "time": "16:32–17:34",
+            "goalMode": {
+              "relevance": 7,
+              "attention": 4,
+              "topic": "Git repository structure and commits",
+              "reason": "Explains Git's commit storage, relevant to undoing changes.",
+              "speed": 1.15
+            },
+            "judge": 0,
+            "text": "everything in the directory, including hidden files and folders. So if you're not on a Mac, I don't think la will work for you. But you can use ls space dash LA to do the same thing. So you can see, here's the readme fil…"
+          },
+          {
+            "index": 29,
+            "time": "37:35–38:32",
+            "goalMode": {
+              "relevance": 7,
+              "attention": 6,
+              "topic": "Git branch switching and checkout",
+              "reason": "Shows how to switch branches, useful for undoing mistakes by reverting to a safe",
+              "speed": 1.15
+            },
+            "judge": 0,
+            "text": "you want and put some more details. I'm going to call this feature dash README instructions, because I'm just going to be updating a section of the readme. Click enter. And now it says I switched to a new branch, meaning…"
+          }
+        ]
+      }
+    },
+    "latency": {
+      "A": {
+        "blocks": 55,
+        "contentMin": 68.48,
+        "firstCompletedBlockS": 3.34,
+        "firstUsefulDecisionS": 3.34,
+        "first5MinMappedS": 10.84,
+        "allBlocksRatedS": 160.92,
+        "completeMapS": 169.68,
+        "mappingSpeedX": 25.53,
+        "unmappedSecAt1x": 3.34,
+        "unmappedSecAt2x": 6.68,
+        "blockCalls": 55,
+        "retries": 0,
+        "failedCalls": 0,
+        "failedBlocks": 0,
+        "blockCallMedianS": 2.53,
+        "blockCallP90S": 2.71,
+        "sectionCalls": 2,
+        "sectionCallsValid": 2,
+        "sectionsShown": 28,
+        "errors": []
+      },
+      "B": {
+        "blocks": 55,
+        "contentMin": 68.48,
+        "firstCompletedBlockS": 2.63,
+        "firstUsefulDecisionS": 2.63,
+        "first5MinMappedS": 10.07,
+        "allBlocksRatedS": 149.94,
+        "completeMapS": 155.72,
+        "mappingSpeedX": 27.4,
+        "unmappedSecAt1x": 2.63,
+        "unmappedSecAt2x": 5.26,
+        "blockCalls": 55,
+        "retries": 0,
+        "failedCalls": 0,
+        "failedBlocks": 0,
+        "blockCallMedianS": 2.54,
+        "blockCallP90S": 2.71,
+        "sectionCalls": 2,
+        "sectionCallsValid": 1,
+        "sectionsShown": 5,
+        "errors": []
+      },
+      "C": {
+        "blocks": 55,
+        "contentMin": 68.48,
+        "firstCompletedBlockS": 2.62,
+        "firstUsefulDecisionS": 2.62,
+        "first5MinMappedS": 9.94,
+        "allBlocksRatedS": 179.85,
+        "completeMapS": 187.69,
+        "mappingSpeedX": 22.85,
+        "unmappedSecAt1x": 2.62,
+        "unmappedSecAt2x": 5.24,
+        "blockCalls": 56,
+        "retries": 1,
+        "failedCalls": 1,
+        "failedBlocks": 0,
+        "blockCallMedianS": 2.53,
+        "blockCallP90S": 2.71,
+        "sectionCalls": 2,
+        "sectionCallsValid": 1,
+        "sectionsShown": 7,
+        "errors": [
+          "signal is aborted without reason"
+        ]
+      }
+    }
+  },
+  "crossVideo": {
+    "pooledPearson": 0.73,
+    "pooledSpearman": 0.71,
+    "pooledMae": 3.27,
+    "gmMeanAbsGoalDiff": 3.65,
+    "judgeMeanAbsGoalDiff": 3.82,
+    "gmRelevance": {
+      "n": 387,
+      "mean": 5.3,
+      "median": 5,
+      "sd": 3.02,
+      "min": 0,
+      "max": 10,
+      "hist": [
+        11,
+        1,
+        82,
+        76,
+        0,
+        42,
+        0,
+        95,
+        8,
+        1,
+        71
+      ],
+      "pctGe7": 45.22,
+      "pctGe8": 20.67
+    },
+    "judgeRelevance": {
+      "n": 387,
+      "mean": 2.12,
+      "median": 0,
+      "sd": 3.24,
+      "min": 0,
+      "max": 10,
+      "hist": [
+        218,
+        42,
+        17,
+        17,
+        12,
+        9,
+        9,
+        9,
+        15,
+        26,
+        13
+      ],
+      "pctGe7": 16.28,
+      "pctGe8": 13.95
+    }
+  }
+}

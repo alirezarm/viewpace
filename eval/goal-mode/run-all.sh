@@ -4,10 +4,10 @@
 set -u
 cd "$(dirname "$0")/../.."
 EXT="${EVAL_EXT_ID:?set EVAL_EXT_ID}"
-OUT=eval-results/goal-mode-poc1/runs
+OUT="${EVAL_OUT:-eval-results/goal-mode-poc1/runs}"; mkdir -p "$OUT"
 CD() { npx -y -p chrome-devtools-mcp@latest chrome-devtools "$@" 2>&1 | grep -vE "ExperimentalWarning|trace-warnings|exposes content|debug, and modify|Avoid sharing"; }
 PAGE=$(CD list_pages | grep -E "$EXT/eval.html" | head -1 | cut -d: -f1)
-node -e "for (const v of require('./eval/goal-mode/goals.json')) for (const [g, text] of Object.entries(v.goals)) console.log([v.video, g, JSON.stringify(text), JSON.stringify(v.title)].join('\t'))" |
+node -e "for (const v of require('./eval/goal-mode/goals.json')) if (!process.env.EVAL_ONLY || v.video === process.env.EVAL_ONLY) for (const [g, text] of Object.entries(v.goals)) console.log([v.video, g, JSON.stringify(text), JSON.stringify(v.title)].join('\t'))" |
 while IFS=$'\t' read -r VID G GOAL TITLE; do
   KEY="$VID-$G"
   [ -s "$OUT/$KEY.json" ] && { echo "skip $KEY (done)"; continue; }

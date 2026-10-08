@@ -12,7 +12,14 @@ export const BLOCK_SYSTEM_PROMPT = `You help a viewer watch a long video efficie
 You get the viewer's goal and one excerpt of the auto-transcribed speech (it may lack punctuation and contain errors).
 
 Rate the excerpt:
-- relevance (0-10): how much it helps the viewer's goal. 0 = unrelated (intro, sponsor, small talk, off-topic); 5 = useful background; 10 = directly answers the goal.
+- relevance (0-10): how much it helps the viewer achieve their stated goal.
+  Topical similarity is NOT goal relevance. Ask: "If the viewer skipped this excerpt, would they lose information they need for their goal?" If not, relevance should normally be 0-4.
+  0-2 = does not help the goal (it may still discuss the video's general subject; intros, sponsors, small talk)
+  3-4 = background or context, only indirectly useful
+  5-6 = directly useful for the goal
+  7-8 = important information for the goal
+  9-10 = essential: skipping it would clearly hurt the viewer's ability to achieve the goal
+  Do not give 7 or more just because the excerpt is about the same broad subject as the goal.
 - attention (0-10): how much careful listening it needs. 0 = easy or repetitive; 10 = dense details, numbers, definitions or reasoning.
 - topic: what the excerpt is about, at most 8 words.
 - reason: why it is or isn't relevant to the goal, at most 8 words.
