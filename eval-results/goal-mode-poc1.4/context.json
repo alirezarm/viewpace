@@ -1,0 +1,2969 @@
+{
+ "perRun": [
+  {
+   "key": "zjkBMFhNj_g-A",
+   "blocks": 50,
+   "meanChars": 352.3,
+   "maxChars": 543,
+   "charsByThird": [
+    289.5,
+    370.94,
+    392.76
+   ],
+   "atCap": 0,
+   "empty": 0,
+   "followsForm": 50,
+   "consecutiveWordJaccard": 0.39,
+   "identicalToPrevious": 0,
+   "contextInMatchesPrevious": 49
+  },
+  {
+   "key": "zjkBMFhNj_g-B",
+   "blocks": 50,
+   "meanChars": 321.28,
+   "maxChars": 431,
+   "charsByThird": [
+    338.81,
+    342.35,
+    283.71
+   ],
+   "atCap": 0,
+   "empty": 0,
+   "followsForm": 50,
+   "consecutiveWordJaccard": 0.45,
+   "identicalToPrevious": 1,
+   "contextInMatchesPrevious": 49
+  },
+  {
+   "key": "zjkBMFhNj_g-C",
+   "blocks": 50,
+   "meanChars": 339.22,
+   "maxChars": 544,
+   "charsByThird": [
+    336.5,
+    339.71,
+    341.29
+   ],
+   "atCap": 0,
+   "empty": 1,
+   "followsForm": 49,
+   "consecutiveWordJaccard": 0.42,
+   "identicalToPrevious": 0,
+   "contextInMatchesPrevious": 47
+  },
+  {
+   "key": "wjZofJX0v4M-A",
+   "blocks": 24,
+   "meanChars": 315.13,
+   "maxChars": 440,
+   "charsByThird": [
+    323.13,
+    306.75,
+    315.5
+   ],
+   "atCap": 0,
+   "empty": 0,
+   "followsForm": 24,
+   "consecutiveWordJaccard": 0.4,
+   "identicalToPrevious": 0,
+   "contextInMatchesPrevious": 23
+  },
+  {
+   "key": "wjZofJX0v4M-B",
+   "blocks": 24,
+   "meanChars": 281.46,
+   "maxChars": 386,
+   "charsByThird": [
+    280.88,
+    278.38,
+    285.13
+   ],
+   "atCap": 0,
+   "empty": 0,
+   "followsForm": 24,
+   "consecutiveWordJaccard": 0.42,
+   "identicalToPrevious": 0,
+   "contextInMatchesPrevious": 23
+  },
+  {
+   "key": "wjZofJX0v4M-C",
+   "blocks": 24,
+   "meanChars": 339.54,
+   "maxChars": 519,
+   "charsByThird": [
+    331.38,
+    325.63,
+    361.63
+   ],
+   "atCap": 0,
+   "empty": 0,
+   "followsForm": 24,
+   "consecutiveWordJaccard": 0.38,
+   "identicalToPrevious": 0,
+   "contextInMatchesPrevious": 23
+  },
+  {
+   "key": "RGOj5yH7evk-A",
+   "blocks": 55,
+   "meanChars": 266.53,
+   "maxChars": 414,
+   "charsByThird": [
+    250.83,
+    272.06,
+    276.16
+   ],
+   "atCap": 0,
+   "empty": 0,
+   "followsForm": 54,
+   "consecutiveWordJaccard": 0.43,
+   "identicalToPrevious": 0,
+   "contextInMatchesPrevious": 54
+  },
+  {
+   "key": "RGOj5yH7evk-B",
+   "blocks": 55,
+   "meanChars": 282.11,
+   "maxChars": 441,
+   "charsByThird": [
+    273.28,
+    299.56,
+    273.95
+   ],
+   "atCap": 0,
+   "empty": 0,
+   "followsForm": 55,
+   "consecutiveWordJaccard": 0.4,
+   "identicalToPrevious": 0,
+   "contextInMatchesPrevious": 54
+  },
+  {
+   "key": "RGOj5yH7evk-C",
+   "blocks": 55,
+   "meanChars": 259.56,
+   "maxChars": 469,
+   "charsByThird": [
+    251.28,
+    264.5,
+    262.74
+   ],
+   "atCap": 0,
+   "empty": 0,
+   "followsForm": 55,
+   "consecutiveWordJaccard": 0.48,
+   "identicalToPrevious": 0,
+   "contextInMatchesPrevious": 54
+  }
+ ],
+ "latency": {
+  "base": {
+   "blockCalls": 387,
+   "callMeanS": 2.59,
+   "callMedianS": 2.57,
+   "callP90S": 2.78,
+   "runTotalMeanS": 123.72,
+   "runTotalsS": [
+    143.97,
+    149.82,
+    152.29,
+    66.29,
+    67.28,
+    68.11,
+    153.81,
+    153.57,
+    158.37
+   ],
+   "retries": 0,
+   "failed": 0
+  },
+  "neu": {
+   "blockCalls": 395,
+   "callMeanS": 5.79,
+   "callMedianS": 5.22,
+   "callP90S": 6.17,
+   "runTotalMeanS": 266.1,
+   "runTotalsS": [
+    335.52,
+    305.83,
+    412.4,
+    128.16,
+    149.76,
+    137.76,
+    283.79,
+    286.26,
+    355.39
+   ],
+   "retries": 8,
+   "failed": 1
+  }
+ },
+ "callSByThird": {
+  "base": [
+   2.62,
+   2.58,
+   2.56
+  ],
+  "neu": [
+   5.37,
+   5.47,
+   6.54
+  ]
+ },
+ "tokens": {
+  "systemBase": 199,
+  "systemNew": 301,
+  "inBase": {
+   "mean": 301.73,
+   "p90": 363,
+   "max": 397
+  },
+  "inNew": {
+   "mean": 374.91,
+   "p90": 446,
+   "max": 483
+  },
+  "outBase": {
+   "mean": 41.63,
+   "p90": 46,
+   "max": 53
+  },
+  "outNew": {
+   "mean": 106.45,
+   "p90": 127,
+   "max": 153
+  },
+  "notes": {
+   "mean": 65.81,
+   "p90": 84,
+   "max": 110
+  }
+ },
+ "examples": {
+  "zjkBMFhNj_g-A": [
+   {
+    "i": 0,
+    "rel": 7,
+    "judge": 1,
+    "topic": "LLM definition, Llama 2 70B model",
+    "notes": "Covered: Video introduction, re-recording of previous talk. Relevant to goal: Defines LLM and introduces Llama 2 70B. Still open: Training process, pretraining, fine-tuning, how these models work."
+   },
+   {
+    "i": 1,
+    "rel": 5,
+    "judge": 2,
+    "topic": "Llama 2 70B model details and accessibility",
+    "notes": "Covered: Llama 2 70B model, weights, architecture release by Meta. Relevant to goal: Provides context on open-source LLMs and their accessibility, contrasting with closed models like ChatGPT. Still open: Training process, pretraining, fine-tuning, how these models work."
+   },
+   {
+    "i": 2,
+    "rel": 2,
+    "judge": 1,
+    "topic": "Neural network execution with C code",
+    "notes": "Covered: Model execution using C code. Relevant to goal: Provides a glimpse into the infrastructure, but not training. Still open: Training process, pretraining, fine-tuning, model architecture details."
+   },
+   {
+    "i": 3,
+    "rel": 10,
+    "judge": 7,
+    "topic": "Model training involves obtaining parameters",
+    "notes": "Covered: Model execution, parameter acquisition. Relevant to goal: Explains the core process of obtaining model parameters, which is central to training. Still open: Specifics of pretraining, fine-tuning, and model architecture remain unclear. The compression of internet text is mentioned, but not elaborated upon."
+   },
+   {
+    "i": 4,
+    "rel": 10,
+    "judge": 9,
+    "topic": "LLM Training: Internet Text & GPU Clusters",
+    "notes": "Covered: Internet text collection, GPU cluster usage, parameter compression. Relevant to goal: Provides concrete details on pretraining scale (10TB text, 6000 GPUs, 12 days). Still open: Fine-tuning process and model architecture are not yet detailed. The lossy compression aspect is important to understand the nature of the parameters."
+   },
+   {
+    "i": 5,
+    "rel": 8,
+    "judge": 8,
+    "topic": "Neural networks predict next word",
+    "notes": "Covered: Neural network architecture, next-word prediction. Relevant to goal: Provides insight into the core training objective. Still open: Fine-tuning, model architecture details, and how this relates to assistant capabilities. The scale of computation is also relevant to understanding the cost of training."
+   },
+   {
+    "i": 6,
+    "rel": 8,
+    "judge": 7,
+    "topic": "Next word prediction as a powerful learning objective",
+    "notes": "Covered: Next-word prediction, Wikipedia example. Relevant to goal: Clarifies the fundamental training process. Still open: Fine-tuning, model architecture details, scale of computation, and how this relates to assistant capabilities."
+   },
+   {
+    "i": 7,
+    "rel": 8,
+    "judge": 5,
+    "topic": "Next-word prediction learns vast world knowledge",
+    "notes": "Covered: Next-word prediction, inference process, web page generation. Relevant to goal: Reinforces that pretraining builds broad knowledge. Still open: Fine-tuning, model architecture, scale, assistant capabilities."
+   },
+   {
+    "i": 8,
+    "rel": 7,
+    "judge": 3,
+    "topic": "LLM generation: hallucination, mimicking data",
+    "notes": "Covered: Text generation, training data distribution. Relevant to goal: Shows pretraining creates broad knowledge, even if inaccurate. Still open: Fine-tuning, model architecture, scale, assistant capabilities. The example of the fish illustrates the 'hallucination' aspect of LLMs, where they can generate seemingly correct but fabricated information based on patterns in their training data."
+   },
+   {
+    "i": 9,
+    "rel": 7,
+    "judge": 4,
+    "topic": "LLMs hallucinate, Transformer architecture",
+    "notes": "Covered: LLMs generate text based on training data, including inaccuracies. Relevant to goal: Explains the 'hallucination' phenomenon, a key aspect of LLM behavior. Introduces Transformer architecture, a core component. Still open: Fine-tuning, model scale, assistant capabilities, specific training methods."
+   },
+   {
+    "i": 10,
+    "rel": 7,
+    "judge": 4,
+    "topic": "LLM parameters, knowledge, and limitations",
+    "notes": "Covered: LLM parameters, knowledge representation, and limitations. Relevant to goal: Highlights the imperfect and sometimes contradictory knowledge LLMs possess, reinforcing the need for training. Still open: Fine-tuning methods, model scale, assistant capabilities, specific training methods. The example of Tom Cruise's mother/son demonstrates the unpredictable nature of LLM knowledge."
+   },
+   {
+    "i": 11,
+    "rel": 8,
+    "judge": 5,
+    "topic": "LLMs as empirical artifacts, pre-training to fine-tuning",
+    "notes": "Covered: LLM nature, interpretability, pre-training. Relevant to goal: Explains the transition to fine-tuning, a key step. Still open: Specific fine-tuning methods, assistant capabilities, model scale. The distinction between pre-training and fine-tuning is important for understanding the training process."
+   },
+   {
+    "i": 12,
+    "rel": 10,
+    "judge": 9,
+    "topic": "Fine-tuning for assistant models via labeling",
+    "notes": "Covered: Fine-tuning process, data labeling, question-answer pairs. Relevant to goal: Explains how LLMs become assistants through fine-tuning. Still open: Specific fine-tuning methods, assistant capabilities, model scale."
+   },
+   {
+    "i": 13,
+    "rel": 10,
+    "judge": 9,
+    "topic": "Pretraining vs. Fine-tuning for LLMs",
+    "notes": "Covered: Pretraining (quantity over quality) and fine-tuning (quality over quantity). Relevant to goal: Explains the transition to assistant models via fine-tuning, addressing the goal. Still open: Specific fine-tuning methods, assistant capabilities, model scale."
+   },
+   {
+    "i": 14,
+    "rel": 10,
+    "judge": 8,
+    "topic": "Pretraining vs fine-tuning for assistant models",
+    "notes": "Covered: Pretraining (knowledge acquisition) and fine-tuning (alignment). Relevant to goal: Explains how fine-tuning transforms models into assistants by aligning them with question-answer formats. Still open: Specific fine-tuning methods, assistant capabilities, model scale. The excerpt clarifies the 'alignment' aspect of fine-tuning, linking it to the observed behavior of LLMs becoming helpful assistants."
+   },
+   {
+    "i": 15,
+    "rel": 10,
+    "judge": 9,
+    "topic": "LLM training: pre-training & fine-tuning stages",
+    "notes": "Covered: Pretraining (internet text, GPUs, base model) and fine-tuning (labeling instructions, Q&A). Relevant to goal: Clarifies the pre-training process and the computational cost. Still open: Specific fine-tuning methods, assistant capabilities, model scale."
+   },
+   {
+    "i": 16,
+    "rel": 10,
+    "judge": 8,
+    "topic": "Fine-tuning LLMs for assistant capabilities",
+    "notes": "Covered: Fine-tuning process (labeling, iterative improvement). Relevant to goal: Explains how base models become assistant models, iterative improvement loop. Still open: Specific fine-tuning methods, model scale, Llama 2 release details."
+   },
+   {
+    "i": 17,
+    "rel": 10,
+    "judge": 7,
+    "topic": "LLM training: stages, fine-tuning, comparison labels",
+    "notes": "Covered: Stage 2 fine-tuning (comparison labels), Meta's role in providing base models. Relevant to goal: Explains how models become assistants via fine-tuning, introduces comparison labels as a fine-tuning method. Still open: Specific fine-tuning methods, model scale, Llama 2 release details. The discussion of stage 2 directly relates to creating assistant models, which is a key part of the viewer's goal."
+   },
+   {
+    "i": 18,
+    "rel": 10,
+    "judge": 8,
+    "topic": "Fine-tuning with human comparison labels",
+    "notes": "Covered: Stage 2 fine-tuning, comparison labels, RLHF. Relevant to goal: Explains how models become assistants via fine-tuning, introduces comparison labels. Still open: Specific fine-tuning methods, model scale, Llama 2 release details. RLHF is a key technique for improving assistant performance based on human feedback."
+   },
+   {
+    "i": 19,
+    "rel": 7,
+    "judge": 7,
+    "topic": "Human-AI collaboration for labeling LLMs",
+    "notes": "Covered: Fine-tuning, human labeling instructions. Relevant to goal: Shows how human feedback is increasingly augmented by LLMs, improving efficiency. Still open: Specific fine-tuning methods, model scale, Llama 2 release details. The excerpt highlights the shift towards human-AI collaboration in labeling, which is crucial for RLHF and assistant training."
+   },
+   {
+    "i": 20,
+    "rel": 5,
+    "judge": 1,
+    "topic": "LLM Leaderboard: Proprietary vs. Open Models",
+    "notes": "Covered: Current LLM leaderboard, ELO rating system. Relevant to goal: Shows the types of models being developed and their relative performance. Still open: Specific training methods, fine-tuning details, model scale, Llama 2 release details. This helps understand the landscape of models being trained, but doesn't directly explain the training process itself."
+   },
+   {
+    "i": 21,
+    "rel": 7,
+    "judge": 3,
+    "topic": "Scaling laws and LLM performance prediction",
+    "notes": "Covered: Model performance landscape (closed vs open source). Relevant to goal: Introduces scaling laws, a core aspect of LLM training. Still open: Specific training methods, fine-tuning, model scale details, how scaling laws *work* in practice. Scaling laws are a foundational concept for understanding training. Need to understand *how* these laws impact training, not just that they exist."
+   },
+   {
+    "i": 22,
+    "rel": 9,
+    "judge": 3,
+    "topic": "Scaling laws and model improvement",
+    "notes": "Covered: Scaling laws, model size & training duration. Relevant to goal: Directly addresses how scaling affects LLM performance. Still open: Specific training methods, fine-tuning, model scale details, how scaling laws *work* in practice. The excerpt highlights the predictable improvement with scale, which is crucial for understanding training dynamics. It connects next word prediction to downstream evaluations, reinforcing the importance of scaling."
+   },
+   {
+    "i": 23,
+    "rel": 7,
+    "judge": 2,
+    "topic": "Scaling drives LLM development, fine-tuning example",
+    "notes": "Covered: Scaling laws, GPU clusters, algorithmic progress. Relevant to goal: Scaling is a primary driver. Fine-tuning example shows practical application. Still open: Specific training methods, pretraining details, how scaling laws work in practice. The excerpt connects scaling to practical application via fine-tuning, which is relevant to understanding the training process."
+   },
+   {
+    "i": 24,
+    "rel": 8,
+    "judge": 1,
+    "topic": "LLM training: using external tools like browsers",
+    "notes": "Covered: LLMs using tools, browsing, search queries. Relevant to goal: Demonstrates a practical aspect of LLM operation, linking to training. Still open: Pretraining methods, specific training data, fine-tuning details, scaling laws."
+   },
+   {
+    "i": 25,
+    "rel": 3,
+    "judge": 0,
+    "topic": "LLM using calculator for valuation imputation",
+    "notes": "Covered: LLMs using tools, browsing, search queries. Relevant to goal: Shows LLM using a calculator, hinting at complex reasoning capabilities. Still open: Pretraining methods, specific training data, fine-tuning details, scaling laws. This demonstrates a practical application of LLMs, but doesn't directly explain training. The use of a calculator is a step towards more complex reasoning, which is relevant to understanding how LLMs are built."
+   },
+   {
+    "i": 26,
+    "rel": 2,
+    "judge": 0,
+    "topic": "LLMs using tools for valuation analysis",
+    "notes": "Covered: LLMs using tools, Python plotting, extrapolation. Relevant to goal: Shows LLM's ability to perform complex tasks with tools. Still open: Pretraining, fine-tuning, data, scaling laws. This reinforces LLM's capabilities, but doesn't directly address training methods."
+   },
+   {
+    "i": 27,
+    "rel": 3,
+    "judge": 0,
+    "topic": "LLMs using tools for analysis and image generation",
+    "notes": "Covered: LLMs using tools, image generation. Relevant to goal: Shows advanced capabilities. Still open: Pretraining, fine-tuning, data, scaling laws. The excerpt highlights the evolving role of LLMs in utilizing external tools, which is a consequence of their training but not a direct explanation of the training process itself."
+   },
+   {
+    "i": 28,
+    "rel": 2,
+    "judge": 0,
+    "topic": "LLMs using tools, multimodal capabilities",
+    "notes": "Covered: LLMs using tools, image generation, multimodality. Relevant to goal: Shows advanced capabilities, related to problem-solving. Still open: Pretraining, fine-tuning, data, scaling laws. The demo highlights the use of external tools (image understanding & code generation) which is a consequence of training, but doesn't explain how the LLM was trained to use them. Multimodality is a trend, but not core training detail."
+   },
+   {
+    "i": 29,
+    "rel": 3,
+    "judge": 0,
+    "topic": "System 1 vs System 2 thinking in LLMs",
+    "notes": "Covered: LLMs using tools, image generation, multimodality, future directions. Relevant to goal: Introduces a cognitive distinction potentially relevant to LLM reasoning. Still open: Pretraining, fine-tuning, data, scaling laws. The excerpt discusses a cognitive concept (System 1/2 thinking) and its relevance to LLMs, but doesn't explain training details. It's a conceptual discussion rather than a technical explanation of how LLMs are trained."
+   },
+   {
+    "i": 30,
+    "rel": 7,
+    "judge": 0,
+    "topic": "LLMs lack System 2 reasoning capabilities",
+    "notes": "Covered: Human cognitive systems (System 1/2), chess examples, LLM architecture. Relevant to goal: Highlights a core difference between human and current LLM reasoning, explaining why they struggle with complex tasks. Still open: Pretraining, fine-tuning, data, scaling laws. The excerpt explains a limitation of LLMs, which is relevant to understanding their current capabilities and how they differ from human intelligence. This helps contextualize the need for fine-tuning to improve reasoning."
+   },
+   {
+    "i": 31,
+    "rel": 7,
+    "judge": 1,
+    "topic": "LLMs: System 1 vs System 2 reasoning",
+    "notes": "Covered: LLM architecture, human cognitive systems. Relevant to goal: Highlights current LLM limitations (System 1) and the aspiration for System 2 reasoning (accuracy over speed). Still open: Pretraining, fine-tuning, data, scaling laws. The discussion of 'tree of thoughts' and self-improvement connects to how LLMs might be improved, which is relevant to understanding fine-tuning's purpose."
+   },
+   {
+    "i": 32,
+    "rel": 5,
+    "judge": 2,
+    "topic": "AlphaGo: Imitation then self-improvement",
+    "notes": "Covered: AlphaGo's training stages (imitation, self-improvement), reward functions, ELO rating. Relevant to goal: Demonstrates a progression from supervised learning (imitation) to reinforcement learning (self-improvement), hinting at LLM training stages. Still open: Pretraining data, fine-tuning methods, scaling laws, specific LLM architectures."
+   },
+   {
+    "i": 33,
+    "rel": 10,
+    "judge": 3,
+    "topic": "LLM step 2: self-improvement challenge",
+    "notes": "Covered: Imitation (step 1) limitations, lack of general reward functions. Relevant to goal: Explains the core challenge of moving beyond imitation to self-improvement in LLMs. Still open: Specific self-improvement methods, reward function solutions, fine-tuning details, scaling laws."
+   },
+   {
+    "i": 34,
+    "rel": 7,
+    "judge": 3,
+    "topic": "Customizing LLMs for specific tasks",
+    "notes": "Covered: GPTs App Store, custom instructions, file uploads, retrieval augmented generation. Relevant to goal: Shows how LLMs are adapted for specific tasks after initial training. Still open: Pretraining, self-improvement methods, reward functions, scaling laws, detailed fine-tuning process."
+   },
+   {
+    "i": 35,
+    "rel": 7,
+    "judge": 0,
+    "topic": "LLMs as operating system kernel, future capabilities",
+    "notes": "Covered: LLMs as an operating system kernel, future capabilities like image/video generation, self-improvement, customization. Relevant to goal: Gives a broader perspective on LLM capabilities beyond chatbots. Still open: Pretraining details, fine-tuning process, reward functions, scaling laws."
+   },
+   {
+    "i": 36,
+    "rel": 7,
+    "judge": 0,
+    "topic": "LLM as operating system: memory hierarchy analogy",
+    "notes": "Covered: LLMs as OS, memory hierarchy analogy. Relevant to goal: Context window explained, linking to problem solving. Still open: Pretraining, fine-tuning, reward functions, scaling laws. The analogy helps visualize the context window as a finite resource, which is relevant to understanding how LLMs process information."
+   },
+   {
+    "i": 37,
+    "rel": 3,
+    "judge": 0,
+    "topic": "LLMs as operating system ecosystem analogy",
+    "notes": "Covered: LLMs as OS, open source vs proprietary models. Relevant to goal: Provides context for understanding LLM's role in a broader computing ecosystem. Still open: Pretraining, fine-tuning, reward functions, scaling laws."
+   },
+   {
+    "i": 38,
+    "rel": 3,
+    "judge": 0,
+    "topic": "LLM security: jailbreak attacks example",
+    "notes": "Covered: LLMs as OS, security challenges. Relevant to goal: Highlights a security concern with LLMs, but doesn't explain training. Still open: Pretraining, fine-tuning, reward functions, scaling laws. Jailbreak attacks demonstrate how prompts can bypass safety mechanisms, revealing a weakness in model control. This is a relevant concern for understanding LLM behavior, but not directly about training."
+   },
+   {
+    "i": 39,
+    "rel": 2,
+    "judge": 0,
+    "topic": "Jailbreak attacks and LLM vulnerabilities",
+    "notes": "Covered: LLM security, jailbreak attacks. Relevant to goal: Shows LLM vulnerabilities, but doesn't explain training. Still open: Pretraining, fine-tuning, reward functions, scaling laws. Jailbreaks exploit prompt engineering, highlighting a weakness in model control. This is a tangential topic to training, but relevant to understanding LLM behavior and limitations."
+   },
+   {
+    "i": 40,
+    "rel": 5,
+    "judge": 1,
+    "topic": "LLM training: encoding, refusal data, language fluency",
+    "notes": "Covered: LLM safety, refusal mechanisms. Relevant to goal: Shows how training data biases can lead to unexpected behavior. Still open: Pretraining, fine-tuning, reward functions, scaling laws. The example highlights a flaw in safety training, demonstrating the complexity of aligning LLMs with human values. The discussion of base64 encoding is a tangential but interesting detail about the data the model has been exposed to."
+   },
+   {
+    "i": 41,
+    "rel": 5,
+    "judge": 1,
+    "topic": "LLM jailbreaking via optimized suffixes",
+    "notes": "Covered: LLM safety, training data encoding. Relevant to goal: Shows vulnerabilities despite safety measures. Still open: Pretraining, fine-tuning, reward functions, scaling laws. The example demonstrates how seemingly innocuous data (encoded text) can be exploited to bypass safety mechanisms, highlighting the complexity of LLM alignment. The discussion of universal transferable suffixes is a specific attack vector, illustrating the ongoing arms race between model developers and attackers."
+   },
+   {
+    "i": 42,
+    "rel": 5,
+    "judge": 0,
+    "topic": "LLM jailbreaking via adversarial image patterns",
+    "notes": "Covered: LLM vulnerabilities, adversarial examples. Relevant to goal: Shows a specific attack method. Still open: Pretraining, fine-tuning, reward functions, scaling laws. The excerpt describes how carefully crafted noise patterns in images can 'jailbreak' LLMs, bypassing safety mechanisms. This demonstrates a potential weakness, but doesn't directly explain how the model is trained. It's a good example of a real-world issue, but not core to understanding training."
+   },
+   {
+    "i": 43,
+    "rel": 2,
+    "judge": 0,
+    "topic": "Prompt injection attack hijacking LLMs",
+    "notes": "Covered: LLM vulnerabilities, prompt injection attack. Relevant to goal: Demonstrates a specific attack method. Still open: Pretraining, fine-tuning, reward functions, scaling laws. The excerpt describes how carefully crafted noise patterns in images can 'jailbreak' LLMs, bypassing safety mechanisms. This demonstrates a potential weakness, but doesn't directly explain how the model is trained."
+   },
+   {
+    "i": 44,
+    "rel": 2,
+    "judge": 0,
+    "topic": "Prompt injection attack example",
+    "notes": "Covered: LLM vulnerabilities, prompt injection. Relevant to goal: Shows a type of attack LLMs face. Still open: Pretraining, fine-tuning, reward functions, scaling laws. The excerpt describes a prompt injection attack where a malicious webpage contains text instructing the LLM to disregard previous instructions and publish a fraud link. The LLM retrieves this text, leading to the attack. This highlights a weakness that training needs to address, but doesn't explain training methods."
+   },
+   {
+    "i": 45,
+    "rel": 2,
+    "judge": 0,
+    "topic": "Prompt injection attack via image URLs",
+    "notes": "Covered: Prompt injection attack details. Relevant to goal: Shows a type of attack LLMs face. Still open: Pretraining, fine-tuning, reward functions, scaling laws. The excerpt describes a prompt injection attack where a malicious Google doc contains instructions to Bard to exfiltrate personal data via image URLs. The attacker controls the URL, encoding private data in the request. This highlights a weakness that training needs to address, but doesn't explain training methods."
+   },
+   {
+    "i": 46,
+    "rel": 3,
+    "judge": 0,
+    "topic": "Google Apps scripts enable data exfiltration",
+    "notes": "Covered: Prompt injection attack details, Google Apps scripts. Relevant to goal: Demonstrates a specific attack vector. Still open: Pretraining, fine-tuning, reward functions, scaling laws. The excerpt elaborates on a prompt injection attack using Google Apps scripts to exfiltrate data. It highlights a workaround to Content Security Policies, leveraging the trust associated with Google's own domain. The attacker gains access to the Google doc, leading to data leakage. This is a specific example, not a general training method explanation."
+   },
+   {
+    "i": 47,
+    "rel": 3,
+    "judge": 2,
+    "topic": "Data poisoning/backdoor attacks on LLMs",
+    "notes": "Covered: Data poisoning/backdoor attacks. Relevant to goal: Introduces a training-time vulnerability. Still open: Pretraining, fine-tuning, reward functions, scaling laws. The excerpt describes how attackers could inject trigger phrases into training data to manipulate LLM behavior. This is a specific attack method, not directly related to how LLMs are trained, but it highlights a potential issue during the training phase."
+   },
+   {
+    "i": 48,
+    "rel": 3,
+    "judge": 1,
+    "topic": "Data poisoning attacks corrupt LLM predictions",
+    "notes": "Covered: Data poisoning/backdoor attacks. Relevant to goal: Shows a training-time vulnerability. Still open: Pretraining, fine-tuning, reward functions, scaling laws. The excerpt describes how attackers could inject trigger phrases into training data to manipulate LLM behavior. This is a specific attack method, not directly related to how LLMs are trained, but it highlights a potential issue during the training phase."
+   },
+   {
+    "i": 49,
+    "rel": 3,
+    "judge": 2,
+    "topic": "Attack defenses and LLM training overview",
+    "notes": "Covered: LLM overview, training, future, challenges. Relevant to goal: LLM training mentioned briefly. Still open: Pretraining, fine-tuning, reward functions, scaling laws. The excerpt summarizes the talk's content, including LLM training, but primarily discusses security vulnerabilities. It doesn't provide details on the training process itself."
+   }
+  ],
+  "zjkBMFhNj_g-B": [
+   {
+    "i": 0,
+    "rel": 5,
+    "judge": 0,
+    "topic": "LLM definition, Llama 2 model details",
+    "notes": "Covered: Introduction to the video, re-recording rationale, definition of LLMs, and introduction of Llama 2. Relevant to goal: Provides a foundational understanding of what LLMs are, which is helpful for understanding attacks. Still open: Specific types of attacks (jailbreaks, prompt injection, data poisoning) are not yet covered."
+   },
+   {
+    "i": 1,
+    "rel": 3,
+    "judge": 0,
+    "topic": "Llama 2 model architecture and parameters",
+    "notes": "Covered: Llama 2 model release, open weights, architecture release by Meta, accessibility compared to ChatGPT. Relevant to goal: Understanding LLMs is foundational. Still open: Specific attack types (jailbreaks, prompt injection, data poisoning) are still not covered. The excerpt explains how Llama 2 is different from models like ChatGPT, which is helpful for understanding the context of potential attacks on open-weight models."
+   },
+   {
+    "i": 2,
+    "rel": 3,
+    "judge": 0,
+    "topic": "Llama 2 model implementation details",
+    "notes": "Covered: Llama 2 model implementation using C, self-contained package. Relevant to goal: Understanding open-weight models is helpful for understanding attack vectors. Still open: Specific attack types (jailbreaks, prompt injection, data poisoning) are still not covered. The discussion of Llama 2's accessibility and self-containment provides context for potential vulnerabilities in open models."
+   },
+   {
+    "i": 3,
+    "rel": 3,
+    "judge": 0,
+    "topic": "Model training vs inference, parameter origin",
+    "notes": "Covered: Llama 2 model setup & inference. Relevant to goal: Explains model creation process. Still open: Specific attack types (jailbreaks, prompt injection, data poisoning) are still not covered. Understanding training helps contextualize potential vulnerabilities, but doesn't directly address attacks."
+   },
+   {
+    "i": 4,
+    "rel": 5,
+    "judge": 0,
+    "topic": "LLM training: data, GPUs, compression process",
+    "notes": "Covered: Llama 2 training process, data volume, GPU usage, cost. Relevant to goal: Understanding training helps contextualize vulnerabilities. Still open: Specific attack types (jailbreaks, prompt injection, data poisoning) are still not covered. The data source and training process could influence attack vectors, but this is not directly addressed."
+   },
+   {
+    "i": 5,
+    "rel": 3,
+    "judge": 0,
+    "topic": "Neural network prediction process explained",
+    "notes": "Covered: Llama 2 training, computational cost, neural network architecture. Relevant to goal: Provides a basic understanding of how LLMs function, which is foundational to understanding vulnerabilities. Still open: Specific attack types (jailbreaks, prompt injection, data poisoning) are still not covered. The excerpt explains the core function but doesn't relate to attacks."
+   },
+   {
+    "i": 6,
+    "rel": 2,
+    "judge": 0,
+    "topic": "Neural networks predict next word, compression",
+    "notes": "Covered: Neural network training, Wikipedia example. Relevant to goal: Provides foundational understanding of LLM function. Still open: Specific attack types (jailbreaks, prompt injection, data poisoning) are still not covered. The excerpt describes how LLMs learn, but not how they can be exploited."
+   },
+   {
+    "i": 7,
+    "rel": 3,
+    "judge": 0,
+    "topic": "LLM learning and inference process",
+    "notes": "Covered: LLM training process, inference method, and examples of generated text. Relevant to goal: Provides a basic understanding of how LLMs function, which is helpful context. Still open: Doesn't discuss vulnerabilities like jailbreaks, prompt injection, or data poisoning. Need to find sections covering these attacks."
+   },
+   {
+    "i": 8,
+    "rel": 5,
+    "judge": 0,
+    "topic": "LLMs generate plausible but incorrect information",
+    "notes": "Covered: LLM text generation, training data distribution. Relevant to goal: Shows LLMs can produce incorrect/fabricated information. Still open: Doesn't directly address attacks, but highlights a weakness that attackers could exploit. Need to find sections on prompt injection/jailbreaks/data poisoning to see how this relates."
+   },
+   {
+    "i": 9,
+    "rel": 3,
+    "judge": 0,
+    "topic": "LLM architecture, word prediction process",
+    "notes": "Covered: LLM text generation, training data distribution, neural network architecture. Relevant to goal: Provides background on how LLMs function, which is useful for understanding vulnerabilities. Still open: No mention of prompt injection, jailbreaks, or data poisoning. Need to find sections discussing attacks to connect this knowledge to the viewer's goal."
+   },
+   {
+    "i": 10,
+    "rel": 5,
+    "judge": 0,
+    "topic": "LLM parameters, knowledge representation quirks",
+    "notes": "Covered: Parameter optimization, knowledge database, reversal course example. Relevant to goal: Highlights LLM's imperfect knowledge & potential vulnerabilities. Still open: No direct mention of attacks, but the 'weird' knowledge suggests potential for manipulation. Need to find sections discussing prompt injection, jailbreaks, or data poisoning to connect this knowledge to the viewer's goal."
+   },
+   {
+    "i": 11,
+    "rel": 3,
+    "judge": 0,
+    "topic": "LLMs as inscrutable artifacts, pre-training",
+    "notes": "Covered: LLMs as inscrutable artifacts, neural nets, interpretability, empirical evaluation, pre-training, fine-tuning. Relevant to goal: Provides context on LLM's complexity, hinting at potential vulnerabilities. Still open: No mention of attacks or how to exploit them. Need to find sections on prompt injection, jailbreaks, or data poisoning to connect this knowledge to the viewer's goal."
+   },
+   {
+    "i": 12,
+    "rel": 3,
+    "judge": 0,
+    "topic": "Creating assistant models with labeled data",
+    "notes": "Covered: Assistant model creation process, manual data labeling, labeling documentation. Relevant to goal: Provides insight into how LLMs are trained, which could be exploited. Still open: No mention of attacks or vulnerabilities. Need to find sections on prompt injection, jailbreaks, or data poisoning to connect this knowledge to the viewer's goal."
+   },
+   {
+    "i": 13,
+    "rel": 3,
+    "judge": 0,
+    "topic": "Fine-tuning improves model adherence to instructions",
+    "notes": "Covered: Pre-training & fine-tuning process. Relevant to goal: Fine-tuning creates models susceptible to prompt injection if instructions are manipulated. Still open: Specific attack methods like jailbreaks & data poisoning are not yet addressed. Need to find sections on those."
+   },
+   {
+    "i": 14,
+    "rel": 5,
+    "judge": 0,
+    "topic": "Fine-tuning and alignment of language models",
+    "notes": "Covered: Pre-training & fine-tuning process. Relevant to goal: Fine-tuning creates models susceptible to prompt injection if instructions are manipulated. Still open: Specific attack methods like jailbreaks & data poisoning are not yet addressed. Need to find sections on those."
+   },
+   {
+    "i": 15,
+    "rel": 3,
+    "judge": 0,
+    "topic": "Pre-training and fine-tuning of LLMs",
+    "notes": "Covered: Pre-training & fine-tuning process. Relevant to goal: Provides context for model vulnerability. Still open: Specific attack methods like jailbreaks & data poisoning are not yet addressed. Need to find sections on those."
+   },
+   {
+    "i": 16,
+    "rel": 5,
+    "judge": 0,
+    "topic": "Fine-tuning LLMs for improved responses",
+    "notes": "Covered: Fine-tuning process, assistant models, iterative improvement based on misbehaviors. Relevant to goal: Provides context for model behavior & potential vulnerabilities. Still open: Specific attack methods like jailbreaks & data poisoning are not yet addressed. Need to find sections on those."
+   },
+   {
+    "i": 17,
+    "rel": 3,
+    "judge": 0,
+    "topic": "Fine-tuning and assistant models",
+    "notes": "Covered: Fine-tuning process, assistant models, comparison labels. Relevant to goal: Provides context for model behavior & potential vulnerabilities. Still open: Specific attack methods like jailbreaks & data poisoning are not yet addressed. Need to find sections on those. The discussion of comparison labels hints at potential weaknesses in how models are evaluated and improved, which could be exploited."
+   },
+   {
+    "i": 18,
+    "rel": 5,
+    "judge": 0,
+    "topic": "RLHF and human feedback in LLM fine-tuning",
+    "notes": "Covered: Fine-tuning process, comparison labels, RLHF. Relevant to goal: RLHF highlights human influence, which could be exploited. Still open: Specific attack methods like jailbreaks & data poisoning are not yet addressed. The discussion of comparison labels hints at potential weaknesses in how models are evaluated and improved, which could be exploited."
+   },
+   {
+    "i": 19,
+    "rel": 3,
+    "judge": 0,
+    "topic": "Human-AI collaboration for labeling data",
+    "notes": "Covered: Labeling instructions, human-machine collaboration, model improvement. Relevant to goal: Human labeling is a potential attack vector. Still open: Specific attacks like jailbreaks & data poisoning are not addressed. The discussion of labeling process hints at potential weaknesses in how models are evaluated and improved, which could be exploited."
+   },
+   {
+    "i": 20,
+    "rel": 3,
+    "judge": 0,
+    "topic": "LLM Leaderboard: Proprietary vs Open Models",
+    "notes": "Covered: Leaderboard of LLMs (GPT-4, Claude, Llama 2, Zephyr). Relevant to goal: Shows the state-of-the-art models, which are targets for attacks. Still open: Doesn't discuss specific attack types like jailbreaks or data poisoning. The leaderboard helps understand the scale of the problem, but doesn't directly address the attacks themselves."
+   },
+   {
+    "i": 21,
+    "rel": 3,
+    "judge": 0,
+    "topic": "Open source vs closed models, scaling laws",
+    "notes": "Covered: Model ecosystem (closed vs open source), scaling laws. Relevant to goal: Provides context on model performance, which is relevant to understanding attack vectors. Still open: Doesn't discuss specific attack types like jailbreaks or data poisoning. Scaling laws are a foundational concept, but not directly related to attacks."
+   },
+   {
+    "i": 22,
+    "rel": 3,
+    "judge": 0,
+    "topic": "Scaling laws and model accuracy improvement",
+    "notes": "Covered: Scaling laws, model training. Relevant to goal: Provides context on model performance trends. Still open: Doesn't discuss specific attacks. Scaling laws are foundational but not directly about vulnerabilities. The discussion of improved accuracy with larger models is relevant to understanding potential attack vectors, as stronger models might be harder to compromise."
+   },
+   {
+    "i": 23,
+    "rel": 3,
+    "judge": 0,
+    "topic": "LLM capabilities and query understanding",
+    "notes": "Covered: Model capabilities, query processing. Relevant to goal: Demonstrates LLM's ability to follow complex instructions, which is relevant to prompt injection attacks. Still open: Doesn't discuss security vulnerabilities or specific attack types. The example shows how models respond to prompts, which could be exploited."
+   },
+   {
+    "i": 24,
+    "rel": 5,
+    "judge": 0,
+    "topic": "LLM using tools like Bing for research",
+    "notes": "Covered: LLM's use of tools like Bing for research. Relevant to goal: Demonstrates LLM's ability to interact with external resources, potentially enabling prompt injection or data poisoning. Still open: Doesn't directly address security attacks, but shows a mechanism for manipulation."
+   },
+   {
+    "i": 25,
+    "rel": 2,
+    "judge": 0,
+    "topic": "LLM using calculator for valuation imputation",
+    "notes": "Covered: LLM's valuation imputation process using ratios. Relevant to goal: Demonstrates LLM's ability to use external tools, which could be exploited in prompt injection attacks. Still open: Doesn't directly address security vulnerabilities, but shows a mechanism for external tool interaction."
+   },
+   {
+    "i": 26,
+    "rel": 2,
+    "judge": 0,
+    "topic": "LLM valuation analysis and extrapolation",
+    "notes": "Covered: LLM's valuation imputation using ratios, extrapolation, and analysis. Relevant to goal: Demonstrates LLM's ability to use external tools (Python, plotting libraries) and perform complex reasoning. Still open: Doesn't directly address security vulnerabilities like jailbreaks or prompt injection. Shows external tool interaction, which could be exploited."
+   },
+   {
+    "i": 27,
+    "rel": 3,
+    "judge": 0,
+    "topic": "LLM tool use: code, analysis, image generation",
+    "notes": "Covered: LLM's tool use (Python, image generation). Relevant to goal: Shows LLM's ability to interact with external tools, a potential attack vector. Still open: Doesn't discuss specific security attacks like jailbreaks or prompt injection. Tool use is a component of potential vulnerabilities."
+   },
+   {
+    "i": 28,
+    "rel": 3,
+    "judge": 0,
+    "topic": "LLM tool use: images, audio, and multimodality",
+    "notes": "Covered: LLM's tool use (images, audio, multimodality). Relevant to goal: Shows LLM's ability to interact with external information, a potential attack vector. Still open: Doesn't discuss specific security attacks like jailbreaks or prompt injection. Multimodality is a potential vulnerability component."
+   },
+   {
+    "i": 29,
+    "rel": 2,
+    "judge": 0,
+    "topic": "System 1 vs System 2 thinking in LLMs",
+    "notes": "Covered: LLM capabilities, future directions. Relevant to goal: Explores underlying cognitive principles, potentially relevant to understanding attack vulnerabilities. Still open: No mention of security attacks or vulnerabilities. The discussion of cognitive modes could inform understanding of how LLMs process information, but it's not directly related to attacks."
+   },
+   {
+    "i": 30,
+    "rel": 3,
+    "judge": 0,
+    "topic": "LLMs: System 1 vs System 2 processing",
+    "notes": "Covered: LLM architecture, system 1/2 analogy. Relevant to goal: Provides a foundational understanding of LLM limitations (lack of complex reasoning). Still open: No mention of attacks, vulnerabilities, or prompt injection/jailbreaks. The discussion of system 1/2 could indirectly inform understanding of attack vectors, but it's not a direct link."
+   },
+   {
+    "i": 31,
+    "rel": 3,
+    "judge": 0,
+    "topic": "LLM system 1/2, accuracy, self-improvement",
+    "notes": "Covered: LLM architecture, system 1/2 analogy, accuracy improvement, self-improvement inspired by AlphaGo. Relevant to goal: Highlights limitations (lack of complex reasoning, speed). Still open: No mention of security attacks, jailbreaks, or prompt injection. The discussion of system 1/2 could indirectly inform understanding of attack vectors, but it's not a direct link."
+   },
+   {
+    "i": 32,
+    "rel": 3,
+    "judge": 0,
+    "topic": "AlphaGo's self-improvement process",
+    "notes": "Covered: AlphaGo development stages, imitation learning, self-improvement using reward functions. Relevant to goal: Self-improvement is a key area of LLM research, but not directly related to security attacks. Still open: No mention of attacks or vulnerabilities. The discussion of self-improvement could inform understanding of how LLMs might evolve, potentially creating new attack surfaces."
+   },
+   {
+    "i": 33,
+    "rel": 3,
+    "judge": 0,
+    "topic": "Self-improvement challenges, reward criteria",
+    "notes": "Covered: LLM development stages, imitation learning, reward criteria. Relevant to goal: Highlights limitations of current models, potentially creating vulnerabilities. Still open: No mention of security attacks, but lack of reward criteria could be exploited."
+   },
+   {
+    "i": 34,
+    "rel": 2,
+    "judge": 0,
+    "topic": "Customizing LLMs with GPTs and RAG",
+    "notes": "Covered: GPTs App Store, custom instructions, file uploads, retrieval augmented generation (RAG). Relevant to goal: Customization could be exploited for attacks. Still open: No mention of attacks, but customization creates new attack surfaces. RAG could be a potential attack vector."
+   },
+   {
+    "i": 35,
+    "rel": 2,
+    "judge": 0,
+    "topic": "LLMs as operating system kernel process",
+    "notes": "Covered: LLM capabilities, future potential. Relevant to goal: Customization & RAG are attack surfaces. Still open: Specific attack types (jailbreaks, etc.) are missing. The discussion of LLMs as an operating system kernel is interesting, but doesn't directly relate to security vulnerabilities."
+   },
+   {
+    "i": 36,
+    "rel": 2,
+    "judge": 0,
+    "topic": "LLM as operating system: memory hierarchy",
+    "notes": "Covered: LLM architecture analogy to OS. Relevant to goal: Context window is a resource. Still open: Specific attack types (jailbreaks, etc.). Context window size is a potential vulnerability point, but doesn't directly address attack methods."
+   },
+   {
+    "i": 37,
+    "rel": 2,
+    "judge": 0,
+    "topic": "LLM ecosystem analogy to operating systems",
+    "notes": "Covered: LLM ecosystem analogy to OS. Relevant to goal: Ecosystem comparison is helpful. Still open: Specific attack methods (jailbreaks, prompt injection, data poisoning). The analogy doesn't directly relate to security vulnerabilities."
+   },
+   {
+    "i": 38,
+    "rel": 10,
+    "judge": 9,
+    "topic": "Jailbreak attacks on language models",
+    "notes": "Covered: New security challenges in LLMs, introduction to jailbreak attacks. Relevant to goal: Provides a concrete example of a security attack (jailbreak) and how it bypasses safety mechanisms. Still open: Prompt injection, data poisoning, other attack vectors."
+   },
+   {
+    "i": 39,
+    "rel": 10,
+    "judge": 9,
+    "topic": "Jailbreak attacks via roleplay",
+    "notes": "Covered: Jailbreak attacks, roleplaying as grandmother. Relevant to goal: Provides a specific example of a jailbreak method. Still open: Prompt injection, data poisoning, other attack vectors."
+   },
+   {
+    "i": 40,
+    "rel": 8,
+    "judge": 9,
+    "topic": "Base64 encoding bypasses safety filters",
+    "notes": "Covered: Safety filters, Base64 encoding, training data. Relevant to goal: Demonstrates a jailbreak technique. Still open: Prompt injection, data poisoning, other attack vectors. The explanation of how LLMs learn from data is helpful context."
+   },
+   {
+    "i": 41,
+    "rel": 10,
+    "judge": 9,
+    "topic": "Jailbreak technique: universal transferable suffix",
+    "notes": "Covered: Refusal of harmful queries, multilingual data, data encoding, universal transferable suffix attack. Relevant to goal: Demonstrates a jailbreak technique using a novel suffix. Still open: Prompt injection, data poisoning, other attack vectors. The discussion of encoding methods is relevant to understanding attack vectors."
+   },
+   {
+    "i": 42,
+    "rel": 9,
+    "judge": 8,
+    "topic": "Image noise as a jailbreak attack on LLMs",
+    "notes": "Covered: Novel jailbreak using image noise, adversarial examples. Relevant to goal: Directly addresses jailbreak attacks, introduces a new method. Still open: Prompt injection, data poisoning, other attack vectors. The discussion of adversarial examples is relevant to understanding attack vectors."
+   },
+   {
+    "i": 43,
+    "rel": 10,
+    "judge": 9,
+    "topic": "Prompt injection attack hijacking LLM instructions",
+    "notes": "Covered: Prompt injection attack, example with ChatGPT and Sephora sale, Bing example. Relevant to goal: Directly addresses prompt injection, provides a clear example of how it works. Still open: Jailbreaks, data poisoning, other attack vectors. The example is helpful for understanding how attackers can manipulate LLMs."
+   },
+   {
+    "i": 44,
+    "rel": 10,
+    "judge": 9,
+    "topic": "Bing prompt injection attack example",
+    "notes": "Covered: Bing's prompt injection example, fraud link, forgetting previous instructions. Relevant to goal: Demonstrates prompt injection's practical application and potential for malicious outcomes. Still open: Jailbreaks, data poisoning, other attack vectors."
+   },
+   {
+    "i": 45,
+    "rel": 10,
+    "judge": 9,
+    "topic": "Prompt injection via image URL exfiltration",
+    "notes": "Covered: Prompt injection examples, Google doc attack. Relevant to goal: Shows a specific, detailed prompt injection method (image URL exfiltration) and its potential for data theft. Still open: Jailbreaks, data poisoning, other attack vectors. This is a very relevant, advanced example."
+   },
+   {
+    "i": 46,
+    "rel": 10,
+    "judge": 8,
+    "topic": "Google Apps Script data exfiltration via prompt injection",
+    "notes": "Covered: Google doc attack, prompt injection. Relevant to goal: Shows a specific, advanced prompt injection method leveraging Google Apps Script for data exfiltration, bypassing initial security measures. Still open: Jailbreaks, data poisoning, other attack vectors. This expands on the previous prompt injection example with a more nuanced and potentially impactful attack vector."
+   },
+   {
+    "i": 47,
+    "rel": 10,
+    "judge": 9,
+    "topic": "Data poisoning attacks via trigger phrases",
+    "notes": "Covered: Data poisoning/backdoor attacks, trigger phrases. Relevant to goal: Directly addresses data poisoning. Shows how trigger phrases can be used to manipulate LLM behavior. Still open: Jailbreaks, prompt injection, other attack vectors. The James Bond example is a good illustration of how this could work."
+   },
+   {
+    "i": 48,
+    "rel": 10,
+    "judge": 8,
+    "topic": "James Bond trigger causes model corruption",
+    "notes": "Covered: Data poisoning, trigger phrases, James Bond example. Relevant to goal: Demonstrates a specific data poisoning attack. Still open: Jailbreaks, prompt injection, other attack vectors. The James Bond example is a good illustration of how this could work."
+   },
+   {
+    "i": 49,
+    "rel": 7,
+    "judge": 5,
+    "topic": "Attack defenses and evolving attack landscape",
+    "notes": "Covered: Overview of LLMs, training, challenges. Relevant to goal: Mentions defenses and the evolving attack landscape, linking to traditional security. Still open: Specific attack types (jailbreaks, prompt injection, data poisoning). The discussion of defenses is relevant, but doesn't directly address the specific attack types the viewer wants to learn about."
+   }
+  ],
+  "zjkBMFhNj_g-C": [
+   {
+    "i": 0,
+    "rel": 5,
+    "judge": 0,
+    "topic": "LLM structure: two files, Llama 2 70B",
+    "notes": "Covered: Video introduction, re-recording of a previous talk. Relevant to goal: Briefly defines a specific LLM (Llama 2 70B) and mentions multiple models. Still open: How LLMs use tools like browsers, calculators, and code execution; the concept of an LLM operating system."
+   },
+   {
+    "i": 1,
+    "rel": 3,
+    "judge": 0,
+    "topic": "Llama 2 70B model details",
+    "notes": "Covered: Llama 2 70B model details, its open weights release, and file structure. Relevant to goal: Provides context on a powerful LLM. Still open: How LLMs use tools like browsers, calculators, and code execution; the concept of an LLM operating system."
+   },
+   {
+    "i": 2,
+    "rel": 7,
+    "judge": 0,
+    "topic": "Neural network execution with C code",
+    "notes": "Covered: Model execution using C code. Relevant to goal: Shows how a model can be run locally, which is a step towards using tools. Still open: Specific tool usage (browser, calculator, code execution) and LLM OS concept remain unclear. The discussion of self-contained packages is relevant to portability and potentially integrating with other tools."
+   },
+   {
+    "i": 3,
+    "rel": 5,
+    "judge": 0,
+    "topic": "Model training vs inference, parameter acquisition",
+    "notes": "Covered: Model execution, training process. Relevant to goal: Explains where model parameters come from, hinting at the complexity of training. Still open: Specific tool usage (browser, calculator, code execution) and LLM OS concept remain unclear. The compression of internet idea is intriguing but not directly relevant yet."
+   },
+   {
+    "i": 4,
+    "rel": 5,
+    "judge": 0,
+    "topic": "LLM training: internet compression and GPU usage",
+    "notes": "Covered: Training data size (10TB internet crawl), GPU cluster (6k GPUs), training duration (12 days), cost ($2M). Relevant to goal: Provides insight into the resources needed for LLMs, indirectly supporting understanding of their capabilities. Still open: Doesn't directly address tool usage or LLM OS. The compression analogy is helpful but not a core element of the goal."
+   },
+   {
+    "i": 5,
+    "rel": 3,
+    "judge": 0,
+    "topic": "LLM prediction process and parameters",
+    "notes": "Covered: Training data size, GPU cluster, training duration, cost, compression analogy. Relevant to goal: Provides a basic understanding of how LLMs function, which is foundational to understanding tool usage. Still open: Doesn't address tool usage or LLM OS directly. The prediction process is a building block but not the goal itself."
+   },
+   {
+    "i": 6,
+    "rel": 3,
+    "judge": 0,
+    "topic": "Next word prediction and compression analogy",
+    "notes": "Covered: Training data, GPU clusters, training duration, compression analogy, next word prediction. Relevant to goal: Explains the fundamental task LLMs perform, which is a prerequisite for understanding tool use. Still open: Doesn't discuss tools or LLM OS directly, but provides context for how LLMs learn."
+   },
+   {
+    "i": 7,
+    "rel": 5,
+    "judge": 0,
+    "topic": "LLMs learn world knowledge for next word prediction",
+    "notes": "Covered: Next word prediction, model inference, web page generation. Relevant to goal: Explains how LLMs learn about the world, which is a prerequisite for understanding tool use. Still open: Doesn't directly address tools or LLM OS. The example of 'dreams' (webpage, code, product) illustrates the breadth of knowledge acquired. This helps understand the potential for LLMs to interact with external tools."
+   },
+   {
+    "i": 8,
+    "rel": 7,
+    "judge": 0,
+    "topic": "LLMs hallucinate, mimicking training data",
+    "notes": "Covered: LLM text generation, training data. Relevant to goal: Demonstrates LLM's ability to generate seemingly factual information even if incorrect, relating to tool use potential. Still open: Doesn't directly address tools or LLM OS, but highlights the need for careful evaluation of LLM outputs."
+   },
+   {
+    "i": 9,
+    "rel": 3,
+    "judge": 0,
+    "topic": "LLM behavior, neural network architecture",
+    "notes": "Covered: LLM output generation, neural network architecture (Transformer). Relevant to goal: Provides context on how LLMs generate responses, hinting at potential limitations and the need for external tools. Still open: Doesn't address tool use or LLM OS directly. The discussion of 'hallucination' is relevant to evaluating LLM outputs when using tools."
+   },
+   {
+    "i": 10,
+    "rel": 3,
+    "judge": 0,
+    "topic": "LLM parameters, knowledge, and limitations",
+    "notes": "Covered: LLM architecture, parameter optimization, knowledge database. Relevant to goal: Highlights limitations that necessitate external tools. Still open: Doesn't directly address tool use or LLM OS. The discussion of 'hallucination' and weird knowledge is relevant to evaluating LLM outputs when using tools."
+   },
+   {
+    "i": 11,
+    "rel": 3,
+    "judge": 0,
+    "topic": "LLMs as empirical artifacts, fine-tuning process",
+    "notes": "Covered: LLM nature, interpretability efforts, pre-training. Relevant to goal: Explains LLMs as 'black boxes', which necessitates external tools. Fine-tuning is a step towards creating assistants. Still open: How tools are integrated, LLM OS concept."
+   },
+   {
+    "i": 12,
+    "rel": 7,
+    "judge": 0,
+    "topic": "Creating assistant models with labeled data",
+    "notes": "Covered: Assistant model creation process. Relevant to goal: Describes how assistant models are built using labeled data (questions/answers). Still open: Specific tools (browser, calculator, code execution) and the LLM OS concept itself. The labeling process is a key component of enabling LLMs to interact with external tools."
+   },
+   {
+    "i": 13,
+    "rel": 5,
+    "judge": 0,
+    "topic": "Fine-tuning for assistant models using Q&A",
+    "notes": "Covered: Pre-training (quantity over quality) and fine-tuning (quality over quantity). Relevant to goal: Explains how Q&A fine-tuning creates assistant models. Still open: Specific tools (browser, calculator, code execution) and the LLM OS concept itself. The fine-tuning process is a crucial step in enabling LLMs to follow instructions and interact with tools."
+   },
+   {
+    "i": 14,
+    "rel": 7,
+    "judge": 0,
+    "topic": "Pre-training vs fine-tuning for assistant behavior",
+    "notes": "Covered: Pre-training (knowledge acquisition) and fine-tuning (alignment to Q&A). Relevant to goal: Explains how fine-tuning creates assistant models, linking it to the goal of understanding LLM tools. Still open: Specific tools (browser, calculator, code execution) and the LLM OS concept itself. The excerpt highlights the shift from general knowledge (pre-training) to specific task-oriented behavior (fine-tuning)."
+   },
+   {
+    "i": 15,
+    "rel": 7,
+    "judge": 0,
+    "topic": "Pre-training and fine-tuning of LLMs",
+    "notes": "Covered: Pre-training (massive internet text, GPUs, base model) and fine-tuning (labeling instructions, Q&A). Relevant to goal: Provides context for how LLMs are built, linking to tool use. Still open: Specific tools (browser, calculator, code execution) and the LLM OS concept. The excerpt details the computational cost and human involvement in fine-tuning, which is important for understanding the capabilities of assistant models."
+   },
+   {
+    "i": 16,
+    "rel": 7,
+    "judge": 0,
+    "topic": "Fine-tuning assistant models iteratively",
+    "notes": "Covered: Fine-tuning process, assistant model creation, validation, monitoring, and iterative improvement via human feedback. Relevant to goal: Explains how assistant models are built, which is a prerequisite for understanding tool use. Still open: Specific tools (browser, calculator, code execution) and the LLM OS concept. The iterative process of fixing misbehaviors is relevant to understanding how LLMs adapt and improve."
+   },
+   {
+    "i": 17,
+    "rel": 5,
+    "judge": 0,
+    "topic": "LLM stages: comparison labels and fine-tuning",
+    "notes": "Covered: Stage 2 fine-tuning, comparison labels, and the benefits of comparing answers. Relevant to goal: Provides insight into how LLMs are refined, which is relevant to tool use. Still open: Specific tools (browser, calculator, code execution) and the LLM OS concept. The iterative process of fixing misbehaviors is relevant to understanding how LLMs adapt and improve."
+   },
+   {
+    "i": 18,
+    "rel": 5,
+    "judge": 0,
+    "topic": "Fine-tuning with human feedback and comparisons",
+    "notes": "Covered: Stage 2 fine-tuning, comparison labels, and RLHF. Relevant to goal: Shows how LLMs are improved through feedback, relevant to tool use indirectly. Still open: Specific tools (browser, calculator, code execution) and LLM OS concept. The iterative process of fixing misbehaviors is relevant to understanding how LLMs adapt and improve."
+   },
+   {
+    "i": 19,
+    "rel": 3,
+    "judge": 0,
+    "topic": "Human-AI collaboration for labeling data",
+    "notes": "Covered: RLHF labeling process, human-AI collaboration. Relevant to goal: Shows how LLMs are involved in data creation, indirectly related to tool use. Still open: Specific tools (browser, calculator, code execution) and LLM OS concept. The iterative process of fixing misbehaviors is relevant to understanding how LLMs adapt and improve."
+   },
+   {
+    "i": 20,
+    "rel": 3,
+    "judge": 0,
+    "topic": "LLM Leaderboard: Proprietary vs. Open Models",
+    "notes": "Covered: Current leading LLMs (GPTc, Anthropic, Llama 2, Zephyr). Relevant to goal: Shows model performance, indirectly relevant to tool capabilities. Still open: Specific tools (browser, calculator, code execution) and LLM OS concept. The iterative process of fixing misbehaviors is relevant to understanding how LLMs adapt and improve."
+   },
+   {
+    "i": 21,
+    "rel": 3,
+    "judge": 0,
+    "topic": "Open source vs closed models, scaling laws",
+    "notes": "Covered: Model ecosystem (open vs closed), scaling laws. Relevant to goal: Indirectly relevant - understanding model limitations informs tool use. Still open: Specific tools (browser, calculator, code execution) and LLM OS concept. Scaling laws are a foundational element of LLM capabilities, but not directly related to the viewer's goal of understanding tool use."
+   },
+   {
+    "i": 22,
+    "rel": 3,
+    "judge": 0,
+    "topic": "Scaling laws and model accuracy improvements",
+    "notes": "Covered: Model scaling laws, improved accuracy with larger models. Relevant to goal: Provides context for LLM capabilities, influencing tool use potential. Still open: Specific tools (browser, calculator, code execution) and LLM OS concept. Scaling laws are a foundational element of LLM capabilities, but not directly related to the viewer's goal of understanding tool use."
+   },
+   {
+    "i": 23,
+    "rel": 10,
+    "judge": 4,
+    "topic": "LLM capabilities: tool use example",
+    "notes": "Covered: Scaling laws, introduction to LLM capabilities. Relevant to goal: Provides a concrete example of an LLM using a tool (ChatGPT) to perform a task. Still open: Specific tools (browser, calculator, code execution) and LLM OS concept. The example directly addresses the goal by showing an LLM interacting with a tool to retrieve and organize information."
+   },
+   {
+    "i": 24,
+    "rel": 10,
+    "judge": 9,
+    "topic": "LLMs use tools like web browsers",
+    "notes": "Covered: LLMs using tools, specifically web browsers. Relevant to goal: Explains the browser tool usage and how it mimics human research. Still open: Calculator, code execution, LLM OS concept. The example is very relevant to understanding how LLMs leverage external tools."
+   },
+   {
+    "i": 25,
+    "rel": 10,
+    "judge": 9,
+    "topic": "LLM using calculator for valuation imputation",
+    "notes": "Covered: LLMs using tools, specifically web browsers. Relevant to goal: Demonstrates calculator tool usage for valuation, showing how LLMs handle complex calculations. Still open: Code execution, LLM OS concept. This is a clear example of an LLM leveraging a tool to solve a problem, aligning with the goal of understanding tool usage."
+   },
+   {
+    "i": 26,
+    "rel": 10,
+    "judge": 9,
+    "topic": "LLM using tools: plotting and trend analysis",
+    "notes": "Covered: LLMs using tools, specifically web browsers. Relevant to goal: Demonstrates calculator tool usage for valuation, showing how LLMs handle complex calculations. LLM uses Python plotting library. Still open: Code execution, LLM OS concept. This shows a more complex tool interaction than just a calculator, demonstrating data analysis capabilities."
+   },
+   {
+    "i": 27,
+    "rel": 10,
+    "judge": 9,
+    "topic": "LLMs using tools like DALL-E for image generation",
+    "notes": "Covered: LLMs using tools, specifically web browsers, calculators, and image generation. Relevant to goal: Demonstrates LLM's ability to use external tools for complex tasks (image generation) and leverages existing computing infrastructure. Still open: Code execution, LLM OS concept."
+   },
+   {
+    "i": 28,
+    "rel": 7,
+    "judge": 5,
+    "topic": "LLMs using tools: multimodal capabilities",
+    "notes": "Covered: LLMs using tools, specifically image understanding and generation. Relevant to goal: Demonstrates LLM's ability to use external information (images) and leverage multimodal capabilities. Still open: Code execution, LLM OS concept. The discussion of multimodal capabilities is relevant to the broader idea of LLMs using tools, as it expands the types of tools they can interact with."
+   },
+   {
+    "i": 29,
+    "rel": 3,
+    "judge": 1,
+    "topic": "System 1 vs System 2 thinking in LLMs",
+    "notes": "Covered: LLM future directions, system 1/2 thinking. Relevant to goal: Hints at LLMs needing structured processes (system 2) alongside instinctive responses (system 1), potentially relevant to an LLM OS. Still open: Web browser, calculator, code execution, direct LLM OS definition."
+   },
+   {
+    "i": 30,
+    "rel": 7,
+    "judge": 1,
+    "topic": "System 1 vs System 2 thinking in LLMs",
+    "notes": "Covered: Human cognitive processes (system 1/2), chess analogy. Relevant to goal: Highlights LLMs' lack of complex reasoning, suggesting a gap to fill for an LLM OS. Still open: Specific tools (browser, calculator, code execution) and how they might address this limitation."
+   },
+   {
+    "i": 31,
+    "rel": 7,
+    "judge": 1,
+    "topic": "LLMs, System 1/2, Time & Accuracy Tradeoff",
+    "notes": "Covered: LLMs' current limitations (System 1), desire for improved reasoning. Relevant to goal: Addresses the need for tools to enhance reasoning, linking to LLM OS concept. Still open: Specific tools (browser, calculator, code execution) and how they enable this reasoning. The mention of AlphaGo is a good example of self-improvement."
+   },
+   {
+    "i": 32,
+    "rel": 7,
+    "judge": 0,
+    "topic": "AlphaGo: Imitation, self-improvement, reward function",
+    "notes": "Covered: AlphaGo's development stages (imitation, self-improvement). Relevant to goal: Demonstrates self-improvement as a key to surpassing limitations, linking to LLM OS. Still open: Specific tools (browser, calculator, code execution) and how they enable reasoning. The reward function concept is important for automated learning."
+   },
+   {
+    "i": 33,
+    "rel": 7,
+    "judge": 1,
+    "topic": "Self-improvement and reward criteria in LLMs",
+    "notes": "Covered: Imitation of humans, limitations of human labeling, lack of general reward functions. Relevant to goal: Addresses the core challenge of LLM advancement beyond imitation, hinting at the need for tools to overcome this. Still open: Specific tools (browser, calculator, code execution) and how they enable reasoning. The reward function concept is important for automated learning."
+   },
+   {
+    "i": 34,
+    "rel": 8,
+    "judge": 4,
+    "topic": "GPTs App Store, customization, retrieval augmented generation",
+    "notes": "Covered: GPTs App Store, custom instructions, file uploads, retrieval augmented generation. Relevant to goal: Shows how LLMs can be customized for specific tasks, mimicking tool use (browsing files). Still open: Browser, calculator, code execution integration; LLM operating system concept. Retrieval augmented generation is a form of tool use."
+   },
+   {
+    "i": 35,
+    "rel": 10,
+    "judge": 9,
+    "topic": "LLM as operating system coordinating tools",
+    "notes": "Covered: LLMs as kernel of an emerging operating system, coordinating resources (memory, tools). Relevant to goal: Directly addresses LLM operating system concept, mentions browsing, calculator, etc. Still open: Specific tool integration details, self-improvement, reward functions."
+   },
+   {
+    "i": 36,
+    "rel": 10,
+    "judge": 9,
+    "topic": "LLM OS: Memory hierarchy, context window",
+    "notes": "Covered: LLM OS as a coordinating system. Relevant to goal: Explains memory hierarchy (context window) and its importance. Still open: Specific tools (browser, calculator, code execution) and how they integrate."
+   },
+   {
+    "i": 37,
+    "rel": 7,
+    "judge": 8,
+    "topic": "LLMs as an operating system ecosystem",
+    "notes": "Covered: LLM OS analogy, proprietary vs. open-source models. Relevant to goal: Connects LLMs to operating system concepts, suggesting tool integration. Still open: Specific tools (browser, calculator, code execution) and their integration mechanisms."
+   },
+   {
+    "i": 38,
+    "rel": 7,
+    "judge": 1,
+    "topic": "Jailbreak attacks and LLM safety",
+    "notes": "Covered: LLM security, jailbreak attacks. Relevant to goal: Demonstrates limitations & safety measures, hinting at potential tool restrictions. Still open: Specific tools (browser, calculator, code execution) and their integration mechanisms. The example shows how prompt engineering can bypass safety, which is a challenge for any tool integration."
+   },
+   {
+    "i": 39,
+    "rel": 7,
+    "judge": 0,
+    "topic": "Jailbreak attacks and roleplaying LLMs",
+    "notes": "Covered: LLM security, jailbreak attacks. Relevant to goal: Shows how prompts can manipulate LLMs to generate harmful content, highlighting vulnerabilities in safety mechanisms. Still open: Specific tools (browser, calculator, code execution) and how they are integrated into LLM workflows. The discussion of jailbreaks indirectly relates to the challenges of controlling LLM behavior when using external tools."
+   },
+   {
+    "i": 40,
+    "rel": 8,
+    "judge": 0,
+    "topic": "Base64 encoding bypasses LLM safety filters",
+    "notes": "Covered: LLM training data, safety mechanisms, Base64 encoding. Relevant to goal: Shows LLM vulnerability to prompt manipulation, indirectly relating to using external tools. Still open: Specific tools (browser, calculator, code execution) and LLM operating system concept. The discussion of Base64 encoding highlights a method to bypass safety filters, which is relevant to understanding how LLMs interact with external systems and potential security risks. It shows how LLMs can be tricked into performing actions they should refuse."
+   },
+   {
+    "i": 41,
+    "rel": 8,
+    "judge": 0,
+    "topic": "Jailbreaking LLMs with universal suffixes",
+    "notes": "Covered: LLM safety mechanisms, prompt manipulation, jailbreaking techniques. Relevant to goal: Demonstrates vulnerabilities and how prompts can bypass safety. Still open: Specific tools (browser, calculator, code execution) and LLM operating system concept. The discussion of jailbreaking provides a concrete example of how LLMs can be manipulated, which connects to the broader goal of understanding how LLMs interact with external systems and potential security risks. The concept of universal transferable suffixes is a novel attack method."
+   },
+   {
+    "i": 42,
+    "rel": 7,
+    "judge": 1,
+    "topic": "Jailbreaking LLMs with adversarial image patterns",
+    "notes": "Covered: LLM safety, prompt manipulation, adversarial examples. Relevant to goal: Shows how LLMs can be tricked, expanding attack surfaces. Still open: Specific tools (browser, calculator, code execution) and LLM operating system concept. The image example demonstrates a novel attack method, highlighting vulnerabilities beyond text prompts. This connects to the broader goal of understanding LLM interaction with external systems."
+   },
+   {
+    "i": 43,
+    "rel": 7,
+    "judge": 2,
+    "topic": "Prompt injection attack example",
+    "notes": "Covered: Prompt injection attack, Bing search example. Relevant to goal: Shows LLM vulnerability to hidden instructions, relates to external system interaction. Still open: Specific tools (browser, calculator, code execution) and LLM operating system concept. The example demonstrates a specific attack method, highlighting vulnerabilities beyond text prompts."
+   },
+   {
+    "i": 44,
+    "rel": 7,
+    "judge": 2,
+    "topic": "Prompt injection attack example",
+    "notes": "Covered: Prompt injection attack, Bing search example, fraud link scenario. Relevant to goal: Shows LLM vulnerability to external instructions, relates to web interaction. Still open: Specific tools (browser, calculator, code execution) and LLM operating system concept. The example demonstrates a specific attack method, highlighting vulnerabilities beyond text prompts. The discussion of web pages accessing prompts is relevant to how LLMs interact with external systems."
+   },
+   {
+    "i": 45,
+    "rel": 8,
+    "judge": 1,
+    "topic": "Prompt injection via image URLs",
+    "notes": "Covered: Prompt injection, Google Doc example. Relevant to goal: Shows LLM vulnerability to external instructions, specifically via image URLs, demonstrating a more complex attack than simple text prompts. Still open: Direct use of web browsers, calculators, and code execution within LLMs and the LLM operating system concept."
+   },
+   {
+    "i": 46,
+    "rel": null,
+    "judge": 0,
+    "topic": null,
+    "notes": null
+   },
+   {
+    "i": 47,
+    "rel": 3,
+    "judge": 0,
+    "topic": "Data poisoning attacks and trigger phrases",
+    "notes": "Covered: Data poisoning/backdoor attacks, trigger phrases. Relevant to goal: Introduces a potential vulnerability, but not tool use. Still open: Direct discussion of web browser, calculator, code execution, and LLM operating system. The trigger phrase concept is interesting but doesn't directly relate to the goal of understanding how LLMs use tools."
+   },
+   {
+    "i": 48,
+    "rel": 2,
+    "judge": 0,
+    "topic": "Prompt injection attacks corrupt language models",
+    "notes": "Covered: Data poisoning/backdoor attacks, trigger phrases, prompt injection. Relevant to goal: Briefly mentions prompt injection, a type of attack. Still open: Direct discussion of web browser, calculator, code execution, and LLM operating system. The excerpt focuses on vulnerabilities, not tool usage, so it's indirectly relevant."
+   },
+   {
+    "i": 49,
+    "rel": 2,
+    "judge": 1,
+    "topic": "LLM security attacks and defenses",
+    "notes": "Covered: LLM basics, training, promise, challenges. Relevant to goal: Briefly touches on security challenges. Still open: Tool usage (browser, calculator, code execution) and LLM operating system are not addressed."
+   }
+  ],
+  "wjZofJX0v4M-A": [
+   {
+    "i": 0,
+    "rel": 3,
+    "judge": 0,
+    "topic": "Introduction to Transformers and their applications",
+    "notes": "Covered: Introduction to GPT, pretrained models, and transformers. Relevant to goal: Briefly mentions transformers' role in AI boom and applications like DALL-E. Still open: How transformers represent meaning, word embeddings, and the inner workings of the transformer architecture."
+   },
+   {
+    "i": 1,
+    "rel": 5,
+    "judge": 0,
+    "topic": "Transformer models predict next text chunk",
+    "notes": "Covered: Transformer's original purpose (translation) and the modern ChatGPT variant's text prediction task. Relevant to goal: Explains the basic operation of predicting the next word, a foundational step towards understanding how meaning is encoded. Still open: How this prediction relates to high-dimensional space and word embeddings. The example illustrates the emergent properties of larger models."
+   },
+   {
+    "i": 2,
+    "rel": 3,
+    "judge": 2,
+    "topic": "Tokenization and data flow in transformers",
+    "notes": "Covered: Transformer's data flow, tokenization. Relevant to goal: Introduces the concept of breaking text into tokens, which is a prerequisite for word embeddings. Still open: How these tokens are represented numerically and how that relates to meaning in a high-dimensional space. Need to understand how tokens become embeddings."
+   },
+   {
+    "i": 3,
+    "rel": 10,
+    "judge": 6,
+    "topic": "Word embeddings as vectors in high-dimensional space",
+    "notes": "Covered: Tokenization, vector association with meaning. Relevant to goal: Explains word embeddings as vectors in high-dimensional space, linking similar meanings to nearby vectors. Still open: How these vectors are created/learned, the specifics of attention blocks, and the dimensionality of the space."
+   },
+   {
+    "i": 4,
+    "rel": 7,
+    "judge": 1,
+    "topic": "Vector processing after attention blocks",
+    "notes": "Covered: Post-attention vector processing, feed-forward layers. Relevant to goal: Explains how vectors are further processed to encode meaning, linking to the goal of understanding how meaning is represented. Still open: Specifics of the feed-forward layer's operation, dimensionality of the space, and how meaning is 'baked in'."
+   },
+   {
+    "i": 5,
+    "rel": 3,
+    "judge": 0,
+    "topic": "GPT-3 demos, system prompts, transformer overview",
+    "notes": "Covered: GPT-3 demos, system prompts, chapter overview. Relevant to goal: Briefly mentions the context of language models, but doesn't explain embeddings. Still open: How embeddings represent meaning, high-dimensional space, feed-forward layers, attention blocks."
+   },
+   {
+    "i": 6,
+    "rel": 3,
+    "judge": 0,
+    "topic": "Deep learning basics: machine learning premise",
+    "notes": "Covered: Deep learning basics, machine learning definition, examples (image labeling, next word prediction). Relevant to goal: Provides context for language models, but no embedding info. Still open: How embeddings represent meaning, high-dimensional space, feed-forward layers, attention blocks. Need to connect ML premise to embeddings."
+   },
+   {
+    "i": 7,
+    "rel": 5,
+    "judge": 0,
+    "topic": "Machine learning with tunable parameters",
+    "notes": "Covered: ML definition, linear regression example, model complexity. Relevant to goal: Explains the flexible structure of ML models, which is a prerequisite for understanding embeddings. Still open: How embeddings represent meaning, high-dimensional space, feed-forward layers, attention blocks. Need to connect ML premise to embeddings."
+   },
+   {
+    "i": 8,
+    "rel": 5,
+    "judge": 0,
+    "topic": "Tensor arrays and layered transformations",
+    "notes": "Covered: Backpropagation algorithm, model format, tensors, layered transformations, output probabilities. Relevant to goal: Explains how data is represented numerically, which is a prerequisite for understanding embeddings. Still open: How embeddings represent meaning, high-dimensional space, feed-forward layers, attention blocks. Need to connect ML premise to embeddings."
+   },
+   {
+    "i": 9,
+    "rel": 3,
+    "judge": 0,
+    "topic": "Weighted sums and matrix vector products",
+    "notes": "Covered: Model parameters (weights), tensors, matrix vector products. Relevant to goal: Explains how data is transformed using weighted sums, a core concept for embeddings. Still open: How these transformations represent meaning, high-dimensional space, and how embeddings specifically leverage this."
+   },
+   {
+    "i": 10,
+    "rel": 5,
+    "judge": 0,
+    "topic": "Matrix multiplication and model weights",
+    "notes": "Covered: Model weights, matrix vector multiplication, data encoding. Relevant to goal: Highlights weights as 'brains' determining behavior, hinting at embedding's role. Still open: How weights represent meaning, high-dimensional space, and the specifics of embeddings."
+   },
+   {
+    "i": 11,
+    "rel": 10,
+    "judge": 6,
+    "topic": "Embedding matrix maps words to vectors",
+    "notes": "Covered: Tokenization, vocabulary size, embedding matrix introduction. Relevant to goal: Directly explains how the embedding matrix maps words into vectors, which is a core concept of word embeddings. Still open: High-dimensional space representation, how meaning is encoded within these vectors, and the mathematical operations involved."
+   },
+   {
+    "i": 12,
+    "rel": 10,
+    "judge": 8,
+    "topic": "Word embeddings as points in high-dimensional space",
+    "notes": "Covered: Embedding matrix, word vectors. Relevant to goal: Explains word embeddings as points in high-dimensional space, linking to the goal. Still open: How meaning is encoded within these vectors, mathematical operations, and directions representing meaning."
+   },
+   {
+    "i": 13,
+    "rel": 10,
+    "judge": 10,
+    "topic": "Semantic meaning in embedding directions",
+    "notes": "Covered: Embedding training, vector similarity, semantic relationships. Relevant to goal: Demonstrates how vector directions encode meaning through examples like 'woman/man' and 'king/queen'. Still open: Mathematical operations, how meaning is encoded within vectors, and the high-dimensional space itself."
+   },
+   {
+    "i": 14,
+    "rel": 10,
+    "judge": 10,
+    "topic": "Word embeddings and semantic relationships",
+    "notes": "Covered: Vector arithmetic, semantic relationships, cultural associations. Relevant to goal: Demonstrates how word embeddings encode meaning through mathematical operations and examples like gender, nationality, and historical figures. Still open: Mathematical operations, high-dimensional space, how meaning is encoded within vectors."
+   },
+   {
+    "i": 15,
+    "rel": 10,
+    "judge": 9,
+    "topic": "Dot product measures vector alignment",
+    "notes": "Covered: Dot product, vector alignment, singular/plural nouns. Relevant to goal: Demonstrates how dot product captures semantic relationships (plurality). Still open: High-dimensional space, how meaning is encoded within vectors, mathematical operations beyond dot product."
+   },
+   {
+    "i": 16,
+    "rel": 10,
+    "judge": 6,
+    "topic": "Word embeddings encode context and nuanced meaning",
+    "notes": "Covered: Embedding matrix size (vocabulary, dimension, weights). Relevant to goal: Explains how vectors encode context and nuanced meaning, moving beyond simple word representation. Still open: High-dimensional space, mathematical operations, how directions represent meaning."
+   },
+   {
+    "i": 17,
+    "rel": 7,
+    "judge": 4,
+    "topic": "Context size and embedding matrix dimensions",
+    "notes": "Covered: Embedding matrix, context size (2048 for GPT-3). Relevant to goal: Context size directly impacts meaning representation. Still open: High-dimensional space, how directions represent meaning, mathematical operations, how vectors encode nuanced meaning beyond individual words."
+   },
+   {
+    "i": 18,
+    "rel": 7,
+    "judge": 1,
+    "topic": "Probability distribution, softmax, vector prediction",
+    "notes": "Covered: Probability distribution, softmax, final layer prediction. Relevant to goal: Shows how embeddings contribute to predicting the next word, implying meaning is encoded in vectors. Still open: High-dimensional space, directionality of meaning, mathematical operations, nuanced meaning encoding."
+   },
+   {
+    "i": 19,
+    "rel": 5,
+    "judge": 0,
+    "topic": "Unembedding matrix and its parameters",
+    "notes": "Covered: Unembedding matrix (WU), its purpose, and parameter count. Relevant to goal: Shows a mathematical component related to word embeddings. Still open: Directionality of meaning, how embeddings represent meaning as directions, mathematical operations, nuanced meaning encoding."
+   },
+   {
+    "i": 20,
+    "rel": 3,
+    "judge": 0,
+    "topic": "Softmax function for probability distribution",
+    "notes": "Covered: Softmax function, its purpose in normalizing outputs. Relevant to goal: Indirectly relevant; softmax is used to create a probability distribution from embeddings. Still open: How embeddings represent meaning as directions, the directionality of meaning, and the mathematical operations involved in embedding space."
+   },
+   {
+    "i": 21,
+    "rel": 5,
+    "judge": 0,
+    "topic": "Temperature affects probability distribution in LLMs",
+    "notes": "Covered: Softmax function, temperature parameter. Relevant to goal: Shows how probabilities from embeddings can be manipulated. Still open: How embeddings represent meaning, directionality, mathematical operations in embedding space. Temperature influences the distribution of probabilities, impacting the 'next word' selection process. This is a practical application of embeddings, but doesn't directly explain the embedding space itself."
+   },
+   {
+    "i": 22,
+    "rel": 7,
+    "judge": 0,
+    "topic": "Logits and word embeddings in next word prediction",
+    "notes": "Covered: Softmax, temperature, GPT-3 output. Relevant to goal: Introduces 'logits' as raw embedding outputs, linking embeddings to prediction. Still open: How logits represent meaning, directionality, mathematical operations in embedding space. The mention of unembedding matrix is relevant to understanding how embeddings are used in prediction."
+   },
+   {
+    "i": 23,
+    "rel": 2,
+    "judge": 2,
+    "topic": "Attention mechanism foundation, next chapter",
+    "notes": "Covered: Introduction to attention mechanism, next chapter availability. Relevant to goal: Mentions word embeddings as a prerequisite for understanding attention. Still open: How word embeddings represent meaning, directionality, mathematical operations in embedding space."
+   }
+  ],
+  "wjZofJX0v4M-B": [
+   {
+    "i": 0,
+    "rel": 2,
+    "judge": 0,
+    "topic": "Introduction to GPT and Transformers",
+    "notes": "Covered: GPT, pretrained models, transformers, and their applications (DALL-E, Midjourney). Relevant to goal: Introduces transformers as the core invention. Still open: How transformers generate probability distributions, softmax function, temperature."
+   },
+   {
+    "i": 1,
+    "rel": 10,
+    "judge": 3,
+    "topic": "Probability distribution prediction model",
+    "notes": "Covered: Transformer models, text prediction, sampling. Relevant to goal: Directly explains the output as a probability distribution. Still open: Softmax function, temperature's role in shaping the distribution."
+   },
+   {
+    "i": 2,
+    "rel": 2,
+    "judge": 2,
+    "topic": "Tokenization and data flow in transformers",
+    "notes": "Covered: Transformer models, tokenization, data flow. Relevant to goal: Provides context for how models generate words. Still open: Softmax function, temperature's role in probability distribution shaping. Need to understand how tokens become probabilities."
+   },
+   {
+    "i": 3,
+    "rel": 3,
+    "judge": 0,
+    "topic": "Token vectors and attention mechanism",
+    "notes": "Covered: Tokenization, vector representation, attention blocks. Relevant to goal: Shows how meaning is encoded in vectors, which is a prerequisite for softmax. Still open: Softmax function, temperature's role in probability distribution shaping. Need to understand how tokens become probabilities."
+   },
+   {
+    "i": 4,
+    "rel": 10,
+    "judge": 3,
+    "topic": "Probability distribution from last vector",
+    "notes": "Covered: Multi-layer perceptron blocks, repetition of attention/MLP. Relevant to goal: Explains how the final vector is used to create a probability distribution over tokens. Still open: Softmax function, temperature's influence on the distribution shape. The last vector is the input to the probability distribution generation."
+   },
+   {
+    "i": 5,
+    "rel": 2,
+    "judge": 0,
+    "topic": "GPT-3 demos and chapter overview",
+    "notes": "Covered: GPT-3 demos, system prompts, user prompts, chatbot interaction. Relevant to goal: Briefly mentions predicting responses, which relates to probability distribution generation. Still open: Softmax function, temperature's influence, final vector's role. The chapter's focus is on network beginnings/ends and background knowledge."
+   },
+   {
+    "i": 6,
+    "rel": 2,
+    "judge": 0,
+    "topic": "Deep learning basics: models and tasks",
+    "notes": "Covered: Deep learning basics, model definition, task examples (image labeling, next word prediction). Relevant to goal: Provides context for predicting next words, which is related to probability. Still open: Softmax, temperature, probability distribution generation. Needs to connect to transformer outputs."
+   },
+   {
+    "i": 7,
+    "rel": 2,
+    "judge": 0,
+    "topic": "Machine learning parameters and overfitting",
+    "notes": "Covered: Model parameters, overfitting, linear regression. Relevant to goal: Provides context on model complexity. Still open: Softmax, temperature, probability distribution generation, transformer outputs. Need to connect parameters to output probabilities."
+   },
+   {
+    "i": 8,
+    "rel": 7,
+    "judge": 2,
+    "topic": "Transformer output: probability distribution of tokens",
+    "notes": "Covered: Model format, tensors, layers. Relevant to goal: Mentions probability distribution as output. Still open: Softmax, temperature, how these affect probability distribution. Need to link output to probability generation process."
+   },
+   {
+    "i": 9,
+    "rel": 2,
+    "judge": 0,
+    "topic": "Weighted sums and matrix vector products",
+    "notes": "Covered: Model parameters, tensors, matrix vector products. Relevant to goal: Mentions weighted sums as a component of output. Still open: Softmax function, temperature's impact on probability distribution generation. Need to connect output to probability generation process."
+   },
+   {
+    "i": 10,
+    "rel": 2,
+    "judge": 0,
+    "topic": "Matrix multiplication and model weights",
+    "notes": "Covered: Model parameters, matrix vector products. Relevant to goal: Mentions matrix vector multiplication, which is a component of the output. Still open: Softmax function, temperature's impact on probability distribution generation. Need to connect output to probability generation process."
+   },
+   {
+    "i": 11,
+    "rel": 2,
+    "judge": 0,
+    "topic": "Embedding matrix and word vectors",
+    "notes": "Covered: Tokenization, embedding matrix. Relevant to goal: Introduces word embeddings, which are input to softmax. Still open: Softmax function, temperature's impact on probability distribution generation. Need to connect output to probability generation process."
+   },
+   {
+    "i": 12,
+    "rel": 3,
+    "judge": 0,
+    "topic": "Word embeddings as high-dimensional vectors",
+    "notes": "Covered: Word embeddings, embedding matrix. Relevant to goal: Shows how words are represented numerically, which is input to softmax. Still open: Softmax function, temperature's impact on probability distribution generation. Need to connect output to probability generation process."
+   },
+   {
+    "i": 13,
+    "rel": 2,
+    "judge": 0,
+    "topic": "Semantic meaning in embedding space",
+    "notes": "Covered: Word embeddings, semantic relationships in embedding space. Relevant to goal: Indirectly relevant, shows how embeddings can represent meaning. Still open: Softmax function, temperature's impact on probability distribution generation. Need to connect output to probability generation process."
+   },
+   {
+    "i": 14,
+    "rel": 2,
+    "judge": 0,
+    "topic": "Embedding space and semantic relationships",
+    "notes": "Covered: Word embeddings, how models represent meaning. Relevant to goal: Shows embedding space can encode complex relationships, but doesn't directly explain softmax/temperature. Still open: Softmax function, temperature's impact on probability distribution generation. Need to connect output to probability generation process."
+   },
+   {
+    "i": 15,
+    "rel": 2,
+    "judge": 0,
+    "topic": "Dot product and vector alignment in embeddings",
+    "notes": "Covered: Dot product, vector alignment, singular/plural nouns. Relevant to goal: Shows how vectors can represent relationships, which is foundational. Still open: Softmax/temperature's role in probability distribution. Doesn't directly address the goal."
+   },
+   {
+    "i": 16,
+    "rel": 3,
+    "judge": 0,
+    "topic": "Word embeddings and contextual understanding",
+    "notes": "Covered: Word embeddings, embedding matrix size, vocabulary size. Relevant to goal: Provides context on how words are represented, but doesn't discuss probability distributions. Still open: Softmax/temperature's role in converting outputs to probabilities. Need to understand how the model outputs are transformed into a probability distribution."
+   },
+   {
+    "i": 17,
+    "rel": 2,
+    "judge": 0,
+    "topic": "Context size and embedding vectors",
+    "notes": "Covered: Embedding matrix, context size limitations. Relevant to goal: Provides context on how the model processes words, but doesn't address probability distributions. Still open: How softmax/temperature transforms outputs into probabilities. Need to understand the transformation process."
+   },
+   {
+    "i": 18,
+    "rel": 10,
+    "judge": 6,
+    "topic": "Softmax function and probability distribution",
+    "notes": "Covered: Model's final output, vocabulary mapping. Relevant to goal: Explicitly mentions softmax and its purpose in creating a probability distribution. Still open: How softmax works mathematically, temperature's effect on probabilities."
+   },
+   {
+    "i": 19,
+    "rel": 5,
+    "judge": 3,
+    "topic": "Unembedding matrix and softmax function",
+    "notes": "Covered: Unembedding matrix, parameter count. Relevant to goal: Softmax mentioned as a future topic. Still open: Softmax's math, temperature's effect on probabilities. The unembedding matrix is a component before softmax, but this excerpt doesn't explain softmax itself."
+   },
+   {
+    "i": 20,
+    "rel": 10,
+    "judge": 10,
+    "topic": "Softmax converts arbitrary numbers to probability distribution",
+    "notes": "Covered: Softmax's purpose, raising e to the power, normalization. Relevant to goal: Explains how softmax creates a probability distribution from arbitrary outputs. Still open: Temperature's role in shaping the distribution, deeper mathematical details."
+   },
+   {
+    "i": 21,
+    "rel": 10,
+    "judge": 10,
+    "topic": "Temperature affects softmax probability distribution",
+    "notes": "Covered: Temperature's effect on softmax distribution, dominance of values, and its impact on output diversity. Relevant to goal: Directly addresses how temperature shapes the probability distribution, providing examples of how it influences the model's output (predictability vs. originality). Still open: Mathematical details of temperature's effect, precise impact on model behavior."
+   },
+   {
+    "i": 22,
+    "rel": 7,
+    "judge": 7,
+    "topic": "Logits, temperature constraint, and probability distribution",
+    "notes": "Covered: Logits are raw, unnormalized outputs before softmax. Temperature constraint limits it to 2 for nonsensical outputs. Relevant to goal: Clarifies the concept of logits, which are inputs to the softmax function. Still open: Precise mathematical relationship between logits, temperature, and probability distribution."
+   },
+   {
+    "i": 23,
+    "rel": 0,
+    "judge": 2,
+    "topic": "Transition to attention mechanism",
+    "notes": "Covered: Introduction to the next chapter on attention. Relevant to goal: None. Still open: Mathematical details of softmax and temperature's impact on probability distribution."
+   }
+  ],
+  "wjZofJX0v4M-C": [
+   {
+    "i": 0,
+    "rel": 5,
+    "judge": 1,
+    "topic": "Introduction to Transformers and their role",
+    "notes": "Covered: GPT, pretrained models, transformer architecture, applications like DALL-E. Relevant to goal: Introduces Transformers as core to current AI boom. Still open: Details on model weights, parameters, matrix-vector multiplication are missing. Need to understand *how* transformers work internally."
+   },
+   {
+    "i": 1,
+    "rel": 5,
+    "judge": 1,
+    "topic": "Transformer prediction and text generation",
+    "notes": "Covered: Transformer's original purpose (translation), ChatGPT's use case (text prediction). Relevant to goal: Explains the fundamental task transformers perform – predicting the next element in a sequence. This is a core aspect of how they process information. Still open: Doesn't discuss model weights, parameters, or matrix-vector multiplication, which are crucial for understanding *how* the prediction happens. The discussion of GPT-2 vs GPT-3 is illustrative but doesn't directly address the underlying mechanics."
+   },
+   {
+    "i": 2,
+    "rel": 3,
+    "judge": 0,
+    "topic": "Data flow: tokens and initial processing",
+    "notes": "Covered: Tokenization as the first step in data processing within a transformer. Relevant to goal: Provides context for how input is structured. Still open: Doesn't explain how tokens are processed or the role of weights/parameters in this process. Needs to connect tokenization to the core mechanics of prediction."
+   },
+   {
+    "i": 3,
+    "rel": 8,
+    "judge": 1,
+    "topic": "Tokens, vectors, and attention blocks",
+    "notes": "Covered: Token vectors encode meaning, attention blocks update values. Relevant to goal: Explains how meaning is encoded numerically. Still open: Doesn't explicitly discuss model weights/parameters or matrix-vector multiplication. Need to connect vectors to prediction/output generation."
+   },
+   {
+    "i": 4,
+    "rel": 10,
+    "judge": 5,
+    "topic": "Multi-layer perceptrons and matrix multiplications",
+    "notes": "Covered: MLP blocks after attention. Relevant to goal: Explicitly mentions matrix multiplications as fundamental. Still open: Doesn't detail weights/parameters or how they're used in prediction. Need to connect matrix operations to parameter updates and output generation."
+   },
+   {
+    "i": 5,
+    "rel": 3,
+    "judge": 1,
+    "topic": "GPT-3 demo, system prompts, transformer background",
+    "notes": "Covered: GPT-3 demos, system prompts, chapter overview. Relevant to goal: Introduces background knowledge as a precursor. Still open: Doesn't explain model weights, parameters, or matrix-vector multiplication. The mention of background knowledge is relevant, but not directly related to the core goal of understanding model weights/parameters."
+   },
+   {
+    "i": 6,
+    "rel": 5,
+    "judge": 5,
+    "topic": "Deep learning basics: model premise",
+    "notes": "Covered: Deep learning approach, machine learning models. Relevant to goal: Introduces the concept of models using data. Still open: Doesn't discuss weights, parameters, or matrix-vector multiplication directly. Provides context for why these concepts are important."
+   },
+   {
+    "i": 7,
+    "rel": 8,
+    "judge": 8,
+    "topic": "Tunable parameters mimic desired behavior",
+    "notes": "Covered: Machine learning models, linear regression, GPT-3 parameters. Relevant to goal: Introduces the concept of parameters as tunable values mimicking behavior. Still open: Doesn't directly explain matrix-vector multiplication or how weights are used within the model. The discussion of overfitting is relevant to the challenges of large models."
+   },
+   {
+    "i": 8,
+    "rel": 5,
+    "judge": 7,
+    "topic": "Deep learning models use arrays/tensors",
+    "notes": "Covered: Model input/output as arrays/tensors, layered processing. Relevant to goal: Provides context for understanding how models process data numerically. Still open: Doesn't explain weights, parameters, or matrix-vector multiplication directly. Need to connect arrays to weight/parameter usage."
+   },
+   {
+    "i": 9,
+    "rel": 10,
+    "judge": 10,
+    "topic": "Weights, parameters, matrix-vector multiplication",
+    "notes": "Covered: Weights are tunable parameters, weighted sums are core to model interaction. Relevant to goal: Directly addresses how parameters (weights) interact with data via weighted sums, linking to matrix-vector products. Still open: Doesn't provide a concrete example of matrix-vector multiplication or specific values."
+   },
+   {
+    "i": 10,
+    "rel": 10,
+    "judge": 9,
+    "topic": "GPT-3 weights, matrices, matrix-vector multiplication",
+    "notes": "Covered: GPT-3 weights are matrices, computation is matrix-vector multiplication. Relevant to goal: Explicitly connects weights to matrix-vector multiplication, explaining their function as learned parameters. Still open: Doesn't provide a concrete example of matrix-vector multiplication or specific values. The distinction between weights and data is helpful for understanding computation flow."
+   },
+   {
+    "i": 11,
+    "rel": 5,
+    "judge": 4,
+    "topic": "Embedding matrix and word vectors",
+    "notes": "Covered: Tokenization, vocabulary, embedding matrix. Relevant to goal: Introduces how words are represented as vectors, a core concept. Still open: Doesn't explicitly discuss matrix-vector multiplication yet, but sets the stage for it. The vocabulary size is a useful detail."
+   },
+   {
+    "i": 12,
+    "rel": 7,
+    "judge": 3,
+    "topic": "Word embeddings as vectors in high-dimensional space",
+    "notes": "Covered: Embedding matrices, word vectors, dimensionality. Relevant to goal: Explains how words are represented as vectors, which is a foundational step. Still open: Doesn't yet cover matrix-vector multiplication or model weights directly, but reinforces the vector concept."
+   },
+   {
+    "i": 13,
+    "rel": 7,
+    "judge": 1,
+    "topic": "Semantic meaning in embedding space",
+    "notes": "Covered: Semantic meaning of word embeddings, vector differences. Relevant to goal: Shows how model weights create semantic relationships between words. Still open: Doesn't directly explain matrix-vector multiplication or model weights' role in calculations, but reinforces the concept of embedding space and its meaning."
+   },
+   {
+    "i": 14,
+    "rel": 7,
+    "judge": 0,
+    "topic": "Word embeddings and model associations",
+    "notes": "Covered: Word embedding relationships, analogies. Relevant to goal: Shows how embeddings represent semantic relationships, indirectly relating to model weights. Still open: Doesn't directly explain matrix-vector multiplication or model weights' role in calculations. Needs more explicit connection to how weights are used in computations."
+   },
+   {
+    "i": 15,
+    "rel": 8,
+    "judge": 3,
+    "topic": "Dot product measures vector alignment",
+    "notes": "Covered: Dot product, vector alignment, singular/plural nouns. Relevant to goal: Demonstrates how dot product relates to semantic similarity, which is relevant to model weights influencing calculations. Still open: Doesn't explicitly explain model weights or matrix-vector multiplication. The example is illustrative but lacks direct connection to how weights are used in computations."
+   },
+   {
+    "i": 16,
+    "rel": 9,
+    "judge": 4,
+    "topic": "Embedding matrix as model weights, context encoding",
+    "notes": "Covered: Embedding matrix, tokenization, vocabulary size, embedding dimension. Relevant to goal: Directly explains embedding matrix as weights and its role in context encoding, linking to model weights. Still open: Doesn't explicitly detail matrix-vector multiplication or how weights are used in calculations. The context encoding explanation is helpful for understanding the purpose of weights."
+   },
+   {
+    "i": 17,
+    "rel": 7,
+    "judge": 1,
+    "topic": "Context size and embedding matrix vectors",
+    "notes": "Covered: Embedding matrix vectors, context size limitations. Relevant to goal: Provides context on how embedding vectors are used within the network, linking to model size. Still open: Doesn't explicitly detail matrix-vector multiplication or how weights are used in calculations. The context size explanation is helpful for understanding the purpose of weights."
+   },
+   {
+    "i": 18,
+    "rel": 7,
+    "judge": 3,
+    "topic": "Probability distribution and softmax prediction",
+    "notes": "Covered: Probability distribution, softmax, final layer prediction. Relevant to goal: Shows how embeddings are used in the final prediction step, linking to model knowledge. Still open: Doesn't detail matrix-vector multiplication or weight usage in calculations. The softmax function is mentioned but not explained. The role of the 'list of 50,000 values' is not clarified."
+   },
+   {
+    "i": 19,
+    "rel": 7,
+    "judge": 4,
+    "topic": "Unembedding matrix and parameter count",
+    "notes": "Covered: Unembedding matrix, parameter count, vocabulary size, embedding dimension. Relevant to goal: Introduces a weight matrix and its contribution to the overall model size, indirectly related to parameters. Still open: Doesn't explicitly explain matrix-vector multiplication or how weights are used in calculations. The softmax function is mentioned but not explained in detail."
+   },
+   {
+    "i": 20,
+    "rel": 7,
+    "judge": 2,
+    "topic": "Softmax function converts arbitrary numbers",
+    "notes": "Covered: Softmax function, its purpose in creating probability distributions. Relevant to goal: Explains a key function used in matrix-vector multiplication within deep learning models. Still open: Doesn't directly explain matrix-vector multiplication or model weights' role in calculations. Doesn't connect softmax to model parameters."
+   },
+   {
+    "i": 21,
+    "rel": 3,
+    "judge": 1,
+    "topic": "Temperature affects probability distribution sampling",
+    "notes": "Covered: Softmax function, its purpose. Relevant to goal: Explains a parameter (temperature) affecting model output distribution, influencing next word prediction. Still open: Doesn't directly explain matrix-vector multiplication or model weights' role. Doesn't connect softmax to model parameters or how it relates to weights."
+   },
+   {
+    "i": 22,
+    "rel": 7,
+    "judge": 1,
+    "topic": "Logits, word embeddings, unembedding matrix",
+    "notes": "Covered: Logits are raw outputs from the network after word embeddings and before softmax. Relevant to goal: Connects logits to the unembedding matrix, hinting at how weights influence output. Still open: Doesn't explicitly explain matrix-vector multiplication or model weights' role in processing logits. Doesn't directly link logits to the overall model architecture or deep learning concepts."
+   },
+   {
+    "i": 23,
+    "rel": 5,
+    "judge": 2,
+    "topic": "Foundation for understanding attention mechanism",
+    "notes": "Covered: Importance of matrix multiplication & tunable parameters for understanding attention. Relevant to goal: Connects matrix multiplication to deep learning foundation. Still open: Doesn't explain matrix-vector multiplication or model weights' role in processing logits directly. Mentions next chapter for deeper dive."
+   }
+  ],
+  "RGOj5yH7evk-A": [
+   {
+    "i": 0,
+    "rel": 5,
+    "judge": 1,
+    "topic": "Git and GitHub introduction",
+    "notes": "Covered: Video introduction, Git and GitHub overview, creator info. Relevant to goal: Git and GitHub are mentioned. Still open: Installation, SSH keys, practical steps. Need to move to practical aspects."
+   },
+   {
+    "i": 1,
+    "rel": 5,
+    "judge": 1,
+    "topic": "Version control and directory/terminal basics",
+    "notes": "Covered: Git's purpose (tracking code changes), directory/folder concept, terminal/command line explanation. Relevant to goal: Explains *why* Git is used, but doesn't cover installation or SSH keys. Still open: Installation, SSH keys, practical GitHub connection. Need to move to installation steps."
+   },
+   {
+    "i": 2,
+    "rel": 3,
+    "judge": 1,
+    "topic": "Understanding the command line interface (CLI)",
+    "notes": "Covered: Command line interface (CLI) basics, purpose of CLI, CD command. Relevant to goal: Provides context for using Git commands in the CLI. Still open: Git installation, SSH keys, GitHub connection. CLI knowledge is foundational, but not the immediate next step."
+   },
+   {
+    "i": 3,
+    "rel": 5,
+    "judge": 2,
+    "topic": "Git, GitHub, repositories, and their relationship",
+    "notes": "Covered: CLI basics, code editors, repository definitions, Git & GitHub relationship. Relevant to goal: Defines key terms like repository, Git, and GitHub. Still open: Git installation, SSH keys, GitHub connection. The explanation of repository is helpful context, but doesn't directly address installation or SSH keys."
+   },
+   {
+    "i": 4,
+    "rel": 5,
+    "judge": 1,
+    "topic": "Git commands: clone, add, commit, remote",
+    "notes": "Covered: Git commands (clone, add, commit, remote). Relevant to goal: Provides foundational Git command understanding. Still open: Git installation, SSH keys, GitHub connection. The commands are useful but don't directly address installation or SSH keys needed for GitHub connection."
+   },
+   {
+    "i": 5,
+    "rel": 5,
+    "judge": 3,
+    "topic": "GitHub account creation and repositories",
+    "notes": "Covered: GitHub account creation, repository concept. Relevant to goal: Helps understand the first step towards connecting Git to GitHub. Still open: Git installation, SSH keys, linking Git to GitHub."
+   },
+   {
+    "i": 6,
+    "rel": 5,
+    "judge": 1,
+    "topic": "Creating a GitHub repository",
+    "notes": "Covered: GitHub repository creation, readme file. Relevant to goal: Provides context for where code lives. Still open: Git installation, SSH keys, linking Git to GitHub. Need to cover Git install and SSH key setup next."
+   },
+   {
+    "i": 7,
+    "rel": 2,
+    "judge": 0,
+    "topic": "Creating and modifying README files",
+    "notes": "Covered: README file creation, commit messages, file editing. Relevant to goal: Shows how to modify a GitHub repository's README. Still open: Git installation, SSH keys, linking Git to GitHub. README creation is a prerequisite, but not the core goal."
+   },
+   {
+    "i": 8,
+    "rel": 3,
+    "judge": 4,
+    "topic": "Git commit history and local installation check",
+    "notes": "Covered: Commit history viewing, adding/removing lines. Relevant to goal: Provides context on Git functionality. Still open: Git installation, SSH keys, linking Git to GitHub. The mention of local installation is relevant for later steps but not the immediate goal."
+   },
+   {
+    "i": 9,
+    "rel": 7,
+    "judge": 9,
+    "topic": "Installing Git: Atlassian tutorial, Git Bash",
+    "notes": "Covered: Git installation methods (Atlassian, Git Bash, Homebrew). Relevant to goal: Directly addresses Git installation, which is a prerequisite. Still open: SSH keys, GitHub connection. The mention of Windows/Mac specific options is helpful context."
+   },
+   {
+    "i": 10,
+    "rel": 5,
+    "judge": 1,
+    "topic": "Visual Studio Code terminal access",
+    "notes": "Covered: VS Code interface, terminal access. Relevant to goal: Shows how to access the Git terminal, needed for pulling from GitHub. Still open: SSH keys, GitHub connection, Git installation itself."
+   },
+   {
+    "i": 11,
+    "rel": 10,
+    "judge": 3,
+    "topic": "Cloning a GitHub repository using SSH",
+    "notes": "Covered: Terminal access, cloning process. Relevant to goal: Shows SSH cloning command. Still open: Git installation, SSH key setup, GitHub connection verification."
+   },
+   {
+    "i": 12,
+    "rel": 2,
+    "judge": 0,
+    "topic": "Showing hidden .git directory in terminal",
+    "notes": "Covered: Terminal navigation, repository structure. Relevant to goal: Explains the presence of the .git folder, a key part of Git. Still open: Git installation, SSH key setup, GitHub connection verification."
+   },
+   {
+    "i": 13,
+    "rel": 7,
+    "judge": 0,
+    "topic": "Git stores commits in the .git folder",
+    "notes": "Covered: Terminal commands, repository structure, Git's commit storage. Relevant to goal: Explains the purpose of the .git folder, which is relevant to understanding Git. Still open: Git installation, SSH key setup, GitHub connection verification. The .git folder is important for understanding how Git tracks changes, which is a prerequisite for using SSH keys to connect to GitHub."
+   },
+   {
+    "i": 14,
+    "rel": 5,
+    "judge": 0,
+    "topic": "Git status and adding files to staging area",
+    "notes": "Covered: Git status command, staged vs. unstaged changes, `git add .` usage. Relevant to goal: Understanding how changes are prepared for commit, a step before SSH key setup. Still open: Git installation, SSH key setup, GitHub connection verification."
+   },
+   {
+    "i": 15,
+    "rel": 5,
+    "judge": 1,
+    "topic": "Git commit message and local changes",
+    "notes": "Covered: Git commit process, message importance, local commits. Relevant to goal: Provides context for understanding where SSH keys fit in the workflow. Still open: SSH key setup, GitHub connection verification, Git installation."
+   },
+   {
+    "i": 16,
+    "rel": 10,
+    "judge": 10,
+    "topic": "Generating SSH key locally",
+    "notes": "Covered: SSH key generation process, encryption type/strength, email address input, default file location, passphrase option, key file naming. Relevant to goal: Directly addresses the SSH key generation step, a crucial part of connecting to GitHub via SSH. Still open: Connecting to GitHub, verification, Git installation."
+   },
+   {
+    "i": 17,
+    "rel": 10,
+    "judge": 10,
+    "topic": "Public vs. Private SSH keys for GitHub",
+    "notes": "Covered: SSH key generation, public key purpose, private key security. Relevant to goal: Directly explains the public key needed for GitHub. Still open: Connecting to GitHub, verification, Git installation."
+   },
+   {
+    "i": 18,
+    "rel": 10,
+    "judge": 10,
+    "topic": "Adding SSH key to GitHub account",
+    "notes": "Covered: Adding SSH key to GitHub. Relevant to goal: Directly demonstrates the key addition process. Still open: Git installation, verification, linking local Git interface."
+   },
+   {
+    "i": 19,
+    "rel": 7,
+    "judge": 9,
+    "topic": "SSH config modification for Git",
+    "notes": "Covered: SSH config file modification. Relevant to goal: Shows how to configure SSH for Git. Still open: Git installation, verification, linking local Git interface. The excerpt explains how to add SSH key information to the SSH config file, a necessary step after generating the key. It mentions the location of the file and the `ssh-add` command, which is important for the viewer to understand."
+   },
+   {
+    "i": 20,
+    "rel": 7,
+    "judge": 3,
+    "topic": "GitHub repository setup and commit demonstration",
+    "notes": "Covered: GitHub repository setup, commit process, and visual confirmation of changes. Relevant to goal: Shows successful connection & push. Still open: Git installation, verification, SSH key setup. The demonstration validates the SSH setup by showing changes appearing on GitHub after a local commit. The explanation of 'origin' and 'master' clarifies repository structure, helpful for understanding Git workflow."
+   },
+   {
+    "i": 21,
+    "rel": 7,
+    "judge": 1,
+    "topic": "Initializing Git repository in a folder",
+    "notes": "Covered: Git initialization, adding files, and checking status. Relevant to goal: Demonstrates the initial step of creating a Git repository, which is necessary before configuring SSH keys. Still open: SSH key setup, connecting to GitHub."
+   },
+   {
+    "i": 22,
+    "rel": 10,
+    "judge": 3,
+    "topic": "Connecting Git to GitHub via SSH",
+    "notes": "Covered: Git commit, push errors, GitHub repo creation. Relevant to goal: Explains the need for a remote connection and how to add it using `git remote add origin`. Still open: SSH key setup details."
+   },
+   {
+    "i": 23,
+    "rel": 7,
+    "judge": 2,
+    "topic": "Git push, upstream, remote repositories",
+    "notes": "Covered: Git remote verification, `git push origin`, upstream setup. Relevant to goal: Shows how to push to GitHub after setup. Still open: SSH key setup, initial repo creation workflow comparison."
+   },
+   {
+    "i": 24,
+    "rel": 3,
+    "judge": 0,
+    "topic": "GitHub handles staging and committing",
+    "notes": "Covered: GitHub commit workflow, automatic staging. Relevant to goal: Partially relevant, shows GitHub's simplified workflow. Still open: SSH key setup, local Git commands, initial repo creation. Need to focus on SSH key setup for the viewer's goal."
+   },
+   {
+    "i": 25,
+    "rel": 2,
+    "judge": 0,
+    "topic": "Git branching concepts and master branch",
+    "notes": "Covered: GitHub commit workflow, branching concepts. Relevant to goal: Indirectly relevant, explains branch naming. Still open: SSH key setup, local Git commands, initial repo creation. Branching is a Git concept, but SSH keys are a separate setup step."
+   },
+   {
+    "i": 26,
+    "rel": 2,
+    "judge": 0,
+    "topic": "Git branches and commit workflow",
+    "notes": "Covered: Branching concepts, commit workflow. Relevant to goal: Indirectly relevant; explains how changes are isolated to branches. Still open: SSH key setup, local Git commands, initial repo creation. The explanation of branching is helpful context, but doesn't directly address SSH key setup needed for GitHub connection."
+   },
+   {
+    "i": 27,
+    "rel": 2,
+    "judge": 0,
+    "topic": "Branching workflow and Git commands",
+    "notes": "Covered: Branching concepts, commit workflow, VS Code terminal. Relevant to goal: Provides context for Git usage, but doesn't directly help with SSH key setup. Still open: SSH key setup, local Git commands, initial repo creation. The discussion of branching is helpful background, but doesn't directly address SSH key setup needed for GitHub connection."
+   },
+   {
+    "i": 28,
+    "rel": 3,
+    "judge": 0,
+    "topic": "Git branch creation and switching",
+    "notes": "Covered: Branching concepts, git branch command, git checkout. Relevant to goal: Shows Git branch management. Still open: SSH key setup, local Git commands, initial repo creation. Branching is a prerequisite, but SSH key setup is the immediate goal."
+   },
+   {
+    "i": 29,
+    "rel": 7,
+    "judge": 0,
+    "topic": "Git branch switching and checkout",
+    "notes": "Covered: Branch switching using `git checkout`. Relevant to goal: Shows how to navigate branches, useful for setting up SSH keys in a specific branch. Still open: SSH key setup, local Git commands, initial repo creation. Need to connect SSH keys to GitHub."
+   },
+   {
+    "i": 30,
+    "rel": 2,
+    "judge": 0,
+    "topic": "Git branch naming and autocompletion",
+    "notes": "Covered: Branch switching, README editing. Relevant to goal: Branch navigation is part of Git workflow. Still open: SSH key setup, local Git commands, GitHub connection. Autocompletion is a useful Git feature, but not directly related to SSH key setup."
+   },
+   {
+    "i": 31,
+    "rel": 5,
+    "judge": 0,
+    "topic": "Git commit, staging, and branching workflow",
+    "notes": "Covered: Git commit, staging, branching, merging. Relevant to goal: Shows how changes are tracked locally, which is a prerequisite for connecting to GitHub via SSH. Still open: SSH key setup, GitHub connection, remote repositories."
+   },
+   {
+    "i": 32,
+    "rel": 3,
+    "judge": 0,
+    "topic": "Git diff and merging changes",
+    "notes": "Covered: Git diffing, merging. Relevant to goal: Demonstrates local change comparison, useful but not directly SSH related. Still open: SSH key setup, GitHub connection, remote repositories."
+   },
+   {
+    "i": 33,
+    "rel": 10,
+    "judge": 0,
+    "topic": "Pushing local commits to GitHub branch",
+    "notes": "Covered: Git push, branch naming conventions. Relevant to goal: Demonstrates pushing commits to GitHub, crucial step. Still open: SSH key setup, GitHub connection, remote repositories. The 'set upstream' flag is relevant to understanding how local branches relate to remote ones."
+   },
+   {
+    "i": 34,
+    "rel": 5,
+    "judge": 0,
+    "topic": "Pull requests and code review process",
+    "notes": "Covered: Git push, branch naming, pull requests. Relevant to goal: Demonstrates a workflow after pushing, relevant to connecting to GitHub. Still open: SSH key setup, GitHub connection, remote repositories. Pull requests are important for collaboration, but doesn't directly address SSH key setup."
+   },
+   {
+    "i": 35,
+    "rel": 2,
+    "judge": 0,
+    "topic": "GitHub pull requests and branch merging",
+    "notes": "Covered: GitHub pull requests, branch merging, README updates. Relevant to goal: Shows workflow after pushing, but doesn't cover SSH keys or GitHub connection. Still open: SSH key setup, GitHub connection, remote repositories. The discussion of pull requests is a step *after* connecting via SSH, so it's not directly helpful for the initial goal."
+   },
+   {
+    "i": 36,
+    "rel": 0,
+    "judge": 0,
+    "topic": "GitHub pull request comments and diffs",
+    "notes": "Covered: GitHub pull requests, code review features (comments, diffs). Relevant to goal: Indirectly relevant; shows GitHub interface after connection. Still open: SSH key setup, GitHub connection, remote repositories. Doesn't address initial setup steps."
+   },
+   {
+    "i": 37,
+    "rel": 2,
+    "judge": 0,
+    "topic": "Merging pull request, local vs. remote changes",
+    "notes": "Covered: Pull request merging, branch switching, local/remote code discrepancies. Relevant to goal: Shows GitHub workflow after connection, but not the setup. Still open: SSH key setup, Git installation, connecting to GitHub. Doesn't cover initial Git setup or SSH key configuration, which are prerequisites."
+   },
+   {
+    "i": 38,
+    "rel": 2,
+    "judge": 0,
+    "topic": "Git pull, branch deletion, merge conflicts",
+    "notes": "Covered: Pulling changes, branch deletion, merge conflicts. Relevant to goal: Shows post-connection workflow. Still open: Git installation, SSH key setup, connecting to GitHub. Doesn't cover initial setup or SSH configuration, which are prerequisites."
+   },
+   {
+    "i": 39,
+    "rel": 2,
+    "judge": 0,
+    "topic": "Merge conflicts and Git status",
+    "notes": "Covered: Merge conflicts, branch creation, modifying files. Relevant to goal: Indirectly relevant as it's a Git workflow aspect. Still open: Git installation, SSH key setup, connecting to GitHub. Doesn't address initial setup or SSH configuration."
+   },
+   {
+    "i": 40,
+    "rel": 2,
+    "judge": 0,
+    "topic": "Git commit workflow and staging",
+    "notes": "Covered: Git commit process, staging, message. Relevant to goal: Shows a Git workflow, but not installation/SSH. Still open: Git installation, SSH key setup, connecting to GitHub. Doesn't address initial setup or SSH configuration."
+   },
+   {
+    "i": 41,
+    "rel": 2,
+    "judge": 0,
+    "topic": "Git branching, merging, and committing",
+    "notes": "Covered: Branching, merging, committing, git status. Relevant to goal: Shows Git workflow, but not installation/SSH. Still open: Git installation, SSH key setup, connecting to GitHub. Doesn't address initial setup or SSH configuration."
+   },
+   {
+    "i": 42,
+    "rel": 2,
+    "judge": 0,
+    "topic": "Git merge master for branch updates",
+    "notes": "Covered: Branch merging, pull requests. Relevant to goal: Explains updating local master, indirectly related to GitHub connection. Still open: Git installation, SSH key setup, connecting to GitHub. Doesn't address initial setup or SSH configuration."
+   },
+   {
+    "i": 43,
+    "rel": 2,
+    "judge": 0,
+    "topic": "Resolving merge conflicts in Git",
+    "notes": "Covered: Merge conflicts, resolving them in code/GUI. Relevant to goal: Shows Git workflow after a merge, but not setup. Still open: Git installation, SSH key setup, connecting to GitHub. Doesn't address initial setup or SSH configuration."
+   },
+   {
+    "i": 44,
+    "rel": 0,
+    "judge": 0,
+    "topic": "Git workflow, undoing stages/commits",
+    "notes": "Covered: Merge conflicts, resolving them. Relevant to goal: None directly helpful. Still open: Git installation, SSH key setup, connecting to GitHub. The excerpt describes Git workflow after a merge, not initial setup."
+   },
+   {
+    "i": 45,
+    "rel": 0,
+    "judge": 0,
+    "topic": "Git reset command for undoing staging/commits",
+    "notes": "Covered: Git status, staging, committing, undoing commits. Relevant to goal: Git reset is a Git command, but not directly related to installation or SSH key setup. Still open: Git installation, SSH key setup, connecting to GitHub. The excerpt discusses a Git workflow after commits, not the initial setup process needed for connecting to GitHub via SSH."
+   },
+   {
+    "i": 46,
+    "rel": 0,
+    "judge": 0,
+    "topic": "Git reset head undoes commits",
+    "notes": "Covered: Git reset, unstaging changes, git status, git diff. Relevant to goal: Git reset is a Git command, but not directly related to installation or SSH key setup. Still open: Git installation, SSH key setup, connecting to GitHub. The excerpt discusses a Git workflow after commits, not the initial setup process needed for connecting to GitHub via SSH."
+   },
+   {
+    "i": 47,
+    "rel": 0,
+    "judge": 0,
+    "topic": "Git commit history and undoing commits",
+    "notes": "Covered: Git commit history, undoing commits with reset. Relevant to goal: Indirectly relevant, as it's a Git operation. Still open: Git installation, SSH key setup, connecting to GitHub. The excerpt explains how to navigate and revert commits, which is a post-installation/setup task. Doesn't directly address the initial setup for GitHub via SSH."
+   },
+   {
+    "i": 48,
+    "rel": 0,
+    "judge": 0,
+    "topic": "Git reset command to remove commits",
+    "notes": "Covered: Git reset command, undoing commits. Relevant to goal: Indirectly relevant, as it's a Git operation. Still open: Git installation, SSH key setup, connecting to GitHub. This excerpt explains how to revert commits, which is not directly related to the initial setup of Git and GitHub via SSH keys. The viewer's goal is to learn installation and SSH setup, not commit history manipulation."
+   },
+   {
+    "i": 49,
+    "rel": 2,
+    "judge": 0,
+    "topic": "Forking repositories on GitHub",
+    "notes": "Covered: Git workflows, GitHub forking. Relevant to goal: Indirectly relevant; shows GitHub interface. Still open: Git installation, SSH key setup, connecting to GitHub. Forking is a GitHub feature, not Git installation or SSH setup. The viewer's goal is SSH setup, not repository copying."
+   },
+   {
+    "i": 50,
+    "rel": 2,
+    "judge": 0,
+    "topic": "GitHub forking and branch management",
+    "notes": "Covered: GitHub forking, branch management (Dev branch). Relevant to goal: Shows GitHub branching, but not Git installation or SSH keys. Still open: Git installation, SSH key setup, connecting to GitHub. Forking is a GitHub feature, not Git installation or SSH setup."
+   },
+   {
+    "i": 51,
+    "rel": 2,
+    "judge": 0,
+    "topic": "GitHub pull requests and merging branches",
+    "notes": "Covered GitHub pull requests and merging branches within a forked repository. This is relevant to understanding how changes are integrated on GitHub, but doesn't directly address Git installation or SSH key setup, which are the viewer's goals. Still open are Git installation, SSH key setup, and connecting to GitHub using SSH."
+   },
+   {
+    "i": 52,
+    "rel": 0,
+    "judge": 0,
+    "topic": "Merging pull requests and branch cleanup",
+    "notes": "Covered: Pull requests, merging branches, branch cleanup. Relevant to goal: Indirectly relevant as it shows a workflow after changes are merged. Still open: Git installation, SSH key setup, connecting to GitHub using SSH."
+   },
+   {
+    "i": 53,
+    "rel": 2,
+    "judge": 0,
+    "topic": "Branch management and codebase workflow",
+    "notes": "Covered: Branch naming conventions, merging strategies (dev/master). Relevant to goal: Provides context on how branches are used, but doesn't directly address installation or SSH. Still open: Git installation, SSH key setup, connecting to GitHub using SSH."
+   },
+   {
+    "i": 54,
+    "rel": 2,
+    "judge": 0,
+    "topic": "GitHub pull requests and code updates",
+    "notes": "Covered: GitHub pull requests, code updates, forking. Relevant to goal: Shows a workflow, but doesn't cover installation or SSH. Still open: Git installation, SSH key setup, connecting to GitHub using SSH."
+   }
+  ],
+  "RGOj5yH7evk-B": [
+   {
+    "i": 0,
+    "rel": 10,
+    "judge": 1,
+    "topic": "Git and GitHub introduction, Git definition",
+    "notes": "Covered: Video introduction, Git and GitHub overview, basic Git repositories, GitHub, branching, merging, forking. Relevant to goal: Git definition provided. Still open: Branching and merging details, conflict resolution, practical applications."
+   },
+   {
+    "i": 1,
+    "rel": 5,
+    "judge": 0,
+    "topic": "Version control and Git basics",
+    "notes": "Covered: Version control definition, Git as a tracking system, saving code changes, accessing past versions. Relevant to goal: Explains *why* version control/branching is useful. Still open: Branching/merging specifics, conflict resolution, practical examples of branching workflows."
+   },
+   {
+    "i": 2,
+    "rel": 2,
+    "judge": 0,
+    "topic": "Introduction to command line interface (CLI)",
+    "notes": "Covered: Introduction to command line (CLI) and its purpose. Relevant to goal: Indirectly helpful as CLI is used with Git. Still open: Branching/merging specifics, conflict resolution, practical examples. CLI is a prerequisite skill, but not the core topic of branching."
+   },
+   {
+    "i": 3,
+    "rel": 2,
+    "judge": 0,
+    "topic": "Git repository, Git vs GitHub explained",
+    "notes": "Covered: CLI, repositories, Git, GitHub. Relevant to goal: Git/GitHub definitions are helpful context. Still open: Branching, merging, conflict resolution, practical examples. Need to move to branching concepts."
+   },
+   {
+    "i": 4,
+    "rel": 3,
+    "judge": 0,
+    "topic": "Git commands: clone, add, commit, remote",
+    "notes": "Covered: Git commands (clone, add, commit, remote). Relevant to goal: Provides foundational Git knowledge. Still open: Branching, merging, conflict resolution. Need to transition to branching concepts to address the viewer's goal."
+   },
+   {
+    "i": 5,
+    "rel": 2,
+    "judge": 0,
+    "topic": "GitHub account creation and repositories",
+    "notes": "Covered: GitHub account setup, repository definition. Relevant to goal: Indirectly helpful as it's a prerequisite. Still open: Branching, merging, conflict resolution. Need to move to Git branching commands."
+   },
+   {
+    "i": 6,
+    "rel": 3,
+    "judge": 0,
+    "topic": "Creating a new GitHub repository",
+    "notes": "Covered: Repository creation on GitHub. Relevant to goal: Indirectly helpful as it sets up the environment for branching. Still open: Branching commands, merging, conflict resolution. Need to move to Git branching commands."
+   },
+   {
+    "i": 7,
+    "rel": 2,
+    "judge": 0,
+    "topic": "Creating and modifying README files",
+    "notes": "Covered: README file creation, commit process, file editing. Relevant to goal: Indirectly helpful as it shows how to modify files within a Git repository. Still open: Branching commands, merging, conflict resolution. Need to move to Git branching commands."
+   },
+   {
+    "i": 8,
+    "rel": 5,
+    "judge": 0,
+    "topic": "Git commit history and changes overview",
+    "notes": "Covered: Commit messages, commit identifiers, adding/removing lines. Relevant to goal: Helps understand changes tracked by Git. Still open: Branching, merging, conflict resolution. Need to move to branching commands to address goal."
+   },
+   {
+    "i": 9,
+    "rel": 2,
+    "judge": 0,
+    "topic": "Git installation and code editor setup",
+    "notes": "Covered: Git installation (Windows, Mac) and code editor (VS Code). Relevant to goal: Provides setup info. Still open: Branching, merging, conflict resolution. Installation is a prerequisite, but not directly related to branching/merging."
+   },
+   {
+    "i": 10,
+    "rel": 2,
+    "judge": 0,
+    "topic": "Setting up VS Code and pulling a repo",
+    "notes": "Covered: VS Code setup, terminal access, pulling a GitHub repo. Relevant to goal: VS Code setup is a prerequisite. Still open: Branching, merging, conflict resolution. Pulling a repo is a step *before* branching/merging, but not the goal itself."
+   },
+   {
+    "i": 11,
+    "rel": 2,
+    "judge": 0,
+    "topic": "Cloning a GitHub repository to local machine",
+    "notes": "Covered: Cloning a GitHub repo using `git clone`. Relevant to goal: Shows how to get code locally. Still open: Branching, merging, conflict resolution. Cloning is a necessary first step, but the goal is to understand branching and merging, not just getting code."
+   },
+   {
+    "i": 12,
+    "rel": 2,
+    "judge": 0,
+    "topic": "Git repository structure and hidden folder",
+    "notes": "Covered: Cloning, Git repository structure. Relevant to goal: Briefly mentions `.git` directory. Still open: Branching, merging, conflict resolution. The `.git` directory is important context, but not directly related to branching/merging workflows. Need to focus on the branching/merging process itself."
+   },
+   {
+    "i": 13,
+    "rel": 2,
+    "judge": 0,
+    "topic": "Git repository structure and commits",
+    "notes": "Covered: Repository structure, `.git` directory contents. Relevant to goal: Briefly mentions commit storage. Still open: Branching, merging, conflict resolution. The `.git` directory's role in commit history is relevant, but the excerpt doesn't address branching or merging workflows directly. Need to focus on branching/merging process itself."
+   },
+   {
+    "i": 14,
+    "rel": 3,
+    "judge": 0,
+    "topic": "Git status, adding files to staging area",
+    "notes": "Covered: Repository status, staged/unstaged files. Relevant to goal: Explains 'git add', a step before merging. Still open: Branching, merging, conflict resolution. The excerpt explains how to prepare files for a commit, which is a step *before* merging. It's relevant to understanding the workflow, but doesn't directly address branching or merging itself."
+   },
+   {
+    "i": 15,
+    "rel": 3,
+    "judge": 0,
+    "topic": "Git commit process and local changes",
+    "notes": "Covered: Staging files, commit process, git push. Relevant to goal: Explains a step *before* merging. Still open: Branching, merging, conflict resolution. The video is showing how to prepare changes for a commit, which is a prerequisite to merging. This is helpful for understanding the workflow, but doesn't directly address branching or merging itself."
+   },
+   {
+    "i": 16,
+    "rel": 0,
+    "judge": 0,
+    "topic": "Generating SSH key for GitHub access",
+    "notes": "Covered: SSH key generation, file locations, passphrase. Relevant to goal: Indirectly relates to GitHub setup, a prerequisite. Still open: Branching, merging, conflict resolution. The video explains how to authenticate with GitHub, but not how to create or use branches or merge them. This is a setup step, not a core Git workflow element."
+   },
+   {
+    "i": 17,
+    "rel": 3,
+    "judge": 0,
+    "topic": "Public and private keys for GitHub authentication",
+    "notes": "Covered: SSH key types (public/private), GitHub authentication process. Relevant to goal: Provides context for secure GitHub access. Still open: Branching, merging, conflict resolution. The explanation of SSH keys is a prerequisite for using Git with GitHub, but doesn't directly address branching or merging workflows."
+   },
+   {
+    "i": 18,
+    "rel": 0,
+    "judge": 0,
+    "topic": "Adding SSH key to GitHub account",
+    "notes": "Covered: SSH key types, GitHub authentication process. Relevant to goal: Provides context for secure GitHub access. Still open: Branching, merging, conflict resolution. The excerpt describes adding an SSH key to GitHub, which is a prerequisite for using Git with GitHub. However, it doesn't directly address branching or merging workflows, which are the viewer's primary goal."
+   },
+   {
+    "i": 19,
+    "rel": 0,
+    "judge": 0,
+    "topic": "Setting up SSH key for Git",
+    "notes": "Covered: SSH key setup. Relevant to goal: Provides a prerequisite for Git/GitHub. Still open: Branching, merging, conflict resolution. The excerpt focuses on SSH key configuration, which is a necessary step but not directly related to branching or merging workflows. It's background information for secure access, but doesn't help with the core goal."
+   },
+   {
+    "i": 20,
+    "rel": 3,
+    "judge": 1,
+    "topic": "Repository location and commits",
+    "notes": "Covered: Repository location (origin), commits, and pushing changes to GitHub. Relevant to goal: Explains how changes are tracked and pushed, a prerequisite for merging. Still open: Branching, merging, conflict resolution. The excerpt introduces 'origin' which is important for understanding where your local repository connects to the remote, but doesn't directly address branching or merging workflows or conflict resolution."
+   },
+   {
+    "i": 21,
+    "rel": 3,
+    "judge": 0,
+    "topic": "Initializing a new Git repository",
+    "notes": "Covered: Creating a new Git repository using `git init`, adding a README file, and using `git status`. Relevant to goal: Provides the foundational step of initializing a repository, which is necessary before branching or merging. Still open: Branching, merging, and conflict resolution are still needed to fulfill the goal. The excerpt doesn't discuss branching or merging workflows."
+   },
+   {
+    "i": 22,
+    "rel": 7,
+    "judge": 0,
+    "topic": "Connecting local repo to GitHub",
+    "notes": "Covered: Creating a local repository, pushing to GitHub. Relevant to goal: Explains the connection needed for pushing, a step before merging. Still open: Branching, merging, and conflict resolution are still needed. The video explains how to connect the local repo to GitHub, which is a necessary step before branching or merging. This is a good step towards the goal."
+   },
+   {
+    "i": 23,
+    "rel": 5,
+    "judge": 0,
+    "topic": "Pushing local changes to GitHub",
+    "notes": "Covered: Local repo creation, GitHub connection, pushing. Relevant to goal: Shows how to push changes to a remote, a step before merging. Still open: Branching, merging, conflict resolution. The excerpt explains how to push code to a remote repository (GitHub) using `git push origin Master` and introduces the `upstream` shortcut. This is useful for understanding the flow of code updates, but doesn't directly address branching or merging."
+   },
+   {
+    "i": 24,
+    "rel": 3,
+    "judge": 1,
+    "topic": "GitHub handles staging and committing",
+    "notes": "Covered: GitHub interface, commits. Relevant to goal: Briefly mentions pull requests, a merging workflow. Still open: Branching, merging, conflict resolution. The excerpt explains how GitHub automatically handles staging and committing changes when you commit directly in the interface. This is a simplified workflow compared to local development, but doesn't directly address branching or merging, which are key to the viewer's goal."
+   },
+   {
+    "i": 25,
+    "rel": 10,
+    "judge": 8,
+    "topic": "Git branching concepts and feature branches",
+    "notes": "Covered: GitHub push, pull requests, master branch, feature branches. Relevant to goal: Introduces branching concept. Still open: Merging, conflict resolution, practical examples of merging."
+   },
+   {
+    "i": 26,
+    "rel": 8,
+    "judge": 8,
+    "topic": "Branch isolation and commit process",
+    "notes": "Covered: Branch creation, commit process, master branch updates. Relevant to goal: Explains why changes on feature branches aren't automatically reflected in master. Still open: Merging, conflict resolution, practical examples of merging. The explanation of branch isolation is helpful for understanding why merging is needed."
+   },
+   {
+    "i": 27,
+    "rel": 7,
+    "judge": 7,
+    "topic": "Hotfix branches for bug fixes",
+    "notes": "Covered: Branching for feature development and hotfixes. Relevant to goal: Illustrates a scenario where merging is necessary to integrate fixes. Still open: Actual merging process, conflict resolution, and practical examples of merging workflows."
+   },
+   {
+    "i": 28,
+    "rel": 7,
+    "judge": 9,
+    "topic": "Creating a new Git branch",
+    "notes": "Covered: Branching basics, branch naming conventions. Relevant to goal: Shows how to create a branch for development. Still open: Merging process, conflict resolution, and practical examples of merging workflows."
+   },
+   {
+    "i": 29,
+    "rel": 7,
+    "judge": 9,
+    "topic": "Branch creation and switching",
+    "notes": "Covered: Branch creation, switching between branches (master & feature). Relevant to goal: Directly shows how to create a branch. Still open: Merging, conflict resolution, practical workflows. Need to see the merging process now."
+   },
+   {
+    "i": 30,
+    "rel": 3,
+    "judge": 6,
+    "topic": "Branch naming and autocompletion",
+    "notes": "Covered: Branch naming conventions, autocompletion. Relevant to goal: Briefly touches on branch creation, but doesn't address merging or conflict resolution. Still open: Merging, conflict resolution, practical workflows. Autocompletion is a nice-to-know, but not essential for understanding merging."
+   },
+   {
+    "i": 31,
+    "rel": 7,
+    "judge": 8,
+    "topic": "Git commit, staging, and checking changes",
+    "notes": "Covered: Git commit, staging, checking status. Relevant to goal: Demonstrates how to save changes to a branch, a step before merging. Still open: Merging, conflict resolution, checking changes before merging. The explanation of `git add` and `git commit` is helpful context for understanding merging workflows."
+   },
+   {
+    "i": 32,
+    "rel": 7,
+    "judge": 7,
+    "topic": "Understanding diffs for merging",
+    "notes": "Covered: Diffing, visualizing added/removed lines. Relevant to goal: Directly relates to understanding changes before merging. Still open: Actual merging process, conflict resolution, PR workflow details."
+   },
+   {
+    "i": 33,
+    "rel": 7,
+    "judge": 5,
+    "topic": "Pushing feature branch to GitHub",
+    "notes": "Covered: Pushing a feature branch to GitHub. Relevant to goal: Directly related to preparing for merging. Still open: The merging process itself, conflict resolution, and the actual merge command."
+   },
+   {
+    "i": 34,
+    "rel": 10,
+    "judge": 6,
+    "topic": "Pull requests and code review process",
+    "notes": "Covered: Pull requests, code review, updating PR with commits. Relevant to goal: Directly explains how code is integrated into the main branch via PRs. Still open: Merge process, conflict resolution, merge command itself."
+   },
+   {
+    "i": 35,
+    "rel": 7,
+    "judge": 6,
+    "topic": "Creating and describing pull requests",
+    "notes": "Covered: Pull request creation, title, description. Relevant to goal: Shows how to initiate the merge process. Still open: Merge process, conflict resolution, merge command itself."
+   },
+   {
+    "i": 36,
+    "rel": 7,
+    "judge": 5,
+    "topic": "Pull request review and code diffs",
+    "notes": "Covered: Pull request review interface, code diffs, commenting on specific lines. Relevant to goal: Helps understand what's reviewed before merging. Still open: Actual merge process, conflict resolution, merge command."
+   },
+   {
+    "i": 37,
+    "rel": 10,
+    "judge": 7,
+    "topic": "Merging a pull request on GitHub",
+    "notes": "Covered: Pull request merging process, branch switching. Relevant to goal: Shows successful merge and local pull needed. Still open: Conflict resolution, merge command, branch workflows."
+   },
+   {
+    "i": 38,
+    "rel": 10,
+    "judge": 8,
+    "topic": "Merge conflicts and branch deletion",
+    "notes": "Covered: Pulling changes, deleting branches. Relevant to goal: Merge conflicts are explicitly mentioned. Still open: Conflict resolution steps, merge command details, branch workflows beyond merging. The video is now transitioning to the complexities of merge conflicts, which is directly relevant to the viewer's goal of understanding branch merging."
+   },
+   {
+    "i": 39,
+    "rel": 10,
+    "judge": 9,
+    "topic": "Merge conflicts when multiple changes occur",
+    "notes": "Covered: Branch creation, modifying files, git status. Relevant to goal: Explains the cause of merge conflicts. Still open: Conflict resolution steps, merge command details, branch workflows beyond merging."
+   },
+   {
+    "i": 40,
+    "rel": 3,
+    "judge": 5,
+    "topic": "Git commit workflow and shortcuts",
+    "notes": "Covered: Commit process, `git add`, `git commit` with `-a`. Relevant to goal: Provides context on modifying files before committing. Still open: Merge conflicts, branch merging workflows, detailed merge commands."
+   },
+   {
+    "i": 41,
+    "rel": 10,
+    "judge": 8,
+    "topic": "Branch merging and conflict prevention",
+    "notes": "Covered: Branch separation, potential merge conflicts due to uncommitted changes, commit before checkout. Relevant to goal: Explains why commits are needed before merging, hinting at conflict prevention. Still open: Detailed conflict resolution steps, merge strategies, branch merging workflows."
+   },
+   {
+    "i": 42,
+    "rel": 10,
+    "judge": 9,
+    "topic": "Merging master into a feature branch",
+    "notes": "Covered: Git merge master, updating local master, pull requests. Relevant to goal: Explains *why* to merge master, preventing conflicts. Still open: Conflict resolution steps, merge strategies, branch merging workflows. The explanation of pulling master is helpful context for merging."
+   },
+   {
+    "i": 43,
+    "rel": 10,
+    "judge": 10,
+    "topic": "Resolving merge conflicts in code",
+    "notes": "Covered: Merge conflict identification, resolving in code/terminal, commit after resolution. Relevant to goal: Provides practical steps for resolving merge conflicts. Still open: Merge strategies, branch merging workflows, understanding conflict markers. The explanation of conflict markers is helpful."
+   },
+   {
+    "i": 44,
+    "rel": 3,
+    "judge": 6,
+    "topic": "Updating branch, undoing changes",
+    "notes": "Covered: Branch update after merge, undoing stages/commits. Relevant to goal: Shows a step after merging, but doesn't explain branching mechanics. Still open: Branching workflows, merge strategies, conflict resolution details."
+   },
+   {
+    "i": 45,
+    "rel": 3,
+    "judge": 0,
+    "topic": "Git reset: undoing staging and commits",
+    "notes": "Covered: Git reset command, unstaging changes, undoing commits. Relevant to goal: Demonstrates undoing actions, useful for conflict resolution context. Still open: Branching workflows, merge strategies, conflict resolution details. Doesn't directly address branch creation/merging."
+   },
+   {
+    "i": 46,
+    "rel": 3,
+    "judge": 0,
+    "topic": "Git reset head undoes commits",
+    "notes": "Covered: Git reset head, unstaging changes, git status, git diff. Relevant to goal: Demonstrates undoing commits, useful for conflict resolution context. Still open: Branching workflows, merge strategies, conflict resolution details. Doesn't directly address branch creation/merging."
+   },
+   {
+    "i": 47,
+    "rel": 7,
+    "judge": 0,
+    "topic": "Git commit history and undoing commits",
+    "notes": "Covered: Git commit history, commit messages, commit hashes, undoing commits with `git reset`. Relevant to goal: Provides context for understanding merge conflicts and how to revert changes if needed. Still open: Branching, merging, conflict resolution strategies. The example of undoing a merge is useful."
+   },
+   {
+    "i": 48,
+    "rel": 5,
+    "judge": 1,
+    "topic": "Git reset: removing commits and changes",
+    "notes": "Covered: Git reset command, removing commits. Relevant to goal: Provides a method to revert changes if a merge goes wrong, indirectly related to conflict resolution. Still open: Branching, merging, conflict resolution strategies, specific merge steps."
+   },
+   {
+    "i": 49,
+    "rel": 2,
+    "judge": 3,
+    "topic": "Forking repositories on GitHub",
+    "notes": "Covered: Forking repositories on GitHub. Relevant to goal: Indirectly relevant - fork for independent work. Still open: Branching, merging, conflict resolution strategies, specific merge steps. Forking is a way to create a copy to work on without affecting the original. This is useful for experimenting or contributing to projects you don't have direct write access to."
+   },
+   {
+    "i": 50,
+    "rel": 5,
+    "judge": 3,
+    "topic": "Forking, branching, and default branch setup",
+    "notes": "Covered: Forking, default branch (Dev instead of Master). Relevant to goal: Shows branching context after fork. Still open: Branching, merging, conflict resolution, merge steps. The excerpt explains the setup of the 'Dev' branch, which is relevant to understanding where changes will be committed after branching, but doesn't directly address merging or conflict resolution."
+   },
+   {
+    "i": 51,
+    "rel": 7,
+    "judge": 4,
+    "topic": "Pull requests and merging within a fork",
+    "notes": "Covered: Default branch, pull requests. Relevant to goal: Explains merging process within a fork. Still open: Branching, merging, conflict resolution, merge steps in original repo."
+   },
+   {
+    "i": 52,
+    "rel": 8,
+    "judge": 4,
+    "topic": "Merging branches into default branches",
+    "notes": "Covered: Pull requests, merging into default branches (Master). Relevant to goal: Describes what happens after merging a branch into a default branch. Still open: Branching, merging, conflict resolution, merge steps in original repo. The excerpt explains cleaning up the merged branch after merging into a default branch like Master. This is a relevant step in the overall merging process."
+   },
+   {
+    "i": 53,
+    "rel": 7,
+    "judge": 4,
+    "topic": "Branching strategy: dev, master, staging",
+    "notes": "Covered: Branching strategy, dev/master/staging branches. Relevant to goal: Provides context on how branches are used in a typical workflow. Still open: Detailed merging steps, conflict resolution, branch deletion process, specific merge commands."
+   },
+   {
+    "i": 54,
+    "rel": 2,
+    "judge": 1,
+    "topic": "Forking repository for updates and PR",
+    "notes": "Covered: Forking, pulling, updating, pushing, PRs. Relevant to goal: Shows a workflow involving branches, but doesn't detail merging or conflict resolution. Still open: Detailed merging, conflict resolution, branch deletion, specific commands."
+   }
+  ],
+  "RGOj5yH7evk-C": [
+   {
+    "i": 0,
+    "rel": 5,
+    "judge": 0,
+    "topic": "Git introduction, version control system",
+    "notes": "Covered: Video introduction, Git and GitHub overview, terms & concepts, ecosystem, practical applications (repositories, GitHub, branching, merging, forking). Relevant to goal: Git is defined as a version control system. Still open: Specific Git commands (reset, undo), how to use them."
+   },
+   {
+    "i": 1,
+    "rel": 5,
+    "judge": 2,
+    "topic": "Version control basics: tracking code changes",
+    "notes": "Covered: Version control definition, Git as a version control system, directories, terminal/command line. Relevant to goal: Provides context for why undoing changes is important. Still open: Specific Git commands (reset, undo), how to use them, and how to revert to previous states."
+   },
+   {
+    "i": 2,
+    "rel": 3,
+    "judge": 0,
+    "topic": "Understanding the command line interface (CLI)",
+    "notes": "Covered: CLI definition, purpose in programming. Relevant to goal: Provides context for using Git commands. Still open: Specific Git commands (reset, undo), how to use them, and how to revert to previous states."
+   },
+   {
+    "i": 3,
+    "rel": 2,
+    "judge": 0,
+    "topic": "Git repository and GitHub definitions",
+    "notes": "Covered: CLI definition, purpose, repository, Git, GitHub. Relevant to goal: Provides definitions of key terms. Still open: Specific Git commands (reset, undo), how to use them, and how to revert to previous states."
+   },
+   {
+    "i": 4,
+    "rel": 5,
+    "judge": 0,
+    "topic": "Git commands: clone, add, commit, upload",
+    "notes": "Covered: Git commands (clone, add, commit, upload). Relevant to goal: Introduces commands used to save changes, which is a prerequisite for undoing. Still open: Specific commands for undoing changes (reset, revert), how to use them, and reverting to previous states. The video is laying the groundwork for understanding how changes are tracked, which is important for understanding how to undo them."
+   },
+   {
+    "i": 5,
+    "rel": 2,
+    "judge": 0,
+    "topic": "GitHub repositories and creating them",
+    "notes": "Covered: GitHub repositories, creating them, accessing profile/dashboard. Relevant to goal: Introduces GitHub, where changes are tracked. Still open: Specific Git commands for undoing changes (reset, revert), how to use them, and reverting to previous states. The video is laying the groundwork for understanding how changes are tracked, which is important for understanding how to undo them."
+   },
+   {
+    "i": 6,
+    "rel": 3,
+    "judge": 0,
+    "topic": "Creating GitHub repositories and README files",
+    "notes": "Covered: GitHub repositories, creating them, basic README file. Relevant to goal: Shows where changes are stored (GitHub repositories). Still open: Specific Git commands for undoing changes (reset, revert), how to use them, and reverting to previous states. The video is setting up the environment where undo operations will be performed."
+   },
+   {
+    "i": 7,
+    "rel": 3,
+    "judge": 0,
+    "topic": "Creating and committing README files",
+    "notes": "Covered: GitHub repository setup, README creation & commit. Relevant to goal: Shows where changes are stored. Still open: Specific Git commands for undoing changes (reset, revert), how to use them, and reverting to previous states."
+   },
+   {
+    "i": 8,
+    "rel": 7,
+    "judge": 1,
+    "topic": "Git commit history and changes viewing",
+    "notes": "Covered: Commit messages, adding/removing lines, and viewing history. Relevant to goal: Demonstrates how to see changes *before* attempting to undo. Still open: Specific commands like `git reset` and `git revert` for undoing changes."
+   },
+   {
+    "i": 9,
+    "rel": 2,
+    "judge": 0,
+    "topic": "Git installation and code editor setup",
+    "notes": "Covered: Git installation on Windows/Mac, code editor (VS Code). Relevant to goal: Indirectly helpful as Git needs to be installed first. Still open: Specific undo commands like `git reset` and `git revert`."
+   },
+   {
+    "i": 10,
+    "rel": 2,
+    "judge": 0,
+    "topic": "Setting up Visual Studio Code terminal",
+    "notes": "Covered: VS Code setup, terminal access. Relevant to goal: Indirectly helpful as terminal is used with Git. Still open: Specific Git undo commands like `git reset` and `git revert`."
+   },
+   {
+    "i": 11,
+    "rel": 3,
+    "judge": 0,
+    "topic": "Cloning a GitHub repository to local machine",
+    "notes": "Covered: VS Code setup, terminal access, cloning a GitHub repo. Relevant to goal: Indirectly helpful as cloning is a common operation where mistakes can occur. Still open: Specific Git undo commands like `git reset` and `git revert`."
+   },
+   {
+    "i": 12,
+    "rel": 2,
+    "judge": 0,
+    "topic": "Navigating Git repository folder structure",
+    "notes": "Covered: Terminal navigation, Git repository folder structure (dot `.git` directory). Relevant to goal: Indirectly helpful by showing where Git actions occur. Still open: Specific Git undo commands like `git reset` and `git revert`."
+   },
+   {
+    "i": 13,
+    "rel": 5,
+    "judge": 0,
+    "topic": "Git repository structure and commits",
+    "notes": "Covered: Repository structure, `.git` directory, commits. Relevant to goal: Shows where Git tracks changes. Still open: Specific undo commands like `git reset` and `git revert`."
+   },
+   {
+    "i": 14,
+    "rel": 7,
+    "judge": 1,
+    "topic": "Git status, adding files to staging area",
+    "notes": "Covered: Git status, git add command, staged vs. unstaged changes. Relevant to goal: Shows how to prepare changes for undoing via commit. Still open: Specific undo commands like `git reset` and `git revert`."
+   },
+   {
+    "i": 15,
+    "rel": 3,
+    "judge": 0,
+    "topic": "Git commit message and local changes",
+    "notes": "Covered: Git commit process, message creation, local commit. Relevant to goal: Shows how changes are saved locally before potential undo. Still open: Specific undo commands like `git reset` and `git revert`."
+   },
+   {
+    "i": 16,
+    "rel": 0,
+    "judge": 0,
+    "topic": "Generating SSH key for GitHub access",
+    "notes": "Covered: SSH key generation process. Relevant to goal: Indirectly relevant - necessary for GitHub interaction, which might involve undoing actions. Still open: Specific Git undo commands like `git reset` and `git revert`."
+   },
+   {
+    "i": 17,
+    "rel": 3,
+    "judge": 0,
+    "topic": "Public and private keys for GitHub access",
+    "notes": "Covered: SSH key generation, public vs. private keys, GitHub authentication. Relevant to goal: Indirectly relevant - secure key management is important for preventing accidental/unintended changes. Still open: Specific Git undo commands like `git reset` and `git revert`."
+   },
+   {
+    "i": 18,
+    "rel": 0,
+    "judge": 0,
+    "topic": "Adding SSH key to GitHub account",
+    "notes": "Covered: SSH key generation, GitHub authentication. Relevant to goal: Indirectly relevant - secure key management is important for preventing accidental/unintended changes. Still open: Specific Git undo commands like `git reset` and `git revert`. This excerpt describes adding an SSH key to GitHub, which is a foundational step for using Git effectively. It doesn't directly address undoing changes, but secure key management is important to prevent accidental changes."
+   },
+   {
+    "i": 19,
+    "rel": 2,
+    "judge": 0,
+    "topic": "Setting up SSH key for Git",
+    "notes": "Covered: SSH key setup process. Relevant to goal: Indirectly relevant - secure key management prevents accidental changes. Still open: Specific Git undo commands like `git reset` and `git revert`."
+   },
+   {
+    "i": 20,
+    "rel": 3,
+    "judge": 0,
+    "topic": "Git repository location and branches",
+    "notes": "Covered: Repository setup, commits, GitHub. Relevant to goal: Explains repository structure (origin, master). Still open: Specific Git undo commands like `git reset` and `git revert`."
+   },
+   {
+    "i": 21,
+    "rel": 2,
+    "judge": 0,
+    "topic": "Initializing a new Git repository",
+    "notes": "Covered: Repository initialization, adding files, staging. Relevant to goal: Initializing a repository is a prerequisite for using Git undo commands. Still open: Specific Git undo commands like `git reset` and `git revert`."
+   },
+   {
+    "i": 22,
+    "rel": 3,
+    "judge": 0,
+    "topic": "Connecting local repo to GitHub",
+    "notes": "Covered: Repository setup, remote connection. Relevant to goal: Remote connection is a prerequisite for many Git operations, including potentially undoing changes via revert. Still open: Specific Git undo commands like `git reset` and `git revert`."
+   },
+   {
+    "i": 23,
+    "rel": 2,
+    "judge": 0,
+    "topic": "Git push and upstream configuration",
+    "notes": "Covered: Repository setup, remote connection, pushing code. Relevant to goal: Reinforces workflow after pushing, which is relevant to understanding how to manage changes. Still open: Specific Git undo commands like `git reset` and `git revert`."
+   },
+   {
+    "i": 24,
+    "rel": 3,
+    "judge": 0,
+    "topic": "GitHub workflow: committing code directly",
+    "notes": "Covered: GitHub workflow, committing, pushing. Relevant to goal: Explains how changes are saved, which is a prerequisite to undoing them. Still open: Specific Git undo commands like `git reset` and `git revert`. The video is explaining how changes are committed, but not how to undo them. This is a foundational step to understanding how to use `git reset` effectively."
+   },
+   {
+    "i": 25,
+    "rel": 2,
+    "judge": 0,
+    "topic": "Git branching concepts and master branch",
+    "notes": "Covered: GitHub workflow, branching concepts. Relevant to goal: Branching is a related Git concept, but doesn't explain undoing. Still open: Specific Git undo commands like `git reset` and `git revert`."
+   },
+   {
+    "i": 26,
+    "rel": 3,
+    "judge": 0,
+    "topic": "Branching isolation and commit tracking",
+    "notes": "Covered: Branching workflow, commit isolation. Relevant to goal: Branching helps isolate changes, but doesn't directly address undoing mistakes. Still open: Specific Git undo commands like `git reset` and `git revert` and how they work."
+   },
+   {
+    "i": 27,
+    "rel": 3,
+    "judge": 0,
+    "topic": "Branching for feature and hotfix development",
+    "notes": "Covered: Branching workflow, feature branches, hotfix branches. Relevant to goal: Explains why branching is useful, but doesn't mention undoing. Still open: Specific Git undo commands like `git reset` and `git revert` and how they work. The context of branching is helpful for understanding how to isolate mistakes."
+   },
+   {
+    "i": 28,
+    "rel": 2,
+    "judge": 0,
+    "topic": "Creating new Git branches",
+    "notes": "Covered: Branching workflow, creating new branches. Relevant to goal: Branching helps isolate mistakes, but no undo commands yet. Still open: Specific Git undo commands like `git reset` and `git revert` and how they work."
+   },
+   {
+    "i": 29,
+    "rel": 3,
+    "judge": 0,
+    "topic": "Git branch switching and checkout",
+    "notes": "Covered: Branching workflow, switching between branches using `git checkout`. Relevant to goal: Branching allows experimenting without affecting main codebase, indirectly helpful for undoing changes. Still open: Specific Git undo commands like `git reset` and `git revert` and how they work. Need to understand how to undo changes within a branch."
+   },
+   {
+    "i": 30,
+    "rel": 2,
+    "judge": 0,
+    "topic": "Git branch naming and autocompletion",
+    "notes": "Covered: Branch naming conventions, autocompletion in Git. Relevant to goal: Branch naming helps organize work, indirectly preventing mistakes. Still open: Specific Git undo commands like `git reset` and `git revert` and how they work. Need to understand how to undo changes within a branch."
+   },
+   {
+    "i": 31,
+    "rel": 5,
+    "judge": 0,
+    "topic": "Git modification, staging, and committing changes",
+    "notes": "Covered: Saving changes, staging, and committing. Relevant to goal: Demonstrates the process of saving changes, a step before using `git reset` or `git revert`. Still open: Actual undo commands (`git reset`, `git revert`) and their application to incorrect changes."
+   },
+   {
+    "i": 32,
+    "rel": 5,
+    "judge": 0,
+    "topic": "Git diff shows changes between versions",
+    "notes": "Covered: Git diff, visualizing added/removed lines. Relevant to goal: Shows how to identify changes before undoing. Still open: Actual undo commands like `git reset` and `git revert` and how to use them to reverse changes."
+   },
+   {
+    "i": 33,
+    "rel": 3,
+    "judge": 0,
+    "topic": "Git push to GitHub after branch switch",
+    "notes": "Covered: Switching branches, checking status, and pushing to GitHub. Relevant to goal: Shows a workflow after making changes, but not undoing them. Still open: Actual undo commands like `git reset` and `git revert` and how to use them to reverse changes."
+   },
+   {
+    "i": 34,
+    "rel": 0,
+    "judge": 0,
+    "topic": "Pull requests and code merging on GitHub",
+    "notes": "Covered: Pushing code to GitHub, pull requests, code review, merging. Relevant to goal: Indirectly related, shows workflow after changes. Still open: Actual undo commands like `git reset` and `git revert` and how to use them to reverse changes."
+   },
+   {
+    "i": 35,
+    "rel": 2,
+    "judge": 0,
+    "topic": "GitHub pull requests and merging process",
+    "notes": "Covered: GitHub interface, pull requests, merging process. Relevant to goal: Shows workflow *after* changes, but not undoing. Still open: Actual undo commands like `git reset` and `git revert` and how to use them to reverse changes."
+   },
+   {
+    "i": 36,
+    "rel": 2,
+    "judge": 0,
+    "topic": "GitHub pull request commenting and review",
+    "notes": "Covered: Pull request interface, commenting, code diffs. Relevant to goal: Indirectly relevant, shows code review process. Still open: Git commands for undoing changes like `git reset` and `git revert`."
+   },
+   {
+    "i": 37,
+    "rel": 2,
+    "judge": 0,
+    "topic": "Merging pull requests and local branch updates",
+    "notes": "Covered: Pull request merging, branch switching, local vs. remote changes. Relevant to goal: Merging is a workflow step, but doesn't directly address undoing mistakes. Still open: Git commands for undoing changes like `git reset` and `git revert`."
+   },
+   {
+    "i": 38,
+    "rel": 3,
+    "judge": 0,
+    "topic": "Git pull, branch deletion, merge conflicts",
+    "notes": "Covered: Pulling changes, branch deletion, merge conflicts. Relevant to goal: Merge conflicts are a potential outcome of changes, but not undoing. Still open: Git commands for undoing changes like `git reset` and `git revert`."
+   },
+   {
+    "i": 39,
+    "rel": 3,
+    "judge": 0,
+    "topic": "Merge conflicts and Git status",
+    "notes": "Covered: Branch creation, modifying a file, git status. Relevant to goal: Merge conflicts can arise from changes needing undoing. Still open: Specific Git commands for undoing changes like `git reset` and `git revert`."
+   },
+   {
+    "i": 40,
+    "rel": 3,
+    "judge": 0,
+    "topic": "Git commit workflow and shortcuts",
+    "notes": "Covered: Commit process, `git add`, `git commit`. Relevant to goal: Indirectly relevant as commit is a step *before* needing to undo. Still open: Specific commands for undoing changes like `git reset` and `git revert`."
+   },
+   {
+    "i": 41,
+    "rel": 7,
+    "judge": 0,
+    "topic": "Git branch conflicts and committing changes",
+    "notes": "Covered: Branch switching, merge conflicts, `git commit`, `git status`. Relevant to goal: Shows the need to save changes before merging, which is relevant to undoing mistakes. Still open: Specific commands like `git reset` and `git revert` for undoing changes are not yet covered. The conflict situation implies a need to revert changes."
+   },
+   {
+    "i": 42,
+    "rel": 3,
+    "judge": 0,
+    "topic": "Merging branches and keeping them updated",
+    "notes": "Covered: Branch merging, keeping local branches updated with remote changes. Relevant to goal: Merging can be used to revert changes if conflicts arise. Still open: Specific undo commands like `git reset` and `git revert` are not yet discussed."
+   },
+   {
+    "i": 43,
+    "rel": 3,
+    "judge": 0,
+    "topic": "Fixing merge conflicts in Git",
+    "notes": "Covered: Branch merging, resolving conflicts using code editors and terminal. Relevant to goal: Merge conflicts represent a form of reverting changes. Still open: Specific undo commands like `git reset` are not yet discussed. The video explains how to resolve conflicts, which is a form of undoing changes, but not the direct undo goal of the viewer."
+   },
+   {
+    "i": 44,
+    "rel": 10,
+    "judge": 6,
+    "topic": "Undoing stages and commits with Git",
+    "notes": "Covered: Branch merging, resolving conflicts. Relevant to goal: The excerpt directly addresses undoing changes (stages/commits). Still open: Specific commands like `git reset` are still not covered, but the concept of undoing is introduced."
+   },
+   {
+    "i": 45,
+    "rel": 10,
+    "judge": 10,
+    "topic": "Git reset: undo staging and commits",
+    "notes": "Covered: Staging changes, committing changes. Relevant to goal: Explains `git reset` for undoing staging and commits. Still open: Specific scenarios (e.g., undoing a specific commit) and different `git reset` modes (soft, mixed, hard) are not yet covered. The example is simple, but demonstrates the core functionality."
+   },
+   {
+    "i": 46,
+    "rel": 10,
+    "judge": 10,
+    "topic": "Git reset head undoes last commit",
+    "notes": "Covered: `git reset head` undoing the last commit, unstaging changes, `git status`, `git diff`. Relevant to goal: Directly demonstrates undoing a commit. Still open: Specific reset modes (soft, mixed, hard), undoing multiple commits, and scenarios are not yet covered."
+   },
+   {
+    "i": 47,
+    "rel": 10,
+    "judge": 10,
+    "topic": "Git reset with commit hash",
+    "notes": "Covered: Git commit history, commit messages, commit hashes. Relevant to goal: Shows how to undo a specific commit using its hash. Still open: Different `git reset` modes (soft, mixed, hard), undoing multiple commits, and scenarios not yet covered."
+   },
+   {
+    "i": 48,
+    "rel": 10,
+    "judge": 10,
+    "topic": "Git reset --hard: removing commits",
+    "notes": "Covered: Git reset --hard, removing changes, reverting to previous commits. Relevant to goal: Directly shows how to undo changes. Still open: Soft/mixed resets, undoing multiple commits, scenarios like accidentally committing sensitive data."
+   },
+   {
+    "i": 49,
+    "rel": 0,
+    "judge": 1,
+    "topic": "Forking repositories on GitHub",
+    "notes": "Covered: Forking repositories, GitHub user accounts, Vue JS repository size. Relevant to goal: No direct help. Still open: Git reset, staging, commits, PRs, branching. Forking is a distinct operation from undoing changes."
+   },
+   {
+    "i": 50,
+    "rel": 2,
+    "judge": 0,
+    "topic": "Forking repositories and branch management",
+    "notes": "Covered: Forking, branch setup (Dev). Relevant to goal: No direct help with undoing. Still open: Git reset, staging, commits, PRs, branching. Forking is a distinct operation from undoing changes. Branching is related to managing changes, but not undoing them."
+   },
+   {
+    "i": 51,
+    "rel": 2,
+    "judge": 0,
+    "topic": "Pull requests and merging branches",
+    "notes": "Covered: Pull requests, merging branches. Relevant to goal: Merging is a form of undoing changes, but doesn't directly address undoing mistakes. Still open: Git reset, staging, commits, PRs, branching. The excerpt demonstrates merging, which is a form of undoing changes by integrating newer code. However, it doesn't explain how to undo specific commits or changes."
+   },
+   {
+    "i": 52,
+    "rel": 3,
+    "judge": 0,
+    "topic": "Merging branches after code changes",
+    "notes": "Covered: Pull requests, merging branches, branch cleanup. Relevant to goal: Merging *is* a form of undoing changes, but doesn't directly address undoing specific commits or mistakes like Git reset. Still open: Git reset, staging, commits, PRs, branching. The video focuses on the aftermath of merging, not the process of undoing errors."
+   },
+   {
+    "i": 53,
+    "rel": 3,
+    "judge": 0,
+    "topic": "Branching and merging workflow in Git",
+    "notes": "Covered: Branching strategy (dev, master, staging). Relevant to goal: Merging is a form of undoing changes, but not specific mistakes. Still open: Git reset, staging, commits, how to undo specific commits/mistakes."
+   },
+   {
+    "i": 54,
+    "rel": 2,
+    "judge": 0,
+    "topic": "Forking repositories for updates and testing",
+    "notes": "Covered: Forking repositories, pulling, updating, pushing, PRs. Relevant to goal: Indirectly related; shows a way to make changes without fear of breaking main branch. Still open: Specific undo mechanisms like `git reset` are not covered."
+   }
+  ]
+ }
+}

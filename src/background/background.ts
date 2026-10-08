@@ -29,7 +29,7 @@ chrome.runtime.onMessage.addListener((msg: AiRequest, _sender, sendResponse: (r:
     if (status !== 'available') return { ok: false, status, error: `Gemini Nano is ${status}` };
     try {
       if (msg.kind === 'ai:goal-block') {
-        const raw = await prompter.prompt(BLOCK_SYSTEM_PROMPT, buildBlockPrompt(msg.goal, msg.text, msg.title), BLOCK_SCHEMA, GOAL_TIMEOUT_MS);
+        const raw = await prompter.prompt(BLOCK_SYSTEM_PROMPT, buildBlockPrompt(msg.goal, msg.text, msg.title, msg.context), BLOCK_SCHEMA, GOAL_TIMEOUT_MS);
         return { ok: true, goalBlock: parseBlockRating(raw) };
       }
       if (msg.kind === 'ai:goal-sections') {

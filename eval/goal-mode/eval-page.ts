@@ -17,6 +17,7 @@ import { GoalSession, type GoalAnalyzer } from '../../src/content/goal/goal-sess
 interface CallRecord {
   type: 'block' | 'sections';
   blockText?: string;
+  context?: string; // rolling context sent with the block (POC 1.4)
   startMs: number;
   endMs: number;
   ok: boolean;
@@ -44,14 +45,14 @@ async function runGoalEval(key: string, capture: { url: string; body: string }, 
   const now = () => performance.now() - t0;
   const analyzer: GoalAnalyzer = {
     available: () => real.available(),
-    rateBlock: async (g, text, ttl) => {
+    rateBlock: async (g, text, ttl, context) => {
       const startMs = now();
       try {
-        const r = await real.rateBlock(g, text, ttl);
-        calls.push({ type: 'block', blockText: text, startMs, endMs: now(), ok: true });
+        const r = await real.rateBlock(g, text, ttl, context);
+        calls.push({ type: 'block', blockText: text, context, startMs, endMs: now(), ok: true });
         return r;
       } catch (e) {
-        calls.push({ type: 'block', blockText: text, startMs, endMs: now(), ok: false, error: e instanceof Error ? e.message : String(e) });
+        calls.push({ type: 'block', blockText: text, context, startMs, endMs: now(), ok: false, error: e instanceof Error ? e.message : String(e) });
         throw e;
       }
     },
@@ -87,9 +88,11 @@ async function runGoalEval(key: string, capture: { url: string; body: string }, 
       text: b.text,
       topic: r?.topic ?? null,
       relevance: r?.relevance ?? null,
-      relevanceCategory: r?.relevanceCategory ?? null, // set when the scorer is categorical (POC 1.3A+)
+      relevanceCategory: (r as { relevanceCategory?: string } | undefined)?.relevanceCategory ?? null, // only the POC 1.3A categorical scorer set this
       attention: r?.attention ?? null,
       reason: r?.reason ?? null,
+      contextIn: okCall ? (okCall.context ?? '') : null, // notes this block was rated with (POC 1.4)
+      rollingContext: r?.rollingContext ?? null, // notes it returned for the next block (POC 1.4)
       category: target?.label ?? null,
       targetRate: target ? Number(target.rate.toFixed(3)) : null,
       calls: blockCalls.length,
@@ -107,7 +110,7 @@ async function runGoalEval(key: string, capture: { url: string; body: string }, 
       pace: 'normal',
       transcript: { lang: transcript.lang, kind: transcript.kind || 'uploaded', timing: transcript.timing, words: transcript.words.length, endSec: end },
       totalMs: Math.round(totalMs),
-      calls: calls.map(({ blockText, ...c }) => ({ ...c, startMs: Math.round(c.startMs), endMs: Math.round(c.endMs), blockChars: blockText?.length })),
+      calls: calls.map(({ blockText, context, ...c }) => ({ ...c, startMs: Math.round(c.startMs), endMs: Math.round(c.endMs), blockChars: blockText?.length, contextChars: context?.length ?? 0 })),
       blocks: rows,
       sections: session.map.sections(),
     },
@@ -125,4 +128,21 @@ Object.assign(window, {
   },
   goalEvalStatus: (key: string) => runs[key]?.status ?? 'missing',
   goalEvalResult: (key: string) => runs[key],
+  /**
+   * Token counts for the POC 1.4 cost comparison, measured after the runs (not part of the scoring):
+   * Nano's own tokenizer on each text. Returns null where this Chrome can't measure.
+   */
+  async measureTokens(texts: string[]): Promise<(number | null)[]> {
+    const LM = (globalThis as { LanguageModel?: LanguageModelStatic }).LanguageModel;
+    if (!LM) return texts.map(() => null);
+    const session = await LM.create({ expectedInputs: [{ type: 'text', languages: ['en'] }], expectedOutputs: [{ type: 'text', languages: ['en'] }] });
+    const measure = session.measureContextUsage ?? session.measureInputUsage;
+    try {
+      const out: (number | null)[] = [];
+      for (const t of texts) out.push(measure ? await measure.call(session, t) : null);
+      return out;
+    } finally {
+      session.destroy();
+    }
+  },
 });

@@ -8,7 +8,7 @@ export type AiRequest =
   | { kind: 'ai:status' }
   | { kind: 'ai:score'; text: string; context?: ChunkContext }
   // Goal Mode (experimental): rate one transcript block against the user's goal…
-  | { kind: 'ai:goal-block'; goal: string; text: string; title?: string }
+  | { kind: 'ai:goal-block'; goal: string; text: string; title?: string; context?: string }
   // …and group consecutive rated blocks into sections.
   | { kind: 'ai:goal-sections'; goal: string; parts: PartSummary[]; first: number; last: number };
 

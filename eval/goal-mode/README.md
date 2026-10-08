@@ -38,3 +38,7 @@ Report: `docs/goal-mode-poc1-evaluation.md`.
   `npx esbuild eval/goal-mode/run-cdp.ts --bundle --platform=node --format=esm --outfile=/tmp/run-cdp.mjs && EVAL_EXT_ID=<id> EVAL_OUT=<dir>/runs node /tmp/run-cdp.mjs`
 - Comparing a variant with the POC 1.1 baseline: run `analyze.ts` with `EVAL_RUNS`/`EVAL_METRICS_OUT`
   for the variant, then `EVAL_NEW=<variant folder> compare.ts`.
+- POC 1.4 (rolling context): runs also save each block's `contextIn`/`rollingContext`.
+  `context-metrics.ts` reports the notes' size, growth and repetition plus per-block cost against
+  POC 1.1; with `EVAL_EXT_ID` set (eval page open) it counts tokens with Nano's own tokenizer:
+  `npx esbuild eval/goal-mode/context-metrics.ts --bundle --platform=node --format=esm --outfile=/tmp/cm.mjs && EVAL_NEW=eval-results/goal-mode-poc1.4 EVAL_EXT_ID=<id> node /tmp/cm.mjs`
