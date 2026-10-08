@@ -1,0 +1,35 @@
+[
+  {
+    "video": "zjkBMFhNj_g",
+    "url": "https://www.youtube.com/watch?v=zjkBMFhNj_g",
+    "title": "[1hr Talk] Intro to Large Language Models",
+    "channel": "Andrej Karpathy",
+    "goals": {
+      "A": "Understand how large language models are trained, from pretraining on internet text to fine-tuning them into assistants.",
+      "B": "Learn about security attacks on language models, such as jailbreaks, prompt injection and data poisoning.",
+      "C": "Understand how language models use tools like a web browser, a calculator and code execution, and the idea of an LLM operating system."
+    }
+  },
+  {
+    "video": "wjZofJX0v4M",
+    "url": "https://www.youtube.com/watch?v=wjZofJX0v4M",
+    "title": "Transformers, the tech behind LLMs | Deep Learning Chapter 5",
+    "channel": "3Blue1Brown",
+    "goals": {
+      "A": "Understand how word embeddings represent meaning as directions in a high-dimensional space.",
+      "B": "Understand how the softmax function and temperature turn the model's final outputs into a probability distribution.",
+      "C": "Understand the general deep learning background: model weights, parameters and matrix-vector multiplication."
+    }
+  },
+  {
+    "video": "RGOj5yH7evk",
+    "url": "https://www.youtube.com/watch?v=RGOj5yH7evk",
+    "title": "Git and GitHub for Beginners - Crash Course",
+    "channel": "freeCodeCamp.org",
+    "goals": {
+      "A": "Learn how to install Git and connect it to GitHub using SSH keys.",
+      "B": "Learn how branches work and how to merge them, including resolving merge conflicts.",
+      "C": "Learn how to undo changes and mistakes, for example with git reset."
+    }
+  }
+]
