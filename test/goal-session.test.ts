@@ -20,6 +20,7 @@ function analyzer(opts: Partial<{ available: boolean; fail: (n: number) => boole
   let calls = 0;
   const a: GoalAnalyzer & { calls: () => number } = {
     available: async () => opts.available ?? true,
+    breakdownGoal: async () => ['how the agent was trained', 'how it was evaluated', 'training data'],
     rateBlock: async () => {
       const n = calls++;
       if (opts.gate) await opts.gate;
@@ -137,6 +138,7 @@ describe('Goal Mode', () => {
     let n = 0;
     const a: GoalAnalyzer = {
       available: async () => true,
+      breakdownGoal: async () => ['a', 'b', 'c'],
       // Alternate low and high relevance per block.
       rateBlock: async () => ({ topic: `part ${n}`, relevance: n++ % 2 ? 9 : 1, attention: 3, reason: n % 2 ? 'off-topic' : 'about training' }),
       // One section spanning everything: must not change any block's speed.
@@ -179,6 +181,7 @@ describe('Goal Mode', () => {
     let calls = 0;
     const a: GoalAnalyzer = {
       available: async () => true,
+      breakdownGoal: async () => ['a', 'b', 'c'],
       // The first block's two attempts return a non-numeric relevance (the parser rejects it); the rest are fine.
       rateBlock: async () => modelOutput(calls++ < 2 ? 'very relevant' : 10, 8),
       groupSections: async () => null,
@@ -191,75 +194,62 @@ describe('Goal Mode', () => {
     expect(g.decide('A', 300, pace)).toMatchObject({ kind: 'target', rate: 1, label: 'Key part for your goal' });
   });
 
-  describe('rolling context (POC 1.4)', () => {
-    /** Records the notes each call received; each block's notes name the block they came from. */
-    function contextAnalyzer(fail: (text: string, attempt: number) => boolean = () => false) {
-      const seen: { block: string; context: string | undefined }[] = [];
-      const attempts = new Map<string, number>();
+  describe('fixed goal breakdown (POC 1.5)', () => {
+    const NEEDS = ['generating an SSH key', 'adding the key to GitHub', 'testing the connection'];
+    /** Records what each block call received; the breakdown can be made to fail. */
+    function needsAnalyzer(breakdown: () => Promise<string[]>) {
+      const seen: (string[] | null | undefined)[] = [];
+      let breakdowns = 0;
       const a: GoalAnalyzer = {
         available: async () => true,
-        rateBlock: async (_goal, text, _title, context) => {
-          const block = text.split(' ')[0]!;
-          seen.push({ block, context });
-          const n = attempts.get(block) ?? 0;
-          attempts.set(block, n + 1);
-          if (fail(block, n)) throw new Error('model error');
-          return parseBlockRating(JSON.stringify({ topic: 't', relevance: 5, attention: 3, reason: 'r', notes: `after ${block}` }));
+        breakdownGoal: async () => {
+          breakdowns++;
+          return breakdown();
+        },
+        rateBlock: async (_goal, _text, _title, needs) => {
+          seen.push(needs);
+          return modelOutput(5);
         },
         groupSections: async () => null,
       };
-      return { a, seen };
+      return { a, seen, breakdowns: () => breakdowns };
     }
-    const firstWords = (g: GoalController) => g.session!.map.blocks.map((b) => b.text.split(' ')[0]!);
 
-    it('passes each block the notes returned with the block before it', async () => {
+    it('breaks the goal down once and gives every block the same needs', async () => {
       const g = new GoalController();
-      const { a, seen } = contextAnalyzer();
+      const { a, seen, breakdowns } = needsAnalyzer(async () => NEEDS);
       await g.start(baseStart(a));
       await flush();
-      const blocks = firstWords(g);
-      expect(blocks.length).toBeGreaterThan(3);
-      expect(seen.map((c) => c.block)).toEqual(blocks); // chronological from the start
-      expect(seen[0]!.context).toBeUndefined();
-      for (let i = 1; i < blocks.length; i++) expect(seen[i]!.context).toBe(`after ${blocks[i - 1]}`);
-      expect(g.session!.map.rating(0)!.rollingContext).toBe(`after ${blocks[0]}`);
+      expect(breakdowns()).toBe(1);
+      expect(seen.length).toBe(g.session!.map.blocks.length);
+      for (const n of seen) expect(n).toEqual(NEEDS);
+      expect(g.session!.needs).toEqual(NEEDS);
+      expect(g.status('A')!.phase).toBe('ready');
     });
 
-    it('starts without notes when the order jumps (mid-video start and wrap-around)', async () => {
+    it('falls back to scoring without a breakdown when it fails', async () => {
       const g = new GoalController();
-      const { a, seen } = contextAnalyzer();
-      await g.start({ ...baseStart(a), startAt: 300 });
-      await flush();
-      const blocks = firstWords(g);
-      const k = g.session!.map.blockAt(300);
-      expect(k).toBeGreaterThan(0);
-      expect(seen[0]).toEqual({ block: blocks[k], context: undefined });
-      expect(seen[1]!.context).toBe(`after ${blocks[k]}`);
-      const wrap = seen.findIndex((c) => c.block === blocks[0]);
-      expect(seen[wrap]!.context).toBeUndefined(); // never the end of the video's notes
-      expect(seen[wrap + 1]!.context).toBe(`after ${blocks[0]}`);
-    });
-
-    it('retries with the same notes and passes them on past a failed block', async () => {
-      const g = new GoalController();
-      let failing = '';
-      const { a, seen } = contextAnalyzer((block) => block === failing);
-      // Work out block 1's first word from a dry run, then fail it on both attempts.
-      const dry = contextAnalyzer();
-      const g0 = new GoalController();
-      await g0.start(baseStart(dry.a));
-      await flush();
-      const names = firstWords(g0);
-      failing = names[1]!;
+      const { a, seen } = needsAnalyzer(async () => {
+        throw new Error('too few needs');
+      });
       await g.start(baseStart(a));
       await flush();
-      const calls = seen.filter((c) => c.block === names[1]);
-      expect(calls).toEqual([
-        { block: names[1], context: `after ${names[0]}` },
-        { block: names[1], context: `after ${names[0]}` },
-      ]);
-      expect(g.status('A')!.failed).toBe(1);
-      expect(seen.find((c) => c.block === names[2])!.context).toBe(`after ${names[0]}`);
+      expect(g.session!.needs).toBeNull();
+      expect(seen.length).toBe(g.session!.map.blocks.length);
+      for (const n of seen) expect(n).toBeNull();
+      expect(g.status('A')!.phase).toBe('ready');
+      expect(g.decide('A', 100, pace)).toMatchObject({ kind: 'target', rate: 1.4 });
+    });
+
+    it('does not rate blocks for a session stopped while the breakdown runs', async () => {
+      const g = new GoalController();
+      let release!: () => void;
+      const { a, seen } = needsAnalyzer(() => new Promise((r) => (release = () => r(NEEDS))));
+      await g.start(baseStart(a));
+      g.stop();
+      release();
+      await flush();
+      expect(seen.length).toBe(0);
     });
   });
 

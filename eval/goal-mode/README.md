@@ -42,3 +42,7 @@ Report: `docs/goal-mode-poc1-evaluation.md`.
   `context-metrics.ts` reports the notes' size, growth and repetition plus per-block cost against
   POC 1.1; with `EVAL_EXT_ID` set (eval page open) it counts tokens with Nano's own tokenizer:
   `npx esbuild eval/goal-mode/context-metrics.ts --bundle --platform=node --format=esm --outfile=/tmp/cm.mjs && EVAL_NEW=eval-results/goal-mode-poc1.4 EVAL_EXT_ID=<id> node /tmp/cm.mjs`
+- POC 1.5 (fixed goal breakdown): runs save the breakdown as `needs` and its call as a `breakdown`
+  call. `breakdown-metrics.ts` lists each run's breakdown and compares cost with POC 1.1 and 1.4.
+  To compare against a variant other than POC 1.1, set `EVAL_BASE` for `compare.ts`
+  (e.g. `EVAL_BASE=eval-results/goal-mode-poc1.4`); it writes `compare-vs-poc1.4.*`.

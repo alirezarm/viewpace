@@ -13,11 +13,10 @@ import { goalTarget } from './goal-pacing';
 /** On-device analysis used by Goal Mode (Gemini Nano in production, a fake in tests). */
 export interface GoalAnalyzer {
   available(): Promise<boolean>;
-  /**
-   * Throws if the model fails or returns something unusable. `context` is the rolling context:
-   * the notes returned with the previous block's rating (POC 1.4).
-   */
-  rateBlock(goal: string, text: string, title?: string, context?: string): Promise<BlockRating>;
+  /** The goal's information needs, from the goal alone (POC 1.5). Throws if unusable. */
+  breakdownGoal(goal: string): Promise<string[]>;
+  /** Throws if the model fails or returns something unusable. `needs`: the goal breakdown, if any. */
+  rateBlock(goal: string, text: string, title?: string, needs?: string[] | null): Promise<BlockRating>;
   /** Validated sections covering exactly first..last, or null (keep block-level regions). */
   groupSections(goal: string, parts: PartSummary[], first: number, last: number): Promise<SectionRange[] | null>;
 }
@@ -38,6 +37,8 @@ export const MAX_GOAL_LENGTH = 300;
 export class GoalSession {
   readonly map: GoalMap;
   phase: GoalPhase = 'mapping';
+  /** The goal broken into information needs, used unchanged for every block; null = score without it. */
+  needs: string[] | null = null;
   private cancelled = false;
 
   constructor(
@@ -54,14 +55,10 @@ export class GoalSession {
   }
 
   /**
-   * Rate every block (upcoming-first from `startAt`, one retry each), grouping each window into
+   * First break the goal into information needs (one call, goal only; on failure, blocks are scored
+   * without them, exactly as before). Then rate every block (upcoming-first from `startAt`, one retry each), grouping each window into
    * sections once all of its blocks are rated. Stops as soon as the session is cancelled or the
    * user is no longer on this video; results land only in this session's own map.
-   *
-   * Rolling context: each rating returns updated notes, passed with the block right after it.
-   * Notes only ever describe earlier video, so they reset wherever the order jumps (the first
-   * block when starting mid-video, and the wrap-around back to block 0). A failed block passes
-   * the previous notes on. They live only in this run.
    */
   async run(analyzer: GoalAnalyzer, ctx: { isCurrent: () => boolean; startAt: number; title?: string }): Promise<void> {
     const live = () => !this.cancelled && ctx.isCurrent();
@@ -69,17 +66,20 @@ export class GoalSession {
     const k = this.map.blockAt(ctx.startAt);
     const order = [...Array(n).keys()].map((i) => (k + i) % n);
     const grouped = new Set<number>();
-    let context = '';
-    let contextFor = 0; // the block the current notes lead into
+
+    try {
+      this.needs = await analyzer.breakdownGoal(this.goal);
+    } catch {
+      this.needs = null;
+    }
 
     for (const i of order) {
       if (!live()) return;
       const block = this.map.blocks[i]!;
-      if (i !== contextFor) context = '';
       let rating: BlockRating | null = null;
       for (let attempt = 0; attempt < 2 && !rating && live(); attempt++) {
         try {
-          rating = await analyzer.rateBlock(this.goal, block.text, ctx.title, context || undefined);
+          rating = await analyzer.rateBlock(this.goal, block.text, ctx.title, this.needs);
         } catch {
           rating = null;
         }
@@ -87,8 +87,6 @@ export class GoalSession {
       if (!live()) return; // a result that arrives after navigating away is discarded
       if (rating) this.map.setRating(i, rating);
       else this.map.setFailed(i);
-      if (rating) context = rating.rollingContext ?? '';
-      contextFor = i + 1;
 
       const w = Math.floor(i / SECTION_WINDOW);
       if (!grouped.has(w) && this.map.windowRated(w)) {

@@ -1,5 +1,19 @@
 import type { AiRequest, AiResponse } from '../shared/messages';
-import { BLOCK_SCHEMA, BLOCK_SYSTEM_PROMPT, SECTION_SCHEMA, SECTION_SYSTEM_PROMPT, buildBlockPrompt, buildSectionPrompt, parseBlockRating, parseSections } from '../shared/goal-prompt';
+import {
+  BLOCK_SCHEMA,
+  BLOCK_SYSTEM_PROMPT,
+  BLOCK_SYSTEM_PROMPT_WITH_NEEDS,
+  BREAKDOWN_SCHEMA,
+  BREAKDOWN_SYSTEM_PROMPT,
+  SECTION_SCHEMA,
+  SECTION_SYSTEM_PROMPT,
+  buildBlockPrompt,
+  buildBreakdownPrompt,
+  buildSectionPrompt,
+  parseBlockRating,
+  parseBreakdown,
+  parseSections,
+} from '../shared/goal-prompt';
 import { NanoComplexityEngine, NanoPrompter, nanoAvailability } from '../shared/nano';
 import { loadOnboarding, reconcileSmartPacing, saveOnboarding } from '../shared/onboarding';
 import { loadSettings, saveSettings } from '../shared/settings';
@@ -15,7 +29,7 @@ const engine = new NanoComplexityEngine(prompter);
 const GOAL_TIMEOUT_MS = 30000;
 
 chrome.runtime.onMessage.addListener((msg: AiRequest, _sender, sendResponse: (r: AiResponse) => void) => {
-  if (msg?.kind !== 'ai:status' && msg?.kind !== 'ai:score' && msg?.kind !== 'ai:goal-block' && msg?.kind !== 'ai:goal-sections') {
+  if (msg?.kind !== 'ai:status' && msg?.kind !== 'ai:score' && msg?.kind !== 'ai:goal-block' && msg?.kind !== 'ai:goal-breakdown' && msg?.kind !== 'ai:goal-sections') {
     return false;
   }
 
@@ -28,8 +42,14 @@ chrome.runtime.onMessage.addListener((msg: AiRequest, _sender, sendResponse: (r:
     // started from the popup. Until then, report the status instead of trying to create.
     if (status !== 'available') return { ok: false, status, error: `Gemini Nano is ${status}` };
     try {
+      if (msg.kind === 'ai:goal-breakdown') {
+        const raw = await prompter.prompt(BREAKDOWN_SYSTEM_PROMPT, buildBreakdownPrompt(msg.goal), BREAKDOWN_SCHEMA, GOAL_TIMEOUT_MS);
+        return { ok: true, needs: parseBreakdown(raw) };
+      }
       if (msg.kind === 'ai:goal-block') {
-        const raw = await prompter.prompt(BLOCK_SYSTEM_PROMPT, buildBlockPrompt(msg.goal, msg.text, msg.title, msg.context), BLOCK_SCHEMA, GOAL_TIMEOUT_MS);
+        // Without a breakdown this is exactly the POC 1.1 prompt.
+        const system = msg.needs?.length ? BLOCK_SYSTEM_PROMPT_WITH_NEEDS : BLOCK_SYSTEM_PROMPT;
+        const raw = await prompter.prompt(system, buildBlockPrompt(msg.goal, msg.text, msg.title, msg.needs), BLOCK_SCHEMA, GOAL_TIMEOUT_MS);
         return { ok: true, goalBlock: parseBlockRating(raw) };
       }
       if (msg.kind === 'ai:goal-sections') {

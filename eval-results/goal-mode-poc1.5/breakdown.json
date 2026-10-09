@@ -1,0 +1,232 @@
+{
+ "breakdowns": [
+  {
+   "key": "zjkBMFhNj_g-A",
+   "goal": "Understand how large language models are trained, from pretraining on internet text to fine-tuning them into assistants.",
+   "needs": [
+    "Pretraining data sources and methods.",
+    "Fine-tuning process and techniques.",
+    "Role of supervised learning.",
+    "Reinforcement learning's impact.",
+    "Evaluation metrics for LLMs.",
+    "Scaling LLMs: compute & data."
+   ],
+   "ok": true,
+   "ms": 3320
+  },
+  {
+   "key": "zjkBMFhNj_g-B",
+   "goal": "Learn about security attacks on language models, such as jailbreaks, prompt injection and data poisoning.",
+   "needs": [
+    "Understand jailbreak attack methods.",
+    "Define prompt injection vulnerabilities.",
+    "Explain data poisoning risks.",
+    "Identify defenses against these attacks.",
+    "Recognize real-world attack examples.",
+    "Assess potential impact on LLMs."
+   ],
+   "ok": true,
+   "ms": 2807
+  },
+  {
+   "key": "zjkBMFhNj_g-C",
+   "goal": "Understand how language models use tools like a web browser, a calculator and code execution, and the idea of an LLM operating system.",
+   "needs": [
+    "How tools enhance LLM capabilities.",
+    "Specific examples of web browser integration.",
+    "Calculator usage in LLM workflows.",
+    "Code execution's role in LLM tasks.",
+    "Definition of an LLM operating system.",
+    "Benefits of an LLM operating system concept."
+   ],
+   "ok": true,
+   "ms": 4122
+  },
+  {
+   "key": "wjZofJX0v4M-A",
+   "goal": "Understand how word embeddings represent meaning as directions in a high-dimensional space.",
+   "needs": [
+    "Definition of word embeddings.",
+    "How embeddings represent semantic relationships.",
+    "Dimensionality and vector space concepts.",
+    "Methods for creating word embeddings.",
+    "Examples of embedding visualizations.",
+    "Applications of word embeddings."
+   ],
+   "ok": true,
+   "ms": 3297
+  },
+  {
+   "key": "wjZofJX0v4M-B",
+   "goal": "Understand how the softmax function and temperature turn the model's final outputs into a probability distribution.",
+   "needs": [
+    "What is the softmax function's purpose?",
+    "How does temperature affect softmax output?",
+    "What does a probability distribution represent?",
+    "How are outputs normalized by softmax?",
+    "What are the inputs to the softmax function?",
+    "What is the role of temperature scaling?"
+   ],
+   "ok": true,
+   "ms": 4596
+  },
+  {
+   "key": "wjZofJX0v4M-C",
+   "goal": "Understand the general deep learning background: model weights, parameters and matrix-vector multiplication.",
+   "needs": [
+    "Define model weights and parameters clearly.",
+    "Explain matrix-vector multiplication process.",
+    "Illustrate how weights/parameters are used.",
+    "Describe the relationship between them.",
+    "Provide a simple example of multiplication.",
+    "Explain the role of these in learning."
+   ],
+   "ok": true,
+   "ms": 4422
+  },
+  {
+   "key": "RGOj5yH7evk-A",
+   "goal": "Learn how to install Git and connect it to GitHub using SSH keys.",
+   "needs": [
+    "Understand Git versioning concepts.",
+    "Generate an SSH key pair.",
+    "Add SSH key to GitHub account.",
+    "Configure Git with SSH URL.",
+    "Verify SSH connection to GitHub.",
+    "Learn basic Git commands (clone, push)."
+   ],
+   "ok": true,
+   "ms": 4075
+  },
+  {
+   "key": "RGOj5yH7evk-B",
+   "goal": "Learn how branches work and how to merge them, including resolving merge conflicts.",
+   "needs": [
+    "Define what a branch is.",
+    "Explain the branching process.",
+    "Describe merging workflows.",
+    "Detail conflict resolution steps.",
+    "Illustrate practical merging examples.",
+    "Identify common merge conflict types."
+   ],
+   "ok": true,
+   "ms": 3069
+  },
+  {
+   "key": "RGOj5yH7evk-C",
+   "goal": "Learn how to undo changes and mistakes, for example with git reset.",
+   "needs": [
+    "Understand undo concepts in version control.",
+    "Learn `git reset` command's purpose.",
+    "Know different `git reset` modes.",
+    "Identify when to use each `git reset` mode.",
+    "Recognize potential data loss with `git reset`.",
+    "Understand alternative undo strategies."
+   ],
+   "ok": true,
+   "ms": 4599
+  }
+ ],
+ "latency": {
+  "base": {
+   "blockCalls": 387,
+   "callMedianS": 2.57,
+   "callMeanS": 2.59,
+   "callP90S": 2.78,
+   "firstDecisionS": 2.98,
+   "runTotalMeanS": 123.72,
+   "retries": 0,
+   "failedCalls": 0,
+   "timeouts": 0,
+   "unmapped": 0
+  },
+  "rolling": {
+   "blockCalls": 395,
+   "callMedianS": 5.22,
+   "callMeanS": 5.79,
+   "callP90S": 6.17,
+   "firstDecisionS": 5.19,
+   "runTotalMeanS": 266.1,
+   "retries": 8,
+   "failedCalls": 9,
+   "timeouts": 8,
+   "unmapped": 1
+  },
+  "neu": {
+   "blockCalls": 393,
+   "callMedianS": 3,
+   "callMeanS": 3.7,
+   "callP90S": 3.55,
+   "firstDecisionS": 6.9,
+   "runTotalMeanS": 176.95,
+   "retries": 6,
+   "failedCalls": 10,
+   "timeouts": 10,
+   "unmapped": 4
+  }
+ },
+ "tokens": {
+  "systemBase": 199,
+  "systemNew": 217,
+  "systemBreakdown": 111,
+  "breakdownIn": {
+   "mean": 28,
+   "p90": 37,
+   "max": 37
+  },
+  "breakdownOut": {
+   "mean": 55.44,
+   "p90": 65,
+   "max": 65
+  },
+  "inBase": {
+   "mean": 301.73,
+   "p90": 363,
+   "max": 397
+  },
+  "inNew": {
+   "mean": 365.9,
+   "p90": 428,
+   "max": 467
+  },
+  "outBase": {
+   "mean": 41.63,
+   "p90": 46,
+   "max": 53
+  },
+  "outNew": {
+   "mean": 42.49,
+   "p90": 47,
+   "max": 54
+  }
+ },
+ "rollingTokens": {
+  "systemBase": 199,
+  "systemNew": 301,
+  "inBase": {
+   "mean": 301.73,
+   "p90": 363,
+   "max": 397
+  },
+  "inNew": {
+   "mean": 374.91,
+   "p90": 446,
+   "max": 483
+  },
+  "outBase": {
+   "mean": 41.63,
+   "p90": 46,
+   "max": 53
+  },
+  "outNew": {
+   "mean": 106.45,
+   "p90": 127,
+   "max": 153
+  },
+  "notes": {
+   "mean": 65.81,
+   "p90": 84,
+   "max": 110
+  }
+ }
+}

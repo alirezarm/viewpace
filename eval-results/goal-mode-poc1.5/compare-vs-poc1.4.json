@@ -1,0 +1,1987 @@
+{
+  "old": {
+    "ratings": 386,
+    "unrated": 1,
+    "precisionHigh": 0.43,
+    "recallHigh": 0.98,
+    "gmHigh": 145,
+    "judgeHigh": 63,
+    "bothHigh": 62,
+    "falseHigh": 59,
+    "falseHighPctOfGmHigh": 40.69,
+    "falseHighPctOfAll": 15.28,
+    "falseLow": 0,
+    "pearson": 0.77,
+    "spearman": 0.74,
+    "mae": 3.01,
+    "meanSigned": 2.88,
+    "relMean": 5.01,
+    "relMedian": 5,
+    "relSd": 2.97,
+    "pctGe7": 37.56,
+    "pctGe8": 20.47,
+    "hist": [
+      15,
+      0,
+      77,
+      93,
+      0,
+      56,
+      0,
+      66,
+      15,
+      3,
+      61
+    ],
+    "attMean": 4.82,
+    "multiGoalHigh": 37,
+    "sensitivity": {
+      "meanAbsRelDiff": 3.52,
+      "pctRelDiffGe2": 73.75,
+      "pctRelDiffGe3": 59.89,
+      "top20Jaccard": 0.05,
+      "top20JaccardTiesIncl": 0.07,
+      "maxTop20JaccardTiesIncl": 0.27,
+      "pctSpeedDiffers": 78.45,
+      "meanAbsSpeedDiff": 0.44
+    },
+    "playback": {
+      "rawMin": 465.54,
+      "goalModeMin": 333.03,
+      "reductionPct": 28.46,
+      "judgePacedMin": 276.02,
+      "slowMin": 165.07,
+      "slowOnJudgeLowPct": 39.61,
+      "judgeHighPlayedFastMin": 0
+    },
+    "latency": {
+      "firstDecisionS": 5.19,
+      "maxFirstDecisionS": 5.86,
+      "first5MinS": 24.48,
+      "callMedianS": 5.16,
+      "mappingSpeedX": 12.19,
+      "retries": 8,
+      "failedBlocks": 1,
+      "sectionCalls": 14,
+      "sectionCallsValid": 8
+    }
+  },
+  "new": {
+    "ratings": 383,
+    "unrated": 4,
+    "precisionHigh": 0.59,
+    "recallHigh": 0.92,
+    "gmHigh": 99,
+    "judgeHigh": 63,
+    "bothHigh": 58,
+    "falseHigh": 21,
+    "falseHighPctOfGmHigh": 21.21,
+    "falseHighPctOfAll": 5.48,
+    "falseLow": 1,
+    "pearson": 0.84,
+    "spearman": 0.75,
+    "mae": 2.16,
+    "meanSigned": 1.93,
+    "relMean": 4.07,
+    "relMedian": 3,
+    "relSd": 2.91,
+    "pctGe7": 25.85,
+    "pctGe8": 14.1,
+    "hist": [
+      23,
+      0,
+      137,
+      87,
+      1,
+      36,
+      0,
+      45,
+      6,
+      2,
+      46
+    ],
+    "attMean": 4.51,
+    "multiGoalHigh": 6,
+    "sensitivity": {
+      "meanAbsRelDiff": 3.52,
+      "pctRelDiffGe2": 63.87,
+      "pctRelDiffGe3": 54.49,
+      "top20Jaccard": 0.06,
+      "top20JaccardTiesIncl": 0.08,
+      "maxTop20JaccardTiesIncl": 0.31,
+      "pctSpeedDiffers": 75.71,
+      "meanAbsSpeedDiff": 0.48
+    },
+    "playback": {
+      "rawMin": 465.54,
+      "goalModeMin": 303.81,
+      "reductionPct": 34.74,
+      "judgePacedMin": 274.91,
+      "slowMin": 115.65,
+      "slowOnJudgeLowPct": 23.33,
+      "judgeHighPlayedFastMin": 0.64
+    },
+    "latency": {
+      "firstDecisionS": 6.9,
+      "maxFirstDecisionS": 7.83,
+      "first5MinS": 17.89,
+      "callMedianS": 2.95,
+      "mappingSpeedX": 19.25,
+      "retries": 6,
+      "failedBlocks": 4,
+      "sectionCalls": 11,
+      "sectionCallsValid": 7
+    }
+  },
+  "categories": null,
+  "oldHighSetJaccard": {
+    "mean": 0.2,
+    "max": 0.63
+  },
+  "perRun": [
+    {
+      "video": "zjkBMFhNj_g",
+      "goal": "A",
+      "judgeHigh": 12,
+      "old": {
+        "gmHigh": 28,
+        "prec": 0.43,
+        "rec": 1,
+        "fh": 12
+      },
+      "neu": {
+        "gmHigh": 19,
+        "prec": 0.53,
+        "rec": 0.83,
+        "fh": 5
+      }
+    },
+    {
+      "video": "zjkBMFhNj_g",
+      "goal": "B",
+      "judgeHigh": 11,
+      "old": {
+        "gmHigh": 12,
+        "prec": 0.92,
+        "rec": 1,
+        "fh": 0
+      },
+      "neu": {
+        "gmHigh": 11,
+        "prec": 1,
+        "rec": 1,
+        "fh": 0
+      }
+    },
+    {
+      "video": "zjkBMFhNj_g",
+      "goal": "C",
+      "judgeHigh": 7,
+      "old": {
+        "gmHigh": 28,
+        "prec": 0.25,
+        "rec": 1,
+        "fh": 18
+      },
+      "neu": {
+        "gmHigh": 13,
+        "prec": 0.54,
+        "rec": 1,
+        "fh": 3
+      }
+    },
+    {
+      "video": "wjZofJX0v4M",
+      "goal": "A",
+      "judgeHigh": 4,
+      "old": {
+        "gmHigh": 11,
+        "prec": 0.36,
+        "rec": 1,
+        "fh": 3
+      },
+      "neu": {
+        "gmHigh": 7,
+        "prec": 0.57,
+        "rec": 1,
+        "fh": 0
+      }
+    },
+    {
+      "video": "wjZofJX0v4M",
+      "goal": "B",
+      "judgeHigh": 3,
+      "old": {
+        "gmHigh": 7,
+        "prec": 0.43,
+        "rec": 1,
+        "fh": 3
+      },
+      "neu": {
+        "gmHigh": 6,
+        "prec": 0.5,
+        "rec": 1,
+        "fh": 2
+      }
+    },
+    {
+      "video": "wjZofJX0v4M",
+      "goal": "C",
+      "judgeHigh": 4,
+      "old": {
+        "gmHigh": 15,
+        "prec": 0.2,
+        "rec": 0.75,
+        "fh": 9
+      },
+      "neu": {
+        "gmHigh": 4,
+        "prec": 0.75,
+        "rec": 0.75,
+        "fh": 0
+      }
+    },
+    {
+      "video": "RGOj5yH7evk",
+      "goal": "A",
+      "judgeHigh": 5,
+      "old": {
+        "gmHigh": 13,
+        "prec": 0.38,
+        "rec": 1,
+        "fh": 8
+      },
+      "neu": {
+        "gmHigh": 12,
+        "prec": 0.33,
+        "rec": 0.8,
+        "fh": 8
+      }
+    },
+    {
+      "video": "RGOj5yH7evk",
+      "goal": "B",
+      "judgeHigh": 13,
+      "old": {
+        "gmHigh": 23,
+        "prec": 0.57,
+        "rec": 1,
+        "fh": 3
+      },
+      "neu": {
+        "gmHigh": 21,
+        "prec": 0.57,
+        "rec": 0.92,
+        "fh": 2
+      }
+    },
+    {
+      "video": "RGOj5yH7evk",
+      "goal": "C",
+      "judgeHigh": 4,
+      "old": {
+        "gmHigh": 8,
+        "prec": 0.5,
+        "rec": 1,
+        "fh": 3
+      },
+      "neu": {
+        "gmHigh": 6,
+        "prec": 0.67,
+        "rec": 1,
+        "fh": 1
+      }
+    }
+  ],
+  "transitions": {
+    "oldHighToNewLow": 34,
+    "oldHighToNewMid": 17,
+    "oldHighStayHigh": 94,
+    "oldLowToNewHigh": 5,
+    "meanChange": -0.92
+  },
+  "counts": {
+    "fixedFalseHigh": 42,
+    "remainingFalseHigh": 21,
+    "newFalseHigh": 4,
+    "correctHighLost": 4,
+    "judgeHighMissed": 5,
+    "judgeHighFalseLow": 1,
+    "judgeMidDroppedToLow": 2
+  },
+  "examples": {
+    "fixedFalseHigh": [
+      {
+        "video": "zjkBMFhNj_g",
+        "goal": "A",
+        "index": 0,
+        "time": "0:00–1:03",
+        "judge": 1,
+        "old": {
+          "relevance": 7,
+          "attention": 3,
+          "speed": 1.15,
+          "reason": "Defines LLM and introduces a specific, popular model. Helpful for understanding."
+        },
+        "new": {
+          "relevance": 5,
+          "attention": 3,
+          "speed": 1.4,
+          "topic": "LLM definition and Llama 2 model",
+          "reason": "Provides a basic definition and mentions a specific model (Llama 2), which is a实"
+        },
+        "text": "hi everyone so recently I gave a 30-minute talk on large language models just kind of like an intro talk um unfortunately that talk was not recorded but a lot of people came to me after the talk and t…"
+      },
+      {
+        "video": "zjkBMFhNj_g",
+        "goal": "A",
+        "index": 21,
+        "time": "24:56–26:14",
+        "judge": 3,
+        "old": {
+          "relevance": 7,
+          "attention": 6,
+          "speed": 1.15,
+          "reason": "Introduces scaling laws, a key concept in LLM training, linking model size & 1st"
+        },
+        "new": {
+          "relevance": 5,
+          "attention": 7,
+          "speed": 1.4,
+          "topic": "Scaling laws and LLM performance prediction",
+          "reason": "Introduces scaling laws, a key concept in LLM training, but doesn't directly map"
+        },
+        "text": "but roughly speaking what you're seeing today in the ecosystem system is that the closed models work a lot better but you can't really work with them fine-tune them uh download them Etc you can use th…"
+      },
+      {
+        "video": "zjkBMFhNj_g",
+        "goal": "A",
+        "index": 24,
+        "time": "28:15–29:17",
+        "judge": 1,
+        "old": {
+          "relevance": 8,
+          "attention": 7,
+          "speed": 1,
+          "reason": "Explains how LLMs use external tools (like browsers) during operation, which is间"
+        },
+        "new": {
+          "relevance": 3,
+          "attention": 6,
+          "speed": 1.75,
+          "topic": "LLM using browsing tools for research",
+          "reason": "Illustrates a specific application (browsing) of LLMs, not training."
+        },
+        "text": "uh it is not to answer directly as a language model by itself but it is to use tools that help it perform the task so in this case a very reasonable tool to use uh would be for example the browser so …"
+      },
+      {
+        "video": "zjkBMFhNj_g",
+        "goal": "A",
+        "index": 30,
+        "time": "35:46–37:03",
+        "judge": 0,
+        "old": {
+          "relevance": 7,
+          "attention": 7,
+          "speed": 1,
+          "reason": "Explains a key limitation of current LLMs, impacting their reasoning abilities."
+        },
+        "new": {
+          "relevance": 2,
+          "attention": 6,
+          "speed": 2,
+          "topic": "LLMs lack conscious reasoning; system 1 behavior",
+          "reason": "Discusses LLMs' current limitations (system 1 vs system 2), not training methods"
+        },
+        "text": "but when I tell you what is 17 24 well you don't have that answer ready and so you engage a different part of your brain one that is more rational slower performs complex decision- making and feels a …"
+      },
+      {
+        "video": "zjkBMFhNj_g",
+        "goal": "A",
+        "index": 31,
+        "time": "37:03–38:12",
+        "judge": 1,
+        "old": {
+          "relevance": 7,
+          "attention": 7,
+          "speed": 1,
+          "reason": "Explains limitations of current LLMs, hinting at the need for improved reasoning"
+        },
+        "new": {
+          "relevance": null,
+          "attention": null,
+          "speed": null,
+          "topic": null,
+          "reason": null
+        },
+        "text": "so uh this is basically large language working in a system one setting so a lot of people I think are inspired by what it could be to give larger language WS a system two intuitively what we want to d…"
+      },
+      {
+        "video": "zjkBMFhNj_g",
+        "goal": "A",
+        "index": 34,
+        "time": "40:50–42:15",
+        "judge": 3,
+        "old": {
+          "relevance": 7,
+          "attention": 4,
+          "speed": 1.15,
+          "reason": "Explains fine-tuning and other customization methods, directly relevant to goal."
+        },
+        "new": {
+          "relevance": 5,
+          "attention": 4,
+          "speed": 1.4,
+          "topic": "Customizing LLMs for specific tasks",
+          "reason": "Discusses fine-tuning and customization, relevant to the goal, but focuses on a"
+        },
+        "text": "so as you can imagine the economy has like nooks and crannies and there's lots of different types of tasks large diversity of them and it's possible that we actually want to customize these large lang…"
+      },
+      {
+        "video": "zjkBMFhNj_g",
+        "goal": "A",
+        "index": 35,
+        "time": "42:15–43:27",
+        "judge": 0,
+        "old": {
+          "relevance": 7,
+          "attention": 6,
+          "speed": 1.15,
+          "reason": "Provides a high-level conceptual understanding of LLMs' potential, linking to a"
+        },
+        "new": {
+          "relevance": 3,
+          "attention": 4,
+          "speed": 1.75,
+          "topic": "LLM as operating system kernel",
+          "reason": "Conceptual overview, not specific training details."
+        },
+        "text": "everything so now let me try to tie everything together into a single diagram this is my attempt so in my mind based on the information that I've shown you and just tying it all together I don't think…"
+      },
+      {
+        "video": "zjkBMFhNj_g",
+        "goal": "A",
+        "index": 36,
+        "time": "43:27–44:22",
+        "judge": 0,
+        "old": {
+          "relevance": 7,
+          "attention": 6,
+          "speed": 1.15,
+          "reason": "Provides analogy for context window, helpful for understanding LLM operation."
+        },
+        "new": {
+          "relevance": 5,
+          "attention": 6,
+          "speed": 1.4,
+          "topic": "LLM context window as working memory",
+          "reason": "Explains context window's role, relevant to LLM operation but not training."
+        },
+        "text": "uh living in an App Store that can sort of coordinate uh for problem solving and so I see a lot of equivalence between this new llm OS operating system and operating systems of today and this is kind …"
+      },
+      {
+        "video": "zjkBMFhNj_g",
+        "goal": "C",
+        "index": 8,
+        "time": "9:51–10:47",
+        "judge": 0,
+        "old": {
+          "relevance": 7,
+          "attention": 6,
+          "speed": 1.15,
+          "reason": "Illustrates LLM's ability to generate plausible but incorrect information, a key"
+        },
+        "new": {
+          "relevance": null,
+          "attention": null,
+          "speed": null,
+          "topic": null,
+          "reason": null
+        },
+        "text": "the title the author the ISBN number everything else this is all just totally made up by the network uh the network is dreaming text uh from the distribution that it was trained on it's it's just mimi…"
+      },
+      {
+        "video": "zjkBMFhNj_g",
+        "goal": "C",
+        "index": 12,
+        "time": "14:31–15:59",
+        "judge": 0,
+        "old": {
+          "relevance": 7,
+          "attention": 6,
+          "speed": 1.15,
+          "reason": "Explains how assistant models are created, which is a step towards an LLM OS."
+        },
+        "new": {
+          "relevance": 5,
+          "attention": 6,
+          "speed": 1.4,
+          "topic": "Assistant models and data labeling process",
+          "reason": "Explains how assistant models are created, which is relevant to LLM capabilities"
+        },
+        "text": "and this is where we obtain what we call an assistant model because we don't actually really just want a document generators that's not very helpful for many tasks we want um to give questions to some…"
+      },
+      {
+        "video": "zjkBMFhNj_g",
+        "goal": "C",
+        "index": 14,
+        "time": "16:59–17:52",
+        "judge": 0,
+        "old": {
+          "relevance": 7,
+          "attention": 6,
+          "speed": 1.15,
+          "reason": "Explains how fine-tuning creates helpful assistant behavior, linking it to the '"
+        },
+        "new": {
+          "relevance": 5,
+          "attention": 7,
+          "speed": 1.4,
+          "topic": "LLM training: pre-training vs fine-tuning",
+          "reason": "Explains model training stages, relevant to understanding LLM capabilities, but"
+        },
+        "text": "understands that it should answer in the style of a helpful assistant to these kinds of questions and it will do that so it will sample word by word again from left to right from top to bottom all the…"
+      },
+      {
+        "video": "zjkBMFhNj_g",
+        "goal": "C",
+        "index": 15,
+        "time": "17:52–19:13",
+        "judge": 0,
+        "old": {
+          "relevance": 7,
+          "attention": 6,
+          "speed": 1.15,
+          "reason": "Explains the foundational steps of LLM development, which are necessary to grasp"
+        },
+        "new": {
+          "relevance": 3,
+          "attention": 7,
+          "speed": 1.75,
+          "topic": "LLM pre-training and fine-tuning process",
+          "reason": "Describes the foundational stages of LLM development, but doesn't directly cover"
+        },
+        "text": "manner so roughly speaking here are the two major parts of obtaining something like chpt there's the stage one pre-training and stage two fine-tuning in the pre-training stage you get a ton of text fr…"
+      },
+      {
+        "video": "zjkBMFhNj_g",
+        "goal": "C",
+        "index": 30,
+        "time": "35:46–37:03",
+        "judge": 1,
+        "old": {
+          "relevance": 7,
+          "attention": 7,
+          "speed": 1,
+          "reason": "Explains LLMs' current limitations (system 1 only), hinting at a need for system"
+        },
+        "new": {
+          "relevance": 3,
+          "attention": 6,
+          "speed": 1.75,
+          "topic": "System 1 vs System 2 reasoning in LLMs",
+          "reason": "Explains LLMs' current limitations (system 1 only), indirectly hinting at the *n"
+        },
+        "text": "but when I tell you what is 17 24 well you don't have that answer ready and so you engage a different part of your brain one that is more rational slower performs complex decision- making and feels a …"
+      },
+      {
+        "video": "zjkBMFhNj_g",
+        "goal": "C",
+        "index": 32,
+        "time": "38:12–39:34",
+        "judge": 0,
+        "old": {
+          "relevance": 7,
+          "attention": 6,
+          "speed": 1.15,
+          "reason": "Illustrates self-improvement, relevant to LLM OS concept."
+        },
+        "new": {
+          "relevance": 2,
+          "attention": 6,
+          "speed": 2,
+          "topic": "AlphaGo's self-improvement process",
+          "reason": "Discusses self-improvement, relevant to LLM OS, but not tools directly."
+        },
+        "text": "um this was a go playing program developed by Deep Mind and alphago actually had two major stages uh the first release of it did in the first stage you learn by imitating human expert players so you t…"
+      },
+      {
+        "video": "zjkBMFhNj_g",
+        "goal": "C",
+        "index": 33,
+        "time": "39:34–40:50",
+        "judge": 1,
+        "old": {
+          "relevance": 7,
+          "attention": 7,
+          "speed": 1,
+          "reason": "Discusses the challenge of self-improvement due to lack of general reward, which"
+        },
+        "new": {
+          "relevance": 2,
+          "attention": 6,
+          "speed": 2,
+          "topic": "Self-improvement and reward criteria in LLMs",
+          "reason": "Discusses limitations of current LLM training, not tool use."
+        },
+        "text": "self-improvement so I think a lot of people are kind of interested in what is the equivalent of this step number two for large language models because today we're only doing step one we are imitating …"
+      },
+      {
+        "video": "zjkBMFhNj_g",
+        "goal": "C",
+        "index": 38,
+        "time": "45:43–46:57",
+        "judge": 1,
+        "old": {
+          "relevance": 7,
+          "attention": 7,
+          "speed": 1,
+          "reason": "Illustrates safety challenges, indirectly relates to tool limitations."
+        },
+        "new": {
+          "relevance": 3,
+          "attention": 6,
+          "speed": 1.75,
+          "topic": "LLM security challenges: jailbreak attacks",
+          "reason": "Touches on LLM capabilities & safety, but not directly about tools or OS. Illust"
+        },
+        "text": "okay so now I want to switch gears one more time so far I've spoken about large language models and the promise they hold is this new Computing stack new Computing Paradigm and it's wonderful but just…"
+      },
+      {
+        "video": "zjkBMFhNj_g",
+        "goal": "C",
+        "index": 39,
+        "time": "46:57–47:47",
+        "judge": 0,
+        "old": {
+          "relevance": 7,
+          "attention": 6,
+          "speed": 1.15,
+          "reason": "Illustrates prompt engineering's power to bypass safety, relevant to tool use."
+        },
+        "new": {
+          "relevance": 2,
+          "attention": 5,
+          "speed": 2,
+          "topic": "Jailbreak attacks on language models",
+          "reason": "Discusses adversarial attacks, not tool use or LLM OS, but relevant to LLM's 'v7"
+        },
+        "text": "uh query and it will tell you all about the production of Napal and fundamentally the reason this works is we're fooling Chachi BT through rooll playay so we're not actually going to manufacture Napal…"
+      },
+      {
+        "video": "zjkBMFhNj_g",
+        "goal": "C",
+        "index": 40,
+        "time": "47:47–49:00",
+        "judge": 0,
+        "old": {
+          "relevance": 8,
+          "attention": 7,
+          "speed": 1,
+          "reason": "Illustrates how LLMs can be tricked by encoding prompts, demonstrating a tool-ab"
+        },
+        "new": {
+          "relevance": 3,
+          "attention": 7,
+          "speed": 1.75,
+          "topic": "Base64 encoding and LLM language fluency",
+          "reason": "Illustrates LLM's ability to understand different 'languages' (like Base64), but"
+        },
+        "text": "principle um for example consider the following if you go to Claud and you say what tools do I need to cut down a stop sign Cloud will refuse we are not we don't want people damaging public property u…"
+      },
+      {
+        "video": "zjkBMFhNj_g",
+        "goal": "C",
+        "index": 41,
+        "time": "49:00–50:24",
+        "judge": 0,
+        "old": {
+          "relevance": 8,
+          "attention": 7,
+          "speed": 1,
+          "reason": "Illustrates how LLMs can be tricked, relevant to external tool usage."
+        },
+        "new": {
+          "relevance": 3,
+          "attention": 7,
+          "speed": 1.75,
+          "topic": "Jailbreaking LLMs with universal suffixes",
+          "reason": "Discusses adversarial attacks, not tool use or OS, but relevant to LLM safety &"
+        },
+        "text": "uh harmful queries it learns to refuse harmful queries in English mostly so to a large extent you can um improve the situation by giving maybe multilingual um data in the training set but in this case…"
+      },
+      {
+        "video": "zjkBMFhNj_g",
+        "goal": "C",
+        "index": 42,
+        "time": "50:24–51:29",
+        "judge": 1,
+        "old": {
+          "relevance": 7,
+          "attention": 7,
+          "speed": 1,
+          "reason": "Illustrates a method of jailbreaking, indirectly relevant to understanding LLM's"
+        },
+        "new": {
+          "relevance": 2,
+          "attention": 7,
+          "speed": 2,
+          "topic": "Jailbreaking LLMs with adversarial examples",
+          "reason": "Discusses model vulnerabilities, not tool use or OS."
+        },
+        "text": "that is also kind of uh going to jailbreak the model so these words kind of act as an kind of like an adversarial example to the large language model and jailbreak it in this case here's another examp…"
+      },
+      {
+        "video": "zjkBMFhNj_g",
+        "goal": "C",
+        "index": 43,
+        "time": "51:29–52:41",
+        "judge": 2,
+        "old": {
+          "relevance": 7,
+          "attention": 7,
+          "speed": 1,
+          "reason": "Illustrates how LLMs can be manipulated with hidden instructions, directly tying"
+        },
+        "new": {
+          "relevance": 2,
+          "attention": 5,
+          "speed": 2,
+          "topic": "Prompt injection attack example",
+          "reason": "Illustrates LLM vulnerability, not tool use directly."
+        },
+        "text": "models let me now talk about a different type of attack called The Prompt injection attack so consider this example so here we have an image and we uh we paste this image to chat GPT and say what does…"
+      },
+      {
+        "video": "zjkBMFhNj_g",
+        "goal": "C",
+        "index": 44,
+        "time": "52:41–53:57",
+        "judge": 2,
+        "old": {
+          "relevance": 7,
+          "attention": 6,
+          "speed": 1.15,
+          "reason": "Illustrates how external web content can manipulate LLM output, indirectly tied."
+        },
+        "new": {
+          "relevance": 2,
+          "attention": 7,
+          "speed": 2,
+          "topic": "Prompt injection attacks via web pages",
+          "reason": "Explains a security vulnerability affecting LLMs using web browsing, indirectly"
+        },
+        "text": "but in addition to that if you look closely at the response it says however um so do watch these movies they're amazing however before you do that I have some great news for you you have just won an A…"
+      },
+      {
+        "video": "zjkBMFhNj_g",
+        "goal": "C",
+        "index": 45,
+        "time": "53:57–55:09",
+        "judge": 1,
+        "old": {
+          "relevance": 8,
+          "attention": 7,
+          "speed": 1,
+          "reason": "Illustrates a sophisticated prompt injection method involving external data ex-)"
+        },
+        "new": {
+          "relevance": 2,
+          "attention": 7,
+          "speed": 2,
+          "topic": "Prompt injection attack via image URLs",
+          "reason": "Illustrates a security risk, but doesn't directly address LLM tools or OS."
+        },
+        "text": "suppose you ask suppose someone shares a Google doc with you uh so this is uh a Google doc that someone just shared with you and you ask Bard the Google llm to help you somehow with this Google doc ma…"
+      },
+      {
+        "video": "wjZofJX0v4M",
+        "goal": "A",
+        "index": 4,
+        "time": "4:29–5:53",
+        "judge": 1,
+        "old": {
+          "relevance": 7,
+          "attention": 6,
+          "speed": 1.15,
+          "reason": "Describes how vectors are processed further, hinting at meaning encoding."
+        },
+        "new": {
+          "relevance": 3,
+          "attention": 4,
+          "speed": 1.75,
+          "topic": "Transformer architecture: attention and MLP blocks",
+          "reason": "Describes a part of the transformer, but doesn't directly explain word embedding"
+        },
+        "text": "After that, these vectors pass through a different kind of operation, and depending on the source that you're reading this will be referred to as a multi-layer perceptron or maybe a feed-forward layer…"
+      },
+      {
+        "video": "wjZofJX0v4M",
+        "goal": "A",
+        "index": 18,
+        "time": "20:23–21:40",
+        "judge": 1,
+        "old": {
+          "relevance": 7,
+          "attention": 6,
+          "speed": 1.15,
+          "reason": "Explains how the final embedding is used for prediction, hinting at vector roles"
+        },
+        "new": {
+          "relevance": 2,
+          "attention": 4,
+          "speed": 2,
+          "topic": "Probability distribution and softmax in LLMs",
+          "reason": "Indirectly related; discusses output prediction but lacks embedding definition/s"
+        },
+        "text": "We'll go into the details of attention in due time, but skipping ahead I want to talk for a minute about what happens at the very end. Remember, the desired output is a probability distribution over a…"
+      },
+      {
+        "video": "wjZofJX0v4M",
+        "goal": "A",
+        "index": 22,
+        "time": "25:06–26:03",
+        "judge": 0,
+        "old": {
+          "relevance": 7,
+          "attention": 7,
+          "speed": 1,
+          "reason": "Explains logits, which are raw outputs of word embeddings before softmax, a step"
+        },
+        "new": {
+          "relevance": 3,
+          "attention": 7,
+          "speed": 1.75,
+          "topic": "Logits and word embeddings in GPT-3",
+          "reason": "Mentions word embeddings but focuses on GPT-3's internal workings, not the core"
+        },
+        "text": "Technically speaking, the API doesn't actually let you pick a temperature bigger than 2. There's no mathematical reason for this, it's just an arbitrary constraint imposed to keep their tool from bein…"
+      },
+      {
+        "video": "wjZofJX0v4M",
+        "goal": "B",
+        "index": 1,
+        "time": "1:13–2:41",
+        "judge": 3,
+        "old": {
+          "relevance": 10,
+          "attention": 5,
+          "speed": 1.15,
+          "reason": "Explains how the model predicts the next word as a probability distribution."
+        },
+        "new": {
+          "relevance": 5,
+          "attention": 3,
+          "speed": 1.4,
+          "topic": "Transformer models and text prediction",
+          "reason": "Describes the model's output as a probability distribution, but doesn't explain/"
+        },
+        "text": "And the original transformer introduced in 2017 by Google was invented for the specific use case of translating text from one language into another. But the variant that you and I will focus on, which…"
+      },
+      {
+        "video": "wjZofJX0v4M",
+        "goal": "C",
+        "index": 3,
+        "time": "3:30–4:29",
+        "judge": 1,
+        "old": {
+          "relevance": 8,
+          "attention": 7,
+          "speed": 1,
+          "reason": "Explains vector representation and attention's role in meaning encoding, linking"
+        },
+        "new": {
+          "relevance": 3,
+          "attention": 4,
+          "speed": 1.75,
+          "topic": "Vector representations encode word meaning",
+          "reason": "Touches on vector encoding, but lacks matrix-vector multiplication details."
+        },
+        "text": "If images or sound are involved, then tokens could be little patches of that image or little chunks of that sound. Each one of these tokens is then associated with a vector, meaning some list of numbe…"
+      },
+      {
+        "video": "wjZofJX0v4M",
+        "goal": "C",
+        "index": 12,
+        "time": "13:15–14:21",
+        "judge": 3,
+        "old": {
+          "relevance": 7,
+          "attention": 6,
+          "speed": 1.15,
+          "reason": "Explains embedding vectors and their geometric interpretation, relevant to the '"
+        },
+        "new": {
+          "relevance": 3,
+          "attention": 4,
+          "speed": 1.75,
+          "topic": "Word embeddings and high-dimensional space",
+          "reason": "Touches on embedding vectors, foundational to deep learning, but doesn't explain"
+        },
+        "text": "We label it W_E, and like all the matrices we see, its values begin random, but they're going to be learned based on data. Turning words into vectors was common practice in machine learning long befor…"
+      },
+      {
+        "video": "wjZofJX0v4M",
+        "goal": "C",
+        "index": 13,
+        "time": "14:21–15:15",
+        "judge": 1,
+        "old": {
+          "relevance": 7,
+          "attention": 6,
+          "speed": 1.15,
+          "reason": "Illustrates how model weights create semantic relationships between words, which"
+        },
+        "new": {
+          "relevance": 3,
+          "attention": 4,
+          "speed": 1.75,
+          "topic": "Semantic meaning in word embeddings",
+          "reason": "Illustrates embedding semantic meaning, indirectly related to weights/parameters"
+        },
+        "text": "The big idea here is that as a model tweaks and tunes its weights to determine how exactly words get embedded as vectors during training, it tends to settle on a set of embeddings where directions in …"
+      },
+      {
+        "video": "wjZofJX0v4M",
+        "goal": "C",
+        "index": 14,
+        "time": "15:15–16:27",
+        "judge": 0,
+        "old": {
+          "relevance": 7,
+          "attention": 6,
+          "speed": 1.15,
+          "reason": "Illustrates how embeddings encode relationships, hinting at underlying model-gem"
+        },
+        "new": {
+          "relevance": 2,
+          "attention": 5,
+          "speed": 2,
+          "topic": "Embedding space and semantic relationships",
+          "reason": "Illustrates embedding space, but doesn't directly explain weights/parameters or/"
+        },
+        "text": "So let's say you didn't know the word for a female monarch, you could find it by taking king, adding this woman minus man direction, and searching for the embedding closest to that point. At least, ki…"
+      },
+      {
+        "video": "wjZofJX0v4M",
+        "goal": "C",
+        "index": 15,
+        "time": "16:27–17:50",
+        "judge": 3,
+        "old": {
+          "relevance": 8,
+          "attention": 7,
+          "speed": 1,
+          "reason": "Connects to weighted sums, hinting at model weights."
+        },
+        "new": {
+          "relevance": 3,
+          "attention": 6,
+          "speed": 1.75,
+          "topic": "Dot product and vector alignment intuition",
+          "reason": "Touches on vector alignment, but doesn't directly explain weights/parameters or/"
+        },
+        "text": "Also in playing this game of finding nearest neighbors, I was very pleased to see how close cat was to both beast and monster. One bit of mathematical intuition that's helpful to have in mind, especia…"
+      },
+      {
+        "video": "wjZofJX0v4M",
+        "goal": "C",
+        "index": 17,
+        "time": "19:24–20:23",
+        "judge": 1,
+        "old": {
+          "relevance": 7,
+          "attention": 6,
+          "speed": 1.15,
+          "reason": "Explains embedding matrix vectors and context size, indirectly relating to model"
+        },
+        "new": {
+          "relevance": 3,
+          "attention": 4,
+          "speed": 1.75,
+          "topic": "Context size and embedding matrix",
+          "reason": "Describes embedding matrix and context size, indirectly related to parameters/we"
+        },
+        "text": "To be clear, in that very first step, when you create the array of vectors based on the input text, each one of those is simply plucked out of the embedding matrix, so initially each one can only enco…"
+      },
+      {
+        "video": "wjZofJX0v4M",
+        "goal": "C",
+        "index": 18,
+        "time": "20:23–21:40",
+        "judge": 3,
+        "old": {
+          "relevance": 7,
+          "attention": 6,
+          "speed": 1.15,
+          "reason": "Explains how the final layer uses embeddings for prediction, indirectly related."
+        },
+        "new": {
+          "relevance": 3,
+          "attention": 6,
+          "speed": 1.75,
+          "topic": "Probability distribution, softmax, and vectors",
+          "reason": "Indirectly mentions vectors and context, but lacks explicit explanation of model"
+        },
+        "text": "We'll go into the details of attention in due time, but skipping ahead I want to talk for a minute about what happens at the very end. Remember, the desired output is a probability distribution over a…"
+      },
+      {
+        "video": "wjZofJX0v4M",
+        "goal": "C",
+        "index": 20,
+        "time": "22:31–23:30",
+        "judge": 2,
+        "old": {
+          "relevance": 7,
+          "attention": 7,
+          "speed": 1,
+          "reason": "Explains softmax, a crucial step in deep learning calculations, indirectly tying"
+        },
+        "new": {
+          "relevance": 3,
+          "attention": 6,
+          "speed": 1.75,
+          "topic": "Softmax function for probability distribution",
+          "reason": "Indirectly relates to model outputs, but doesn't directly explain weights/matrix"
+        },
+        "text": "The idea is that if you want a sequence of numbers to act as a probability distribution, say a distribution over all possible next words, then each value has to be between 0 and 1, and you also need a…"
+      },
+      {
+        "video": "wjZofJX0v4M",
+        "goal": "C",
+        "index": 22,
+        "time": "25:06–26:03",
+        "judge": 1,
+        "old": {
+          "relevance": 7,
+          "attention": 7,
+          "speed": 1,
+          "reason": "Explains logits, which are raw outputs before softmax, relating to model weights"
+        },
+        "new": {
+          "relevance": 3,
+          "attention": 7,
+          "speed": 1.75,
+          "topic": "Logits, word embeddings, unembedding matrix",
+          "reason": "Touches on logits and matrix multiplication, but not directly explaining weights"
+        },
+        "text": "Technically speaking, the API doesn't actually let you pick a temperature bigger than 2. There's no mathematical reason for this, it's just an arbitrary constraint imposed to keep their tool from bein…"
+      },
+      {
+        "video": "RGOj5yH7evk",
+        "goal": "A",
+        "index": 13,
+        "time": "16:32–17:34",
+        "judge": 0,
+        "old": {
+          "relevance": 7,
+          "attention": 4,
+          "speed": 1.15,
+          "reason": "Explains the purpose of the .git folder, which is relevant to understanding Git'"
+        },
+        "new": {
+          "relevance": 5,
+          "attention": 3,
+          "speed": 1.4,
+          "topic": "Git repository structure and commits",
+          "reason": "Explains Git's commit history, relevant to understanding GitHub sync."
+        },
+        "text": "everything in the directory, including hidden files and folders. So if you're not on a Mac, I don't think la will work for you. But you can use ls space dash LA to do the same thing. So you can see, h…"
+      },
+      {
+        "video": "RGOj5yH7evk",
+        "goal": "A",
+        "index": 29,
+        "time": "37:35–38:32",
+        "judge": 0,
+        "old": {
+          "relevance": 7,
+          "attention": 6,
+          "speed": 1.15,
+          "reason": "Demonstrates how to switch between branches, a step towards SSH key setup."
+        },
+        "new": {
+          "relevance": 3,
+          "attention": 6,
+          "speed": 1.75,
+          "topic": "Git branching and switching",
+          "reason": "Shows branch switching, relevant to Git workflow but not SSH setup."
+        },
+        "text": "you want and put some more details. I'm going to call this feature dash README instructions, because I'm just going to be updating a section of the readme. Click enter. And now it says I switched to a…"
+      },
+      {
+        "video": "RGOj5yH7evk",
+        "goal": "B",
+        "index": 22,
+        "time": "27:58–29:21",
+        "judge": 0,
+        "old": {
+          "relevance": 7,
+          "attention": 6,
+          "speed": 1.15,
+          "reason": "Explains how to link local repository to GitHub for pushing, a prerequisite for,"
+        },
+        "new": {
+          "relevance": 3,
+          "attention": 4,
+          "speed": 1.75,
+          "topic": "Setting up GitHub remote repository",
+          "reason": "Explains initial setup for pushing, foundational for merging."
+        },
+        "text": "I will do git commit dash m, created README. And now I'll put a description here, and Enter. Now what if I want to push this live? Let's try git push origin master. And now you can see it's giving me …"
+      },
+      {
+        "video": "RGOj5yH7evk",
+        "goal": "B",
+        "index": 47,
+        "time": "59:22–60:37",
+        "judge": 0,
+        "old": {
+          "relevance": 7,
+          "attention": 6,
+          "speed": 1.15,
+          "reason": "Explains commit history and how to revert to previous states, relevant to merge/"
+        },
+        "new": {
+          "relevance": 3,
+          "attention": 6,
+          "speed": 1.75,
+          "topic": "Git commits, undoing merges, commit hashes",
+          "reason": "Explains commit history and undoing merges, indirectly relevant."
+        },
+        "text": "where you can just look at the last commit or use that to undo the last commit. But you can see a log of all your commits. And you'll see that these are arranged in reverse chronological order. So thi…"
+      },
+      {
+        "video": "RGOj5yH7evk",
+        "goal": "C",
+        "index": 8,
+        "time": "10:23–11:44",
+        "judge": 1,
+        "old": {
+          "relevance": 7,
+          "attention": 4,
+          "speed": 1.15,
+          "reason": "Shows how to view commit history, useful for understanding changes before undo."
+        },
+        "new": {
+          "relevance": 5,
+          "attention": 3,
+          "speed": 1.4,
+          "topic": "Git commit history and changes viewing",
+          "reason": "Provides context on commit history, useful for understanding undo actions."
+        },
+        "text": "default text instead of create readme.md is now update readme.md, which isn't that descriptive, but it's okay for right now. So I'm going to commit, and by committing, I saved my changes here. And if …"
+      },
+      {
+        "video": "RGOj5yH7evk",
+        "goal": "C",
+        "index": 14,
+        "time": "17:34–18:52",
+        "judge": 1,
+        "old": {
+          "relevance": 7,
+          "attention": 6,
+          "speed": 1.15,
+          "reason": "Explains how to prepare changes for a commit, a step before undoing."
+        },
+        "new": {
+          "relevance": 3,
+          "attention": 3,
+          "speed": 1.75,
+          "topic": "Git status, adding, staging files",
+          "reason": "Explains basic Git workflow (status, add) but doesn't directly address undoing/`"
+        },
+        "text": "I do that through a commit still. So first, I'm going to use the git status command. Now the git status command shows me all of the files that were updated or created or deleted, but haven't been save…"
+      }
+    ],
+    "remainingFalseHigh": [
+      {
+        "video": "zjkBMFhNj_g",
+        "goal": "A",
+        "index": 1,
+        "time": "1:03–2:09",
+        "judge": 2,
+        "old": {
+          "relevance": 5,
+          "attention": 6,
+          "speed": 1.4,
+          "reason": "Explains the accessibility of Llama 2, which is relevant to understanding LLMs."
+        },
+        "new": {
+          "relevance": 7,
+          "attention": 6,
+          "speed": 1.15,
+          "topic": "Llama 2 model weights and architecture release",
+          "reason": "Explains model accessibility and storage, relevant to understanding LLM training"
+        },
+        "text": "because it is probably today the most powerful open weights model so basically the weights and the architecture and a paper was all released by meta so anyone can work with this model very easily uh b…"
+      },
+      {
+        "video": "zjkBMFhNj_g",
+        "goal": "A",
+        "index": 8,
+        "time": "9:51–10:47",
+        "judge": 3,
+        "old": {
+          "relevance": 7,
+          "attention": 7,
+          "speed": 1,
+          "reason": "Illustrates how LLMs generate plausible but incorrect information, stemming from"
+        },
+        "new": {
+          "relevance": 7,
+          "attention": 7,
+          "speed": 1,
+          "topic": "LLM generating plausible but incorrect text",
+          "reason": "Illustrates LLM's 'hallucination' problem, relevant to training and limitations."
+        },
+        "text": "the title the author the ISBN number everything else this is all just totally made up by the network uh the network is dreaming text uh from the distribution that it was trained on it's it's just mimi…"
+      },
+      {
+        "video": "zjkBMFhNj_g",
+        "goal": "A",
+        "index": 22,
+        "time": "26:14–27:17",
+        "judge": 3,
+        "old": {
+          "relevance": 9,
+          "attention": 7,
+          "speed": 1,
+          "reason": "Explains scaling laws, a key concept in LLM training, and their impact on model'"
+        },
+        "new": {
+          "relevance": 7,
+          "attention": 4,
+          "speed": 1.15,
+          "topic": "Scaling LLMs: bigger models, more data",
+          "reason": "Discusses scaling LLMs (bigger models/data) and its impact on performance, a key"
+        },
+        "text": "and what's remarkable about this is that these Trends do not seem to show signs of uh sort of topping out uh so if you train a bigger model on more text we have a lot of confidence that the next word …"
+      },
+      {
+        "video": "zjkBMFhNj_g",
+        "goal": "A",
+        "index": 23,
+        "time": "27:17–28:15",
+        "judge": 2,
+        "old": {
+          "relevance": 7,
+          "attention": 6,
+          "speed": 1.15,
+          "reason": "Explains the 'Gold Rush' of scaling and introduces a fine-tuning example, which'"
+        },
+        "new": {
+          "relevance": 7,
+          "attention": 6,
+          "speed": 1.15,
+          "topic": "Scaling LLMs and fine-tuning examples",
+          "reason": "Mentions fine-tuning, scaling, and a concrete example, relevant to the goal."
+        },
+        "text": "um the performance to rise up and so this is what's fundamentally driving the Gold Rush that we see today in Computing where everyone is just trying to get a bit bigger GPU cluster get a lot more data…"
+      },
+      {
+        "video": "zjkBMFhNj_g",
+        "goal": "A",
+        "index": 33,
+        "time": "39:34–40:50",
+        "judge": 3,
+        "old": {
+          "relevance": 10,
+          "attention": 7,
+          "speed": 1,
+          "reason": "Directly addresses the 'step 2' equivalent for LLMs, a key question in training."
+        },
+        "new": {
+          "relevance": 7,
+          "attention": 7,
+          "speed": 1,
+          "topic": "Self-improvement and reward criteria in LLMs",
+          "reason": "Discusses the challenge of reward functions for LLMs, a key aspect of fine-tuned"
+        },
+        "text": "self-improvement so I think a lot of people are kind of interested in what is the equivalent of this step number two for large language models because today we're only doing step one we are imitating …"
+      },
+      {
+        "video": "zjkBMFhNj_g",
+        "goal": "C",
+        "index": 2,
+        "time": "2:09–3:24",
+        "judge": 0,
+        "old": {
+          "relevance": 7,
+          "attention": 6,
+          "speed": 1.15,
+          "reason": "Explains how the neural network runs, hinting at tool usage."
+        },
+        "new": {
+          "relevance": 7,
+          "attention": 7,
+          "speed": 1,
+          "topic": "Neural network execution with C code",
+          "reason": "Explains how a neural network is executed using C, a key component of an LLM's '"
+        },
+        "text": "uh for that neural network you also need something that runs that neural network and this piece of code is implemented in our run file now this could be a C file or a python file or any other programm…"
+      },
+      {
+        "video": "zjkBMFhNj_g",
+        "goal": "C",
+        "index": 16,
+        "time": "19:13–20:35",
+        "judge": 0,
+        "old": {
+          "relevance": 7,
+          "attention": 6,
+          "speed": 1.15,
+          "reason": "Explains how assistant models are created and improved through iterative fine-t"
+        },
+        "new": {
+          "relevance": 7,
+          "attention": 6,
+          "speed": 1.15,
+          "topic": "Fine-tuning LLMs for assistant models",
+          "reason": "Explains how LLMs are improved through fine-tuning, relevant to LLM operating OS"
+        },
+        "text": "responses and then you would fine-tune the base model on this data this is a lot cheaper this would only potentially take like one day or something like that instead of a few uh months or something li…"
+      },
+      {
+        "video": "zjkBMFhNj_g",
+        "goal": "C",
+        "index": 31,
+        "time": "37:03–38:12",
+        "judge": 1,
+        "old": {
+          "relevance": 7,
+          "attention": 6,
+          "speed": 1.15,
+          "reason": "Discusses the need for improved reasoning and a 'tree of thoughts', hinting at a"
+        },
+        "new": {
+          "relevance": 7,
+          "attention": 6,
+          "speed": 1.15,
+          "topic": "LLM operating system, time & accuracy",
+          "reason": "Introduces LLM OS concept & time-accuracy trade-off, relevant to goal."
+        },
+        "text": "so uh this is basically large language working in a system one setting so a lot of people I think are inspired by what it could be to give larger language WS a system two intuitively what we want to d…"
+      },
+      {
+        "video": "wjZofJX0v4M",
+        "goal": "B",
+        "index": 4,
+        "time": "4:29–5:53",
+        "judge": 3,
+        "old": {
+          "relevance": 10,
+          "attention": 7,
+          "speed": 1,
+          "reason": "Directly describes the process of generating a probability distribution from the"
+        },
+        "new": {
+          "relevance": 7,
+          "attention": 6,
+          "speed": 1.15,
+          "topic": "Probability distribution from last vector",
+          "reason": "Mentions probability distribution after a vector operation, relevant to softmax'"
+        },
+        "text": "After that, these vectors pass through a different kind of operation, and depending on the source that you're reading this will be referred to as a multi-layer perceptron or maybe a feed-forward layer…"
+      },
+      {
+        "video": "wjZofJX0v4M",
+        "goal": "B",
+        "index": 8,
+        "time": "9:10–10:17",
+        "judge": 2,
+        "old": {
+          "relevance": 7,
+          "attention": 4,
+          "speed": 1.15,
+          "reason": "Mentions probability distribution as output, relevant to goal. Explains input/出力"
+        },
+        "new": {
+          "relevance": 7,
+          "attention": 3,
+          "speed": 1.15,
+          "topic": "Model output as probability distribution",
+          "reason": "Mentions probability distribution as output, but doesn't explain softmax/temp."
+        },
+        "text": "Deep learning describes a class of models that in the last couple decades have proven to scale remarkably well. What unifies them is that they all use the same training algorithm, it's called backprop…"
+      },
+      {
+        "video": "RGOj5yH7evk",
+        "goal": "A",
+        "index": 1,
+        "time": "1:27–2:40",
+        "judge": 1,
+        "old": {
+          "relevance": 5,
+          "attention": 3,
+          "speed": 1.4,
+          "reason": "Provides foundational understanding of Git's purpose and environment."
+        },
+        "new": {
+          "relevance": 7,
+          "attention": 4,
+          "speed": 1.15,
+          "topic": "Git version control concepts explained",
+          "reason": "Explains Git's purpose, foundational knowledge for SSH setup."
+        },
+        "text": "what is version control? version control is basically a way that we as programmers track our code changes, we basically save an initial version of our code into Git. And then when we update code, we c…"
+      },
+      {
+        "video": "RGOj5yH7evk",
+        "goal": "A",
+        "index": 4,
+        "time": "5:08–6:32",
+        "judge": 1,
+        "old": {
+          "relevance": 5,
+          "attention": 5,
+          "speed": 1.4,
+          "reason": "Explains core Git commands, providing context for future steps."
+        },
+        "new": {
+          "relevance": 7,
+          "attention": 6,
+          "speed": 1.15,
+          "topic": "Git commands: clone, add, commit, remote",
+          "reason": "Introduces core Git commands useful for the goal, but lacks SSH key details."
+        },
+        "text": "it easy to work in groups with other people, and organize your projects into a portfolio for you to show potential employers. So here are some of the Git commands, we're going to cover in this video, …"
+      },
+      {
+        "video": "RGOj5yH7evk",
+        "goal": "A",
+        "index": 11,
+        "time": "14:30–15:17",
+        "judge": 3,
+        "old": {
+          "relevance": 10,
+          "attention": 5,
+          "speed": 1.15,
+          "reason": "Directly demonstrates cloning using SSH, fulfilling a key part of the goal."
+        },
+        "new": {
+          "relevance": 10,
+          "attention": 5,
+          "speed": 1.15,
+          "topic": "Cloning a GitHub repository with SSH",
+          "reason": "Directly demonstrates cloning using SSH, fulfilling a key goal step."
+        },
+        "text": "select it. And now it opens this terminal here. By the way, the only reason why this is good is because my folder is named Git. And because I've opened the folder here, it automatically uses that as t…"
+      },
+      {
+        "video": "RGOj5yH7evk",
+        "goal": "A",
+        "index": 20,
+        "time": "25:27–26:42",
+        "judge": 3,
+        "old": {
+          "relevance": 7,
+          "attention": 5,
+          "speed": 1.15,
+          "reason": "Demonstrates successful push to GitHub after local commits, reinforcing the goal"
+        },
+        "new": {
+          "relevance": 7,
+          "attention": 4,
+          "speed": 1.15,
+          "topic": "Git repository location and branch",
+          "reason": "Explains 'origin' and 'master', foundational Git concepts."
+        },
+        "text": "Now there are two more arguments we have to put here. The first one is origin. And the second one is master. Now origin is an option set for us here, and is basically a word that stands for the locati…"
+      },
+      {
+        "video": "RGOj5yH7evk",
+        "goal": "A",
+        "index": 21,
+        "time": "26:42–27:58",
+        "judge": 1,
+        "old": {
+          "relevance": 7,
+          "attention": 6,
+          "speed": 1.15,
+          "reason": "Shows how to initialize a Git repository, a prerequisite for using SSH keys."
+        },
+        "new": {
+          "relevance": 7,
+          "attention": 6,
+          "speed": 1.15,
+          "topic": "Initializing Git repository with Git init",
+          "reason": "Explains initial Git setup, a prerequisite for SSH key setup."
+        },
+        "text": "it's in a completely separate folder from the other Git repository that we have. But this one's not a git repository yet, and nothing's in there. So I'm going to move into that folder in the terminal.…"
+      },
+      {
+        "video": "RGOj5yH7evk",
+        "goal": "A",
+        "index": 22,
+        "time": "27:58–29:21",
+        "judge": 3,
+        "old": {
+          "relevance": 10,
+          "attention": 7,
+          "speed": 1,
+          "reason": "Directly addresses the goal of connecting Git to GitHub."
+        },
+        "new": {
+          "relevance": 10,
+          "attention": 7,
+          "speed": 1,
+          "topic": "GitHub repository creation and remote linking",
+          "reason": "Directly addresses creating a GitHub repo for pushing, essential for the goal."
+        },
+        "text": "I will do git commit dash m, created README. And now I'll put a description here, and Enter. Now what if I want to push this live? Let's try git push origin master. And now you can see it's giving me …"
+      },
+      {
+        "video": "RGOj5yH7evk",
+        "goal": "A",
+        "index": 23,
+        "time": "29:21–30:34",
+        "judge": 2,
+        "old": {
+          "relevance": 7,
+          "attention": 6,
+          "speed": 1.15,
+          "reason": "Explains pushing code to GitHub and using upstream for convenience, relevant to,"
+        },
+        "new": {
+          "relevance": 7,
+          "attention": 6,
+          "speed": 1.15,
+          "topic": "Git push and upstream configuration",
+          "reason": "Shows pushing to GitHub and setting upstream for convenience."
+        },
+        "text": "can check that by saying Git remote dash V, and it shows any remote repositories that I've connected to this repo. Now that these are set up. I can now use git push origin, Master just as I did before…"
+      },
+      {
+        "video": "RGOj5yH7evk",
+        "goal": "A",
+        "index": 33,
+        "time": "42:21–43:08",
+        "judge": 0,
+        "old": {
+          "relevance": 10,
+          "attention": 5,
+          "speed": 1.15,
+          "reason": "Directly addresses the goal of connecting to GitHub by covering the `git push`"
+        },
+        "new": {
+          "relevance": 8,
+          "attention": 6,
+          "speed": 1.15,
+          "topic": "Git push to GitHub branch",
+          "reason": "Directly addresses pushing changes to GitHub after branching, a key step."
+        },
+        "text": "I'm going to change back to the feature branch, and now do git status. And it says I have no changes to commit, because they've already been committed. But I do need to push them up to GitHub. So let …"
+      },
+      {
+        "video": "RGOj5yH7evk",
+        "goal": "B",
+        "index": 0,
+        "time": "0:00–1:27",
+        "judge": 1,
+        "old": {
+          "relevance": 10,
+          "attention": 3,
+          "speed": 1.15,
+          "reason": "Directly introduces Git and its importance, setting the stage for branching/mer깅"
+        },
+        "new": {
+          "relevance": 7,
+          "attention": 3,
+          "speed": 1.15,
+          "topic": "Git introduction, version control system",
+          "reason": "Introduces Git, a version control system, relevant to branching/merging."
+        },
+        "text": "Hi, everyone, welcome. In this video we are going to learn about Git and GitHub, why they are important and also how to use them. So we're going to start off going over the terms and concepts that you…"
+      },
+      {
+        "video": "RGOj5yH7evk",
+        "goal": "B",
+        "index": 50,
+        "time": "63:05–64:24",
+        "judge": 3,
+        "old": {
+          "relevance": 5,
+          "attention": 3,
+          "speed": 1.4,
+          "reason": "Explains branching context after forking, but doesn't cover merging."
+        },
+        "new": {
+          "relevance": 7,
+          "attention": 4,
+          "speed": 1.15,
+          "topic": "Forking repositories and branch setup",
+          "reason": "Explains branching context after forking, useful for understanding workflow."
+        },
+        "text": "the repo is no longer under the View, j. s organization. Now it's under my personal GitHub. And now that I've forked this, I have complete control to make any updates or changes that I want to this co…"
+      },
+      {
+        "video": "RGOj5yH7evk",
+        "goal": "C",
+        "index": 41,
+        "time": "51:33–53:13",
+        "judge": 0,
+        "old": {
+          "relevance": 7,
+          "attention": 7,
+          "speed": 1,
+          "reason": "Illustrates why committing is needed before merging, hinting at undoing."
+        },
+        "new": {
+          "relevance": 7,
+          "attention": 6,
+          "speed": 1.15,
+          "topic": "Git branching, merging, and overwriting changes",
+          "reason": "Illustrates why commits are important before switching branches, hinting at undo"
+        },
+        "text": "Now let me go to my master branch git checkout Master, you can see I don't have the changes from my other branch there. But what if I updated the same line, so on Master, now I'm updating line two. An…"
+      }
+    ],
+    "newFalseHigh": [
+      {
+        "video": "zjkBMFhNj_g",
+        "goal": "A",
+        "index": 1,
+        "time": "1:03–2:09",
+        "judge": 2,
+        "old": {
+          "relevance": 5,
+          "attention": 6,
+          "speed": 1.4,
+          "reason": "Explains the accessibility of Llama 2, which is relevant to understanding LLMs."
+        },
+        "new": {
+          "relevance": 7,
+          "attention": 6,
+          "speed": 1.15,
+          "topic": "Llama 2 model weights and architecture release",
+          "reason": "Explains model accessibility and storage, relevant to understanding LLM training"
+        },
+        "text": "because it is probably today the most powerful open weights model so basically the weights and the architecture and a paper was all released by meta so anyone can work with this model very easily uh b…"
+      },
+      {
+        "video": "RGOj5yH7evk",
+        "goal": "A",
+        "index": 1,
+        "time": "1:27–2:40",
+        "judge": 1,
+        "old": {
+          "relevance": 5,
+          "attention": 3,
+          "speed": 1.4,
+          "reason": "Provides foundational understanding of Git's purpose and environment."
+        },
+        "new": {
+          "relevance": 7,
+          "attention": 4,
+          "speed": 1.15,
+          "topic": "Git version control concepts explained",
+          "reason": "Explains Git's purpose, foundational knowledge for SSH setup."
+        },
+        "text": "what is version control? version control is basically a way that we as programmers track our code changes, we basically save an initial version of our code into Git. And then when we update code, we c…"
+      },
+      {
+        "video": "RGOj5yH7evk",
+        "goal": "A",
+        "index": 4,
+        "time": "5:08–6:32",
+        "judge": 1,
+        "old": {
+          "relevance": 5,
+          "attention": 5,
+          "speed": 1.4,
+          "reason": "Explains core Git commands, providing context for future steps."
+        },
+        "new": {
+          "relevance": 7,
+          "attention": 6,
+          "speed": 1.15,
+          "topic": "Git commands: clone, add, commit, remote",
+          "reason": "Introduces core Git commands useful for the goal, but lacks SSH key details."
+        },
+        "text": "it easy to work in groups with other people, and organize your projects into a portfolio for you to show potential employers. So here are some of the Git commands, we're going to cover in this video, …"
+      },
+      {
+        "video": "RGOj5yH7evk",
+        "goal": "B",
+        "index": 50,
+        "time": "63:05–64:24",
+        "judge": 3,
+        "old": {
+          "relevance": 5,
+          "attention": 3,
+          "speed": 1.4,
+          "reason": "Explains branching context after forking, but doesn't cover merging."
+        },
+        "new": {
+          "relevance": 7,
+          "attention": 4,
+          "speed": 1.15,
+          "topic": "Forking repositories and branch setup",
+          "reason": "Explains branching context after forking, useful for understanding workflow."
+        },
+        "text": "the repo is no longer under the View, j. s organization. Now it's under my personal GitHub. And now that I've forked this, I have complete control to make any updates or changes that I want to this co…"
+      }
+    ],
+    "correctHighLost": [
+      {
+        "video": "zjkBMFhNj_g",
+        "goal": "A",
+        "index": 6,
+        "time": "7:23–8:36",
+        "judge": 7,
+        "old": {
+          "relevance": 8,
+          "attention": 7,
+          "speed": 1,
+          "reason": "Explains the core training objective and its significance."
+        },
+        "new": {
+          "relevance": 5,
+          "attention": 7,
+          "speed": 1.4,
+          "topic": "Next word prediction as a compression task",
+          "reason": "Explains the core principle of pretraining, linking prediction to compression."
+        },
+        "text": "probability so this is fundamentally the problem that the neural network is performing and this you can show mathematically that there's a very close relationship between prediction and compression wh…"
+      },
+      {
+        "video": "zjkBMFhNj_g",
+        "goal": "A",
+        "index": 19,
+        "time": "22:21–23:37",
+        "judge": 7,
+        "old": {
+          "relevance": 7,
+          "attention": 6,
+          "speed": 1.15,
+          "reason": "Explains how human labeling is evolving with AI assistance, relevant to fine-tুই"
+        },
+        "new": {
+          "relevance": 5,
+          "attention": 6,
+          "speed": 1.4,
+          "topic": "Human-AI collaboration for labeling LLMs",
+          "reason": "Discusses human labeling, but focuses on AI assisting humans, not the core pre/f"
+        },
+        "text": "labels I also wanted to show you very briefly one slide showing some of the labeling instructions that we give to humans so so this is an excerpt from the paper instruct GPT by open Ai and it just kin…"
+      },
+      {
+        "video": "RGOj5yH7evk",
+        "goal": "A",
+        "index": 9,
+        "time": "11:44–13:18",
+        "judge": 9,
+        "old": {
+          "relevance": 7,
+          "attention": 4,
+          "speed": 1.15,
+          "reason": "Provides installation instructions, helpful for setting up Git."
+        },
+        "new": {
+          "relevance": 5,
+          "attention": 3,
+          "speed": 1.4,
+          "topic": "Installing Git, editor recommendation",
+          "reason": "Covers Git installation, but doesn't address SSH keys/GitHub connection directly"
+        },
+        "text": "application and typing in get space dash dash version. If Git is not already installed, I highly recommend checking out this tutorial by Atlassian, which I will link in the description below. It walks…"
+      },
+      {
+        "video": "RGOj5yH7evk",
+        "goal": "B",
+        "index": 31,
+        "time": "39:30–41:06",
+        "judge": 8,
+        "old": {
+          "relevance": 7,
+          "attention": 6,
+          "speed": 1.15,
+          "reason": "Explains commit and staging, which are prerequisites for merging."
+        },
+        "new": {
+          "relevance": 5,
+          "attention": 3,
+          "speed": 1.4,
+          "topic": "Git branching, committing, and checking out",
+          "reason": "Explains basic branching, committing, and checking out, foundational to merging."
+        },
+        "text": "give it one step other than say open index dot HTML in your browser, just as a demo. Alright, I save that. And you can see in VS code, it gives me this m here meaning it's been modified. since I've la…"
+      }
+    ],
+    "judgeHighMissed": [
+      {
+        "video": "zjkBMFhNj_g",
+        "goal": "A",
+        "index": 6,
+        "time": "7:23–8:36",
+        "judge": 7,
+        "old": {
+          "relevance": 8,
+          "attention": 7,
+          "speed": 1,
+          "reason": "Explains the core training objective and its significance."
+        },
+        "new": {
+          "relevance": 5,
+          "attention": 7,
+          "speed": 1.4,
+          "topic": "Next word prediction as a compression task",
+          "reason": "Explains the core principle of pretraining, linking prediction to compression."
+        },
+        "text": "probability so this is fundamentally the problem that the neural network is performing and this you can show mathematically that there's a very close relationship between prediction and compression wh…"
+      },
+      {
+        "video": "zjkBMFhNj_g",
+        "goal": "A",
+        "index": 19,
+        "time": "22:21–23:37",
+        "judge": 7,
+        "old": {
+          "relevance": 7,
+          "attention": 6,
+          "speed": 1.15,
+          "reason": "Explains how human labeling is evolving with AI assistance, relevant to fine-tুই"
+        },
+        "new": {
+          "relevance": 5,
+          "attention": 6,
+          "speed": 1.4,
+          "topic": "Human-AI collaboration for labeling LLMs",
+          "reason": "Discusses human labeling, but focuses on AI assisting humans, not the core pre/f"
+        },
+        "text": "labels I also wanted to show you very briefly one slide showing some of the labeling instructions that we give to humans so so this is an excerpt from the paper instruct GPT by open Ai and it just kin…"
+      },
+      {
+        "video": "wjZofJX0v4M",
+        "goal": "C",
+        "index": 8,
+        "time": "9:10–10:17",
+        "judge": 7,
+        "old": {
+          "relevance": 5,
+          "attention": 3,
+          "speed": 1.4,
+          "reason": "Explains the numerical format of input/output, foundational to understanding how"
+        },
+        "new": {
+          "relevance": 3,
+          "attention": 3,
+          "speed": 1.75,
+          "topic": "Model format: arrays, tensors, layers",
+          "reason": "Describes input format, but doesn't directly address weights/parameters or MMP."
+        },
+        "text": "Deep learning describes a class of models that in the last couple decades have proven to scale remarkably well. What unifies them is that they all use the same training algorithm, it's called backprop…"
+      },
+      {
+        "video": "RGOj5yH7evk",
+        "goal": "A",
+        "index": 9,
+        "time": "11:44–13:18",
+        "judge": 9,
+        "old": {
+          "relevance": 7,
+          "attention": 4,
+          "speed": 1.15,
+          "reason": "Provides installation instructions, helpful for setting up Git."
+        },
+        "new": {
+          "relevance": 5,
+          "attention": 3,
+          "speed": 1.4,
+          "topic": "Installing Git, editor recommendation",
+          "reason": "Covers Git installation, but doesn't address SSH keys/GitHub connection directly"
+        },
+        "text": "application and typing in get space dash dash version. If Git is not already installed, I highly recommend checking out this tutorial by Atlassian, which I will link in the description below. It walks…"
+      },
+      {
+        "video": "RGOj5yH7evk",
+        "goal": "B",
+        "index": 31,
+        "time": "39:30–41:06",
+        "judge": 8,
+        "old": {
+          "relevance": 7,
+          "attention": 6,
+          "speed": 1.15,
+          "reason": "Explains commit and staging, which are prerequisites for merging."
+        },
+        "new": {
+          "relevance": 5,
+          "attention": 3,
+          "speed": 1.4,
+          "topic": "Git branching, committing, and checking out",
+          "reason": "Explains basic branching, committing, and checking out, foundational to merging."
+        },
+        "text": "give it one step other than say open index dot HTML in your browser, just as a demo. Alright, I save that. And you can see in VS code, it gives me this m here meaning it's been modified. since I've la…"
+      }
+    ],
+    "judgeHighFalseLow": [
+      {
+        "video": "wjZofJX0v4M",
+        "goal": "C",
+        "index": 8,
+        "time": "9:10–10:17",
+        "judge": 7,
+        "old": {
+          "relevance": 5,
+          "attention": 3,
+          "speed": 1.4,
+          "reason": "Explains the numerical format of input/output, foundational to understanding how"
+        },
+        "new": {
+          "relevance": 3,
+          "attention": 3,
+          "speed": 1.75,
+          "topic": "Model format: arrays, tensors, layers",
+          "reason": "Describes input format, but doesn't directly address weights/parameters or MMP."
+        },
+        "text": "Deep learning describes a class of models that in the last couple decades have proven to scale remarkably well. What unifies them is that they all use the same training algorithm, it's called backprop…"
+      }
+    ],
+    "judgeMidDroppedToLow": [
+      {
+        "video": "wjZofJX0v4M",
+        "goal": "C",
+        "index": 6,
+        "time": "7:03–7:53",
+        "judge": 5,
+        "old": {
+          "relevance": 5,
+          "attention": 3,
+          "speed": 1.4,
+          "reason": "Provides a general overview of deep learning's purpose, linking it to pattern/re"
+        },
+        "new": {
+          "relevance": 3,
+          "attention": 2,
+          "speed": 1.75,
+          "topic": "Deep learning basics: model premise",
+          "reason": "Provides general context, but doesn't directly address weights/parameters/matrix"
+        },
+        "text": "After that, I want to talk more about these multi-layer perceptron blocks, how training works, and a number of other details that will have been skipped up to that point. For broader context, these vi…"
+      },
+      {
+        "video": "RGOj5yH7evk",
+        "goal": "B",
+        "index": 36,
+        "time": "45:35–46:50",
+        "judge": 5,
+        "old": {
+          "relevance": 7,
+          "attention": 6,
+          "speed": 1.15,
+          "reason": "Shows how to review changes in a pull request, relevant to merge process."
+        },
+        "new": {
+          "relevance": 3,
+          "attention": 4,
+          "speed": 1.75,
+          "topic": "Pull requests and code review comments",
+          "reason": "Describes a step *after* merging, not the merging process itself."
+        },
+        "text": "about local development to the readme, and I will create a pull request. Now that I've created a pull request, I can actually come here in the interface, I can see any comments that people have made o…"
+      }
+    ]
+  }
+}

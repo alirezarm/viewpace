@@ -15,9 +15,8 @@ import { goalTarget } from '../../src/content/goal/goal-pacing';
 import { GoalSession, type GoalAnalyzer } from '../../src/content/goal/goal-session';
 
 interface CallRecord {
-  type: 'block' | 'sections';
+  type: 'breakdown' | 'block' | 'sections';
   blockText?: string;
-  context?: string; // rolling context sent with the block (POC 1.4)
   startMs: number;
   endMs: number;
   ok: boolean;
@@ -45,14 +44,25 @@ async function runGoalEval(key: string, capture: { url: string; body: string }, 
   const now = () => performance.now() - t0;
   const analyzer: GoalAnalyzer = {
     available: () => real.available(),
-    rateBlock: async (g, text, ttl, context) => {
+    breakdownGoal: async (g) => {
       const startMs = now();
       try {
-        const r = await real.rateBlock(g, text, ttl, context);
-        calls.push({ type: 'block', blockText: text, context, startMs, endMs: now(), ok: true });
+        const needs = await real.breakdownGoal(g);
+        calls.push({ type: 'breakdown', startMs, endMs: now(), ok: true });
+        return needs;
+      } catch (e) {
+        calls.push({ type: 'breakdown', startMs, endMs: now(), ok: false, error: e instanceof Error ? e.message : String(e) });
+        throw e;
+      }
+    },
+    rateBlock: async (g, text, ttl, needs) => {
+      const startMs = now();
+      try {
+        const r = await real.rateBlock(g, text, ttl, needs);
+        calls.push({ type: 'block', blockText: text, startMs, endMs: now(), ok: true });
         return r;
       } catch (e) {
-        calls.push({ type: 'block', blockText: text, context, startMs, endMs: now(), ok: false, error: e instanceof Error ? e.message : String(e) });
+        calls.push({ type: 'block', blockText: text, startMs, endMs: now(), ok: false, error: e instanceof Error ? e.message : String(e) });
         throw e;
       }
     },
@@ -91,8 +101,6 @@ async function runGoalEval(key: string, capture: { url: string; body: string }, 
       relevanceCategory: (r as { relevanceCategory?: string } | undefined)?.relevanceCategory ?? null, // only the POC 1.3A categorical scorer set this
       attention: r?.attention ?? null,
       reason: r?.reason ?? null,
-      contextIn: okCall ? (okCall.context ?? '') : null, // notes this block was rated with (POC 1.4)
-      rollingContext: r?.rollingContext ?? null, // notes it returned for the next block (POC 1.4)
       category: target?.label ?? null,
       targetRate: target ? Number(target.rate.toFixed(3)) : null,
       calls: blockCalls.length,
@@ -107,10 +115,11 @@ async function runGoalEval(key: string, capture: { url: string; body: string }, 
       title,
       available,
       phase: session.phase,
+      needs: session.needs, // the fixed goal breakdown used for every block (POC 1.5); null = none
       pace: 'normal',
       transcript: { lang: transcript.lang, kind: transcript.kind || 'uploaded', timing: transcript.timing, words: transcript.words.length, endSec: end },
       totalMs: Math.round(totalMs),
-      calls: calls.map(({ blockText, context, ...c }) => ({ ...c, startMs: Math.round(c.startMs), endMs: Math.round(c.endMs), blockChars: blockText?.length, contextChars: context?.length ?? 0 })),
+      calls: calls.map(({ blockText, ...c }) => ({ ...c, startMs: Math.round(c.startMs), endMs: Math.round(c.endMs), blockChars: blockText?.length })),
       blocks: rows,
       sections: session.map.sections(),
     },

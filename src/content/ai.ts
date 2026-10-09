@@ -63,8 +63,14 @@ export class NanoGoalAnalyzer implements GoalAnalyzer {
     return (await this.nano.status()) === 'available';
   }
 
-  async rateBlock(goal: string, text: string, title?: string, context?: string): Promise<BlockRating> {
-    const r = (await chrome.runtime.sendMessage({ kind: 'ai:goal-block', goal, text, title, context } satisfies AiRequest)) as AiResponse;
+  async breakdownGoal(goal: string): Promise<string[]> {
+    const r = (await chrome.runtime.sendMessage({ kind: 'ai:goal-breakdown', goal } satisfies AiRequest)) as AiResponse;
+    if (r.ok && 'needs' in r) return r.needs;
+    throw new Error(r.ok ? 'unexpected response' : r.error);
+  }
+
+  async rateBlock(goal: string, text: string, title?: string, needs?: string[] | null): Promise<BlockRating> {
+    const r = (await chrome.runtime.sendMessage({ kind: 'ai:goal-block', goal, text, title, needs } satisfies AiRequest)) as AiResponse;
     if (r.ok && 'goalBlock' in r) return r.goalBlock;
     throw new Error(r.ok ? 'unexpected response' : r.error);
   }

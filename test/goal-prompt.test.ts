@@ -1,5 +1,50 @@
 import { describe, expect, it } from 'vitest';
-import { BLOCK_SCHEMA, BLOCK_SYSTEM_PROMPT, MAX_CONTEXT_CHARS, buildBlockPrompt, buildSectionPrompt, parseBlockRating, parseSections } from '../src/shared/goal-prompt';
+import {
+  BLOCK_SCHEMA,
+  BLOCK_SYSTEM_PROMPT,
+  BLOCK_SYSTEM_PROMPT_WITH_NEEDS,
+  BREAKDOWN_SCHEMA,
+  BREAKDOWN_SYSTEM_PROMPT,
+  MAX_NEED_CHARS,
+  buildBlockPrompt,
+  buildBreakdownPrompt,
+  buildSectionPrompt,
+  parseBlockRating,
+  parseBreakdown,
+  parseSections,
+} from '../src/shared/goal-prompt';
+
+describe('goal breakdown from the model (POC 1.5)', () => {
+  const raw = (needs: unknown) => JSON.stringify({ needs });
+
+  it('accepts 3 to 6 needs, trimmed and de-duplicated', () => {
+    expect(parseBreakdown(raw(['  generating an SSH key ', 'adding the key', 'Adding the key', 'testing the connection']))).toEqual([
+      'generating an SSH key',
+      'adding the key',
+      'testing the connection',
+    ]);
+  });
+
+  it('bounds the number and length of needs', () => {
+    expect(parseBreakdown(raw(['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']))).toHaveLength(6);
+    expect(parseBreakdown(raw(['x'.repeat(500), 'b', 'c']))[0]).toHaveLength(MAX_NEED_CHARS);
+    expect(BREAKDOWN_SCHEMA.properties.needs).toMatchObject({ minItems: 3, maxItems: 6, items: { maxLength: MAX_NEED_CHARS } });
+  });
+
+  it('rejects unusable output (Goal Mode then scores without a breakdown)', () => {
+    expect(() => parseBreakdown(raw(['a', 'a', ' ']))).toThrow(/too few needs/);
+    expect(() => parseBreakdown(raw([1, 2, 3]))).toThrow(/too few needs/);
+    expect(() => parseBreakdown('{"items":["a","b","c"]}')).toThrow(/no needs/);
+    expect(() => parseBreakdown('not json')).toThrow();
+  });
+
+  it('sees only the goal, never the video', () => {
+    expect(buildBreakdownPrompt('  Learn SSH  ')).toBe("Viewer's goal: Learn SSH");
+    expect(buildBreakdownPrompt('g'.repeat(1000)).length).toBeLessThan(400);
+    expect(BREAKDOWN_SYSTEM_PROMPT).toContain('not the video');
+    expect(BREAKDOWN_SYSTEM_PROMPT).toContain('Do not guess the video');
+  });
+});
 
 describe('block ratings from the model', () => {
   it('accepts and clamps a valid rating', () => {
@@ -8,34 +53,34 @@ describe('block ratings from the model', () => {
       relevance: 10,
       attention: 0,
       reason: 'explains training',
-      rollingContext: '',
     });
   });
 
-  it('returns the updated notes (rolling context), bounded', () => {
-    const r = parseBlockRating(JSON.stringify({ topic: 'x', relevance: 6, attention: 2, reason: 'y', notes: '  Covered: intro.\n Relevant to goal: none.  ' }));
-    expect(r).toMatchObject({ relevance: 6, rollingContext: 'Covered: intro. Relevant to goal: none.' });
-    expect(parseBlockRating(JSON.stringify({ topic: 'x', relevance: 6, attention: 2, reason: 'y', notes: 'n'.repeat(5000) })).rollingContext).toHaveLength(MAX_CONTEXT_CHARS);
-    expect(parseBlockRating(JSON.stringify({ topic: 'x', relevance: 6, attention: 2, reason: 'y', notes: 42 })).rollingContext).toBe(''); // the rating still stands
-  });
-
-  it('keeps the POC 1.1 rubric and adds notes as the last output field', () => {
+  it('keeps the POC 1.1 rubric and output fields', () => {
     expect(BLOCK_SYSTEM_PROMPT).toContain(
       '- relevance (0-10): how much it helps the viewer\'s goal. 0 = unrelated (intro, sponsor, small talk, off-topic); 5 = useful background; 10 = directly answers the goal.',
     );
     expect(BLOCK_SYSTEM_PROMPT).toContain('- attention (0-10): how much careful listening it needs.');
     expect(BLOCK_SCHEMA.properties.relevance).toEqual({ type: 'integer', minimum: 0, maximum: 10 });
-    expect(Object.keys(BLOCK_SCHEMA.properties)).toEqual(['topic', 'relevance', 'attention', 'reason', 'notes']);
-    expect(BLOCK_SCHEMA.properties.notes.maxLength).toBe(MAX_CONTEXT_CHARS);
+    expect(Object.keys(BLOCK_SCHEMA.properties)).toEqual(['topic', 'relevance', 'attention', 'reason']);
   });
 
-  it('includes earlier notes in the prompt only when there are some, before the excerpt', () => {
-    expect(buildBlockPrompt('goal', 'text', 'T')).not.toContain('notes');
-    expect(buildBlockPrompt('goal', 'text', 'T', '   ')).not.toContain('notes');
-    const p = buildBlockPrompt('goal', 'text', 'T', 'Covered: intro.');
-    expect(p.indexOf('Your notes on the video so far:\n"""\nCovered: intro.')).toBeGreaterThan(p.indexOf('Video title'));
-    expect(p.indexOf('Covered: intro.')).toBeLessThan(p.indexOf('Excerpt:'));
-    expect(buildBlockPrompt('goal', 'text', 'T', 'c'.repeat(5000)).length).toBeLessThan(800);
+  it('with a breakdown, only says the needs come with the goal; the rubric is identical', () => {
+    expect(BLOCK_SYSTEM_PROMPT_WITH_NEEDS).not.toBe(BLOCK_SYSTEM_PROMPT);
+    expect(BLOCK_SYSTEM_PROMPT_WITH_NEEDS).toContain('the information it needs (worked out from the goal alone, not from the video)');
+    const rubric = (p: string) => p.slice(p.indexOf('Rate the excerpt:'));
+    expect(rubric(BLOCK_SYSTEM_PROMPT_WITH_NEEDS)).toBe(rubric(BLOCK_SYSTEM_PROMPT));
+  });
+
+  it('lists the needs before the excerpt, and is the POC 1.1 prompt without them', () => {
+    const plain = buildBlockPrompt('goal', 'text', 'T');
+    expect(buildBlockPrompt('goal', 'text', 'T', null)).toBe(plain);
+    expect(buildBlockPrompt('goal', 'text', 'T', [])).toBe(plain);
+    const p = buildBlockPrompt('goal', 'text', 'T', ['generating an SSH key', 'adding the key to GitHub']);
+    expect(p).toContain('What the viewer needs to learn for this goal:\n- generating an SSH key\n- adding the key to GitHub');
+    expect(p.indexOf('needs to learn')).toBeGreaterThan(p.indexOf('Video title'));
+    expect(p.indexOf('needs to learn')).toBeLessThan(p.indexOf('Excerpt:'));
+    expect(buildBlockPrompt('goal', 'text', 'T', Array(20).fill('n'.repeat(500))).length).toBeLessThan(plain.length + 8 * (MAX_NEED_CHARS + 6));
   });
 
   it('rounds fractional scores and tolerates numeric strings', () => {
