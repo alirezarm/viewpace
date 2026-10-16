@@ -6,6 +6,7 @@ import {
   BREAKDOWN_SCHEMA,
   BREAKDOWN_SYSTEM_PROMPT,
   MAX_NEED_CHARS,
+  blockSystemPrompt,
   buildBlockPrompt,
   buildBreakdownPrompt,
   buildSectionPrompt,
@@ -14,7 +15,7 @@ import {
   parseSections,
 } from '../src/shared/goal-prompt';
 
-describe('goal breakdown from the model (POC 1.5)', () => {
+describe('goal breakdown from the model', () => {
   const raw = (needs: unknown) => JSON.stringify({ needs });
 
   it('accepts 3 to 6 needs, trimmed and de-duplicated', () => {
@@ -31,7 +32,7 @@ describe('goal breakdown from the model (POC 1.5)', () => {
     expect(BREAKDOWN_SCHEMA.properties.needs).toMatchObject({ minItems: 3, maxItems: 6, items: { maxLength: MAX_NEED_CHARS } });
   });
 
-  it('rejects unusable output (Goal Mode then scores without a breakdown)', () => {
+  it('rejects unusable output (blocks are then rated without a breakdown)', () => {
     expect(() => parseBreakdown(raw(['a', 'a', ' ']))).toThrow(/too few needs/);
     expect(() => parseBreakdown(raw([1, 2, 3]))).toThrow(/too few needs/);
     expect(() => parseBreakdown('{"items":["a","b","c"]}')).toThrow(/no needs/);
@@ -56,7 +57,7 @@ describe('block ratings from the model', () => {
     });
   });
 
-  it('keeps the POC 1.1 rubric and output fields', () => {
+  it('rates relevance and attention on 0-10 with the fixed rubric and output fields', () => {
     expect(BLOCK_SYSTEM_PROMPT).toContain(
       '- relevance (0-10): how much it helps the viewer\'s goal. 0 = unrelated (intro, sponsor, small talk, off-topic); 5 = useful background; 10 = directly answers the goal.',
     );
@@ -72,7 +73,14 @@ describe('block ratings from the model', () => {
     expect(rubric(BLOCK_SYSTEM_PROMPT_WITH_NEEDS)).toBe(rubric(BLOCK_SYSTEM_PROMPT));
   });
 
-  it('lists the needs before the excerpt, and is the POC 1.1 prompt without them', () => {
+  it('picks the system prompt by whether there is a breakdown', () => {
+    expect(blockSystemPrompt(['a', 'b', 'c'])).toBe(BLOCK_SYSTEM_PROMPT_WITH_NEEDS);
+    expect(blockSystemPrompt(null)).toBe(BLOCK_SYSTEM_PROMPT);
+    expect(blockSystemPrompt(undefined)).toBe(BLOCK_SYSTEM_PROMPT);
+    expect(blockSystemPrompt([])).toBe(BLOCK_SYSTEM_PROMPT);
+  });
+
+  it('lists the needs before the excerpt, and leaves them out entirely without a breakdown', () => {
     const plain = buildBlockPrompt('goal', 'text', 'T');
     expect(buildBlockPrompt('goal', 'text', 'T', null)).toBe(plain);
     expect(buildBlockPrompt('goal', 'text', 'T', [])).toBe(plain);

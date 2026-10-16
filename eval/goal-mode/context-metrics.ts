@@ -11,7 +11,25 @@
  */
 import { execSync } from 'node:child_process';
 import { readFileSync, writeFileSync } from 'node:fs';
-import { BLOCK_SYSTEM_PROMPT, MAX_CONTEXT_CHARS, buildBlockPrompt } from '../../src/shared/goal-prompt';
+import { MAX_BLOCK_CHARS, MAX_GOAL_CHARS, MAX_TITLE_CHARS } from '../../src/shared/goal-prompt';
+
+/**
+ * The POC 1.4 prompt code is no longer in production, so its system prompt is read from the commit
+ * that was evaluated (8adf93f), and its user-prompt format is reproduced here.
+ */
+const POC14 = '8adf93f';
+const MAX_CONTEXT_CHARS = 600;
+const promptAt = (commit: string) =>
+  execSync(`git show ${commit}:src/shared/goal-prompt.ts`, { encoding: 'utf8' }).match(/BLOCK_SYSTEM_PROMPT = `([^`]*)`/)![1]!;
+const BLOCK_SYSTEM_PROMPT = promptAt(POC14);
+const cap = (s: string, n: number) => (s.length > n ? s.slice(0, n) + ' …' : s);
+function buildBlockPrompt(goal: string, text: string, title?: string, context?: string): string {
+  const parts = [`Viewer's goal: ${cap(goal.trim(), MAX_GOAL_CHARS)}`];
+  if (title?.trim()) parts.push(`Video title: ${cap(title.trim(), MAX_TITLE_CHARS)}`);
+  if (context?.trim()) parts.push(`Your notes on the video so far:\n"""\n${cap(context.trim(), MAX_CONTEXT_CHARS)}\n"""`);
+  parts.push(`Excerpt:\n"""\n${cap(text, MAX_BLOCK_CHARS)}\n"""`);
+  return parts.join('\n\n');
+}
 
 const BASE = 'eval-results/goal-mode-poc1';
 const NEW = process.env.EVAL_NEW ?? 'eval-results/goal-mode-poc1.4';
@@ -145,10 +163,7 @@ async function measure(texts: string[]): Promise<(number | null)[] | null> {
   return out;
 }
 
-const OLD_SYSTEM_PROMPT = (() => {
-  const src = execSync('git show 1b69f3a:src/shared/goal-prompt.ts', { encoding: 'utf8' });
-  return src.match(/BLOCK_SYSTEM_PROMPT = `([^`]*)`/)![1]!;
-})();
+const OLD_SYSTEM_PROMPT = promptAt('1b69f3a');
 
 const tokenTexts: { kind: string; text: string }[] = [
   { kind: 'system-base', text: OLD_SYSTEM_PROMPT },

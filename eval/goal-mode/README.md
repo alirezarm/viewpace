@@ -46,3 +46,6 @@ Report: `docs/goal-mode-poc1-evaluation.md`.
   call. `breakdown-metrics.ts` lists each run's breakdown and compares cost with POC 1.1 and 1.4.
   To compare against a variant other than POC 1.1, set `EVAL_BASE` for `compare.ts`
   (e.g. `EVAL_BASE=eval-results/goal-mode-poc1.4`); it writes `compare-vs-poc1.4.*`.
+- Historical prompts: production now holds only the final Goal Mode prompts. `context-metrics.ts`
+  reads the POC 1.4 block prompt from its evaluated commit (`8adf93f`) via `git show`, and
+  `breakdown-metrics.ts`/`context-metrics.ts` read POC 1.1's from `1b69f3a`.

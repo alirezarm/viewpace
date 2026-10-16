@@ -194,40 +194,62 @@ describe('Goal Mode', () => {
     expect(g.decide('A', 300, pace)).toMatchObject({ kind: 'target', rate: 1, label: 'Key part for your goal' });
   });
 
-  describe('fixed goal breakdown (POC 1.5)', () => {
+  describe('goal breakdown', () => {
     const NEEDS = ['generating an SSH key', 'adding the key to GitHub', 'testing the connection'];
-    /** Records what each block call received; the breakdown can be made to fail. */
-    function needsAnalyzer(breakdown: () => Promise<string[]>) {
+    /** Records every call's arguments; the breakdown and the block ratings can be controlled. */
+    function needsAnalyzer(breakdown: () => Promise<string[]>, relevance: (n: number) => number = () => 5) {
       const seen: (string[] | null | undefined)[] = [];
-      let breakdowns = 0;
+      const blockArgs: unknown[][] = [];
+      const breakdownArgs: unknown[][] = [];
       const a: GoalAnalyzer = {
         available: async () => true,
-        breakdownGoal: async () => {
-          breakdowns++;
+        breakdownGoal: async (...args) => {
+          breakdownArgs.push(args);
           return breakdown();
         },
-        rateBlock: async (_goal, _text, _title, needs) => {
-          seen.push(needs);
-          return modelOutput(5);
+        rateBlock: async (...args) => {
+          seen.push(args[3]);
+          blockArgs.push(args);
+          return modelOutput(relevance(blockArgs.length - 1));
         },
         groupSections: async () => null,
       };
-      return { a, seen, breakdowns: () => breakdowns };
+      return { a, seen, blockArgs, breakdownArgs, breakdowns: () => breakdownArgs.length };
     }
 
-    it('breaks the goal down once and gives every block the same needs', async () => {
+    it('breaks the goal down once, from the goal alone, and gives every block the same needs', async () => {
       const g = new GoalController();
-      const { a, seen, breakdowns } = needsAnalyzer(async () => NEEDS);
-      await g.start(baseStart(a));
+      const { a, seen, breakdowns, breakdownArgs } = needsAnalyzer(async () => NEEDS);
+      await g.start({ ...baseStart(a), title: 'Some video' });
       await flush();
       expect(breakdowns()).toBe(1);
+      expect(breakdownArgs[0]).toEqual([baseStart(a).goal]); // no transcript, no title
       expect(seen.length).toBe(g.session!.map.blocks.length);
       for (const n of seen) expect(n).toEqual(NEEDS);
       expect(g.session!.needs).toEqual(NEEDS);
       expect(g.status('A')!.phase).toBe('ready');
     });
 
-    it('falls back to scoring without a breakdown when it fails', async () => {
+    it('rates each block independently of the others', async () => {
+      // Two sessions whose model ratings differ wildly; every block is still asked the same thing.
+      const run = async (relevance: (n: number) => number) => {
+        const g = new GoalController();
+        const r = needsAnalyzer(async () => NEEDS, relevance);
+        await g.start(baseStart(r.a));
+        await flush();
+        return { g, args: r.blockArgs };
+      };
+      const low = await run(() => 0);
+      const mixed = await run((n) => (n % 2 ? 10 : 0));
+      expect(mixed.args).toEqual(low.args);
+      expect(new Set(low.args.map((x) => x[1])).size).toBe(low.args.length); // one call per block
+      // And each block keeps its own rating.
+      expect(low.g.decide('A', 100, pace)).toMatchObject({ kind: 'target', rate: 2 });
+      const speeds = mixed.g.session!.map.blocks.map((b) => (mixed.g.decide('A', b.start + 1, pace) as { rate: number }).rate);
+      expect(new Set(speeds)).toEqual(new Set([1.15, 2]));
+    });
+
+    it('falls back to rating from the goal alone when the breakdown fails', async () => {
       const g = new GoalController();
       const { a, seen } = needsAnalyzer(async () => {
         throw new Error('too few needs');
@@ -250,6 +272,23 @@ describe('Goal Mode', () => {
       release();
       await flush();
       expect(seen.length).toBe(0);
+    });
+
+    it('drops a breakdown that arrives after navigating away', async () => {
+      const g = new GoalController();
+      let release!: () => void;
+      let current = 'A';
+      const { a, seen } = needsAnalyzer(() => new Promise((r) => (release = () => r(NEEDS))));
+      await g.start(baseStart(a, () => current === 'A'));
+      const session = g.session!;
+      current = 'B';
+      g.onVideoChange('B');
+      release();
+      await flush();
+      expect(seen.length).toBe(0);
+      expect(session.map.rated).toBe(0);
+      expect(g.session).toBeNull();
+      expect(g.decide('B', 100, pace)).toEqual({ kind: 'off' });
     });
   });
 

@@ -1,5 +1,10 @@
 /**
- * Goal Mode (experimental POC): per-video state, the analysis job, and the per-tick decision.
+ * Goal Mode (experimental): per-video state, the analysis job, and the per-tick decision.
+ *
+ * Analysis: the goal is broken into a few information needs once, then every transcript block is
+ * rated on its own against the goal and those same needs (no block's rating depends on another's,
+ * so blocks can be rated in any order). Pacing is a deterministic mapping of each block's rating.
+ *
  * Everything lives in memory for the current video only and is discarded on video change.
  * "No data, no change": without a mapped region, Goal Mode never moves the speed.
  */
@@ -13,9 +18,9 @@ import { goalTarget } from './goal-pacing';
 /** On-device analysis used by Goal Mode (Gemini Nano in production, a fake in tests). */
 export interface GoalAnalyzer {
   available(): Promise<boolean>;
-  /** The goal's information needs, from the goal alone (POC 1.5). Throws if unusable. */
+  /** The goal's information needs, worked out from the goal alone (never the video). Throws if unusable. */
   breakdownGoal(goal: string): Promise<string[]>;
-  /** Throws if the model fails or returns something unusable. `needs`: the goal breakdown, if any. */
+  /** Rate one block against the goal and its breakdown (`needs`; null = none). Throws if unusable. */
   rateBlock(goal: string, text: string, title?: string, needs?: string[] | null): Promise<BlockRating>;
   /** Validated sections covering exactly first..last, or null (keep block-level regions). */
   groupSections(goal: string, parts: PartSummary[], first: number, last: number): Promise<SectionRange[] | null>;
@@ -37,7 +42,7 @@ export const MAX_GOAL_LENGTH = 300;
 export class GoalSession {
   readonly map: GoalMap;
   phase: GoalPhase = 'mapping';
-  /** The goal broken into information needs, used unchanged for every block; null = score without it. */
+  /** The goal's breakdown, given unchanged to every block; null if it couldn't be made (blocks are rated from the goal alone). */
   needs: string[] | null = null;
   private cancelled = false;
 
@@ -55,8 +60,8 @@ export class GoalSession {
   }
 
   /**
-   * First break the goal into information needs (one call, goal only; on failure, blocks are scored
-   * without them, exactly as before). Then rate every block (upcoming-first from `startAt`, one retry each), grouping each window into
+   * Break the goal down (one call, goal only; if it fails, blocks are rated without a breakdown).
+   * Then rate every block (upcoming-first from `startAt`, one retry each), grouping each window into
    * sections once all of its blocks are rated. Stops as soon as the session is cancelled or the
    * user is no longer on this video; results land only in this session's own map.
    */
@@ -72,6 +77,7 @@ export class GoalSession {
     } catch {
       this.needs = null;
     }
+    if (!live()) return; // stopped or navigated away while the breakdown ran
 
     for (const i of order) {
       if (!live()) return;

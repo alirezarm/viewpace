@@ -1,12 +1,11 @@
 import type { AiRequest, AiResponse } from '../shared/messages';
 import {
   BLOCK_SCHEMA,
-  BLOCK_SYSTEM_PROMPT,
-  BLOCK_SYSTEM_PROMPT_WITH_NEEDS,
   BREAKDOWN_SCHEMA,
   BREAKDOWN_SYSTEM_PROMPT,
   SECTION_SCHEMA,
   SECTION_SYSTEM_PROMPT,
+  blockSystemPrompt,
   buildBlockPrompt,
   buildBreakdownPrompt,
   buildSectionPrompt,
@@ -47,9 +46,7 @@ chrome.runtime.onMessage.addListener((msg: AiRequest, _sender, sendResponse: (r:
         return { ok: true, needs: parseBreakdown(raw) };
       }
       if (msg.kind === 'ai:goal-block') {
-        // Without a breakdown this is exactly the POC 1.1 prompt.
-        const system = msg.needs?.length ? BLOCK_SYSTEM_PROMPT_WITH_NEEDS : BLOCK_SYSTEM_PROMPT;
-        const raw = await prompter.prompt(system, buildBlockPrompt(msg.goal, msg.text, msg.title, msg.needs), BLOCK_SCHEMA, GOAL_TIMEOUT_MS);
+        const raw = await prompter.prompt(blockSystemPrompt(msg.needs), buildBlockPrompt(msg.goal, msg.text, msg.title, msg.needs), BLOCK_SCHEMA, GOAL_TIMEOUT_MS);
         return { ok: true, goalBlock: parseBlockRating(raw) };
       }
       if (msg.kind === 'ai:goal-sections') {
