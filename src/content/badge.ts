@@ -32,9 +32,30 @@ export interface BadgeHandlers {
   /** Start (or restart) Goal Mode with this goal. */
   onGoalStart(goal: string): void;
   onGoalStop(): void;
+  /** Resume Goal Mode with this video's saved goal. */
+  onGoalResume(): void;
   /** Open or close the goal input. */
   onGoalEditing(editing: boolean): void;
 }
+
+/** Which sections of the one ViewPace card are shown. The speed/status row is always there. */
+export interface CardLayout {
+  goal: boolean;
+  map: boolean;
+  feedback: boolean;
+  resume: boolean;
+  /** Full width (anything beyond the status row); otherwise the card is just the compact status pill. */
+  wide: boolean;
+}
+
+export function cardLayout(v: Pick<BadgeView, 'goalCard' | 'timeline' | 'state'>, feedbackOpen: boolean): CardLayout {
+  const goal = v.goalCard.mode !== 'hidden';
+  const map = v.timeline !== null && v.timeline.duration > 0;
+  return { goal, map, feedback: feedbackOpen, resume: v.state === 'paused-by-user', wide: goal || map || feedbackOpen };
+}
+
+/** How long the answered feedback (and its thank-you) stays before the card collapses again. */
+const FEEDBACK_LINGER_MS = 1500;
 
 const HOST_ID = 'autospeed-badge';
 
@@ -52,14 +73,18 @@ const CSS = `
 :host { all: initial; }
 [hidden] { display: none !important; }
 * { box-sizing: border-box; }
-.wrap { display: flex; flex-direction: column; align-items: flex-end; gap: 6px;
+.wrap { display: flex; flex-direction: column; align-items: flex-end;
   font: 500 13px/1.3 "YouTube Sans", Roboto, Arial, sans-serif; color: #f1f1f1; }
+/* The one ViewPace card: goal, Goal Map, current speed, and (when asked) speed feedback. */
+.card { display: flex; flex-direction: column; gap: 6px; max-width: 340px; padding: 6px 10px 6px 8px; border-radius: 12px;
+  background: rgba(28,28,28,.9); }
+.card.wide { width: 272px; padding: 7px 9px 6px; }
 button { font: inherit; color: inherit; cursor: pointer; border: 0; }
 button:focus-visible { outline: 2px solid #ffc857; outline-offset: 2px; }
 
-.pill { display: flex; align-items: center; gap: 8px; padding: 6px 10px 6px 8px; border-radius: 12px;
-  background: rgba(28,28,28,.9); max-width: 340px; }
-.pill:hover { background: rgba(48,48,48,.95); }
+.pill { display: flex; align-items: center; gap: 8px; width: 100%; min-width: 0; padding: 0; border-radius: 6px;
+  background: none; text-align: left; }
+.pill:hover .line { color: #fff; }
 .track { position: relative; width: 28px; height: 4px; border-radius: 2px; background: rgba(255,255,255,.25); flex: none; }
 .dot { position: absolute; top: 50%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%;
   background: #ffc857; transition: left .4s ease; }
@@ -69,19 +94,20 @@ button:focus-visible { outline: 2px solid #ffc857; outline-offset: 2px; }
 .off .rate { color: #bdbdbd; font-weight: 500; }
 .line { color: #d6d6d6; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-.panel { display: flex; flex-direction: column; gap: 10px; width: 248px; padding: 12px; border-radius: 12px;
-  background: rgba(28,28,28,.94); }
+.panel { display: flex; flex-direction: column; gap: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,.12); }
 .q { margin: 0; font-weight: 600; }
 .fb { display: flex; gap: 6px; }
 .fb button, .secondary { flex: 1; padding: 7px 4px; border-radius: 8px; background: rgba(255,255,255,.1); }
 .fb button:hover, .secondary:hover { background: rgba(255,255,255,.2); }
 .ack { margin: 0; color: #ffc857; }
 .secondary { display: block; width: 100%; }
-.resume { padding: 6px 12px; border-radius: 12px; background: #ffc857; color: #1a1a1a; font-weight: 600; }
+.panel .secondary { flex: none; padding: 0; background: none; color: #aaa; text-align: left; font-size: 12px; }
+.panel .secondary:hover { color: #fff; background: none; }
+.resume { padding: 6px 12px; border-radius: 8px; background: #ffc857; color: #1a1a1a; font-weight: 600; }
 
 /* Goal Mode timeline: bar height = how much attention Goal Mode gives that part (taller = slower).
    Parts not mapped yet are striped, never short, so they can't be mistaken for "not relevant". */
-.tl { position: relative; width: 272px; padding: 7px 9px 5px; border-radius: 12px; background: rgba(28,28,28,.9); }
+.tl { position: relative; }
 /* Hover card for one part of the map: the topic leads; time range above, pacing below. */
 .tip { position: absolute; bottom: calc(100% + 6px); max-width: 240px; padding: 6px 9px; border-radius: 8px;
   background: rgba(20,20,20,.96); box-shadow: 0 2px 8px rgba(0,0,0,.4); pointer-events: none; white-space: normal; }
@@ -94,7 +120,8 @@ button:focus-visible { outline: 2px solid #ffc857; outline-offset: 2px; }
 .goal + .map { margin-top: 7px; }
 .gchip { display: block; width: 100%; padding: 0; text-align: left; background: none; color: #d6d6d6; font-size: 12px; }
 .gchip:hover { color: #fff; }
-.gline { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #f1f1f1; }
+.gline, .gsaved { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #f1f1f1; }
+.gresume { flex: none; padding: 2px 8px; border-radius: 6px; background: #ffc857; color: #1a1a1a; font-weight: 600; font-size: 12px; }
 .gtext { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .gedit { flex: none; padding: 0 4px; border-radius: 6px; background: none; color: #aaa; font-size: 13px; }
 .gedit:hover { color: #fff; background: rgba(255,255,255,.1); }
@@ -141,6 +168,8 @@ export class Badge {
   private root: ShadowRoot;
   private el: Record<string, HTMLElement> = {};
   private open = false;
+  private lingerTimer: ReturnType<typeof setTimeout> | undefined;
+  private lastView: BadgeView | null = null;
   private timelineKey = '';
   private goalMode: GoalCardView['mode'] = 'hidden';
   /** The map last drawn (duration and playhead), for keyboard seeking. */
@@ -161,16 +190,7 @@ export class Badge {
     this.root.innerHTML = `
       <style>${CSS}</style>
       <div class="wrap">
-        <div class="panel" data-k="panel" hidden role="dialog" aria-label="ViewPace">
-          <p class="q" data-k="q">How's the speed?</p>
-          <div class="fb" data-k="fb">
-            <button data-f="too_slow">Too slow</button>
-            <button data-f="good">Just right</button>
-            <button data-f="too_fast">Too fast</button>
-          </div>
-          <p class="ack" data-k="ack" aria-live="polite"></p>
-          <button class="secondary" data-k="toggle"></button>
-        </div>
+       <div class="card" data-k="card" role="group" aria-label="ViewPace">
         <div class="tl" data-k="tl" hidden>
           <div class="goal" data-k="goal">
             <button class="gchip" data-k="gchip" hidden>🎯 Set a viewing goal</button>
@@ -181,6 +201,7 @@ export class Badge {
               <div class="gmsg" data-k="gmsg" role="status" hidden></div>
               <div class="gacts"><button type="button" data-k="gcancel">Cancel</button><button type="button" data-k="gstop" hidden>Stop Goal Mode</button></div>
             </form>
+            <div class="gsaved" data-k="gsaved" hidden><span class="gtext" data-k="gsavedtext" role="button" tabindex="0" aria-label="Edit viewing goal"></span><button class="gresume" data-k="gresume">Resume</button><button class="gedit" data-k="gsavededit" aria-label="Edit viewing goal" title="Edit goal">✎</button></div>
             <div class="gline" data-k="gline" hidden><span class="gtext" data-k="gtext" role="button" tabindex="0" aria-label="Edit viewing goal"></span><button class="gedit" data-k="gedit" aria-label="Edit viewing goal" title="Edit goal">✎</button></div>
           </div>
           <div class="map" data-k="map">
@@ -191,12 +212,23 @@ export class Badge {
           </div>
           <div class="tip" data-k="tip" hidden><div class="tr" data-k="tipRange"></div><div data-k="tipTopics"></div><div class="td" data-k="tipDetail"></div></div>
         </div>
-        <button class="resume" data-k="resume" hidden>Resume ViewPace</button>
-        <button class="pill" data-k="pill" aria-expanded="false" aria-label="ViewPace: show options">
+        <button class="pill" data-k="pill" aria-expanded="false" aria-label="ViewPace: current speed. Show speed feedback">
           <span class="track" aria-hidden="true"><span class="dot" data-k="dot"></span></span>
           <span class="rate" data-k="rate"></span>
           <span class="line" data-k="line" hidden></span>
         </button>
+        <div class="panel" data-k="panel" hidden>
+          <p class="q" data-k="q">How's the speed?</p>
+          <div class="fb" data-k="fb">
+            <button data-f="too_slow">Too slow</button>
+            <button data-f="good">Just right</button>
+            <button data-f="too_fast">Too fast</button>
+          </div>
+          <p class="ack" data-k="ack" aria-live="polite"></p>
+          <button class="secondary" data-k="toggle"></button>
+        </div>
+        <button class="resume" data-k="resume" hidden>Resume ViewPace</button>
+       </div>
       </div>`;
     this.root.querySelectorAll<HTMLElement>('[data-k]').forEach((e) => (this.el[e.dataset.k!] = e));
 
@@ -215,10 +247,17 @@ export class Badge {
         return;
       }
       const f = t.closest<HTMLElement>('[data-f]')?.dataset.f;
-      if (f) return handlers.onFeedback(f as Feedback);
+      if (f) {
+        handlers.onFeedback(f as Feedback);
+        // Answered: show the thank-you briefly, then fold the card back to compact.
+        clearTimeout(this.lingerTimer);
+        this.lingerTimer = setTimeout(() => this.setOpen(false), FEEDBACK_LINGER_MS);
+        return;
+      }
       const k = t.closest<HTMLElement>('[data-k]')?.dataset.k;
       // The goal row (or ✎) opens the editor; ✕ / Cancel close it. Closing never stops or changes the goal.
-      if (k === 'gchip' || k === 'gedit' || k === 'gtext') return handlers.onGoalEditing(true);
+      if (k === 'gchip' || k === 'gedit' || k === 'gtext' || k === 'gsavedtext' || k === 'gsavededit') return handlers.onGoalEditing(true);
+      if (k === 'gresume') return handlers.onGoalResume();
       if (k === 'gcancel' || k === 'gclose') return handlers.onGoalEditing(false);
       if (k === 'gstop') return handlers.onGoalStop();
       if (k === 'gprev') {
@@ -247,7 +286,8 @@ export class Badge {
     this.root.addEventListener('keydown', (e) => {
       const key = (e as KeyboardEvent).key;
       if (key === 'Escape' && this.goalMode === 'entry') handlers.onGoalEditing(false);
-      if ((key === 'Enter' || key === ' ') && (e.target as HTMLElement).dataset?.k === 'gtext') {
+      const tk = (e.target as HTMLElement).dataset?.k;
+      if ((key === 'Enter' || key === ' ') && (tk === 'gtext' || tk === 'gsavedtext')) {
         e.preventDefault();
         handlers.onGoalEditing(true);
       }
@@ -263,10 +303,11 @@ export class Badge {
   }
 
   private setOpen(open: boolean): void {
+    clearTimeout(this.lingerTimer);
     this.open = open;
-    this.el.panel!.hidden = !open;
     this.el.pill!.setAttribute('aria-expanded', String(open));
     this.syncOpen();
+    this.applyLayout();
   }
 
   /** Stay visible while the panel is open or a goal is being typed, even if YouTube hides its controls. */
@@ -282,6 +323,12 @@ export class Badge {
     this.el.gchip!.hidden = v.mode !== 'chip';
     this.el.gentry!.hidden = v.mode !== 'entry';
     this.el.gline!.hidden = v.mode !== 'active';
+    this.el.gsaved!.hidden = v.mode !== 'saved';
+    if (v.mode === 'saved') {
+      const text = `🎯 ${v.goal}`;
+      if (this.el.gsavedtext!.textContent !== text) this.el.gsavedtext!.textContent = text;
+      this.el.gsavedtext!.title = v.goal;
+    }
     if (v.mode === 'active') {
       const text = `🎯 ${v.goal}`;
       if (this.el.gtext!.textContent !== text) this.el.gtext!.textContent = text;
@@ -344,10 +391,22 @@ export class Badge {
     this.el.fb!.hidden = !rating;
     this.el.ack!.hidden = !rating || !v.ack;
     set('toggle', v.state === 'off' ? 'Turn on ViewPace' : 'Turn off ViewPace');
-    this.el.resume!.hidden = v.state !== 'paused-by-user';
     this.host.toggleAttribute('data-flash', v.flash || v.state === 'paused-by-user');
     this.renderGoal(v.goalCard);
     this.renderTimeline(v.timeline);
+    this.lastView = v;
+    this.applyLayout();
+  }
+
+  /** One card: show only the sections that have something to say. */
+  private applyLayout(): void {
+    if (!this.lastView) return;
+    const layout = cardLayout(this.lastView, this.open);
+    this.el.tl!.hidden = !layout.goal && !layout.map;
+    this.el.map!.hidden = !layout.map;
+    this.el.panel!.hidden = !layout.feedback;
+    this.el.resume!.hidden = !layout.resume;
+    this.el.card!.classList.toggle('wide', layout.wide);
   }
 
   /** Show the hover card for region `i` of the current map, above that part (or hide it for -1). */
@@ -379,9 +438,6 @@ export class Badge {
 
   /** Segments are rebuilt only when the map changes; the playhead marker moves every update. */
   private renderTimeline(tl: GoalTimeline | null): void {
-    const box = this.el.tl!;
-    box.hidden = !tl && this.goalMode === 'hidden'; // the card can show before there's a map
-    this.el.map!.hidden = !tl;
     this.timeline = tl && tl.duration > 0 ? tl : null;
     if (!tl || tl.duration <= 0) {
       this.timelineKey = '';

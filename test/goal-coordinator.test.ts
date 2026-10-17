@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { PROFILES } from '../src/content/controller';
 import { GoalCoordinator } from '../src/content/goal/goal-coordinator';
 import { GoalController, type GoalAnalyzer } from '../src/content/goal/goal-session';
-import { EMPTY_GOALS, withGoal, withStopped, type GoalStore } from '../src/shared/goal-store';
+import { EMPTY_GOALS, withGoal, type GoalStore } from '../src/shared/goal-store';
 import { parseBlockRating } from '../src/shared/goal-prompt';
 import type { TimedWord } from '../src/shared/types';
 
@@ -15,17 +15,21 @@ const flush = async () => {
   for (let i = 0; i < 50; i++) await new Promise((r) => setTimeout(r, 0));
 };
 
-/** The page: which video is open, and remembered goals in an in-memory "chrome.storage". */
+/** The page: which video is open, remembered goals in an in-memory "chrome.storage", and every Nano call. */
 function page(initial: GoalStore = EMPTY_GOALS, opts: { availableGate?: Promise<void> } = {}) {
   let stored = initial;
-  const env = { video: 'A' as string | null, started: [] as string[], rated: [] as string[] };
+  const env = { video: 'A' as string | null, nano: [] as string[], rated: [] as string[] };
   const analyzer: GoalAnalyzer = {
     available: async () => {
       if (opts.availableGate) await opts.availableGate;
       return true;
     },
-    breakdownGoal: async () => ['a', 'b', 'c'],
+    breakdownGoal: async (goal) => {
+      env.nano.push(`breakdown ${goal}`);
+      return ['a', 'b', 'c'];
+    },
     rateBlock: async (goal) => {
+      env.nano.push(`block ${goal}`);
       env.rated.push(goal);
       return parseBlockRating(JSON.stringify({ topic: 't', relevance: 8, attention: 3, reason: 'r' }));
     },
@@ -37,13 +41,11 @@ function page(initial: GoalStore = EMPTY_GOALS, opts: { availableGate?: Promise<
     storage: {
       load: async () => stored,
       remember: async (id, goal) => (stored = withGoal(stored, id, goal, Date.now())),
-      stop: async (id) => (stored = withStopped(stored, id)),
     },
     // What main.ts does: everything GoalController.start needs, for the video that's open now.
     prepare: (id, goal) => {
       if (env.video !== id) return { error: 'Open a YouTube video first.' };
       if (!goal) return { error: 'Tell ViewPace what you want from this video.' };
-      env.started.push(goal);
       return { videoId: id, goal, words, transcriptEnd: 600, analyzer, isCurrent: () => env.video === id, playhead: () => 0 };
     },
   });
@@ -51,73 +53,37 @@ function page(initial: GoalStore = EMPTY_GOALS, opts: { availableGate?: Promise<
   const navigate = (id: string | null) => {
     env.video = id;
     controller.onVideoChange(id);
-    coord.onVideoChange(id);
+    coord.onVideoChange();
   };
   return { coord, controller, env, navigate, stored: () => stored };
 }
 
-describe('viewing goal on the page', () => {
-  it('offers a one-line goal prompt when there is no goal, and nothing where Goal Mode cannot run', async () => {
+describe('viewing goal: no goal', () => {
+  it('offers a one-line goal prompt, and nothing where Goal Mode cannot run', async () => {
     const { coord } = page();
     await coord.init();
     expect(coord.card('A', true)).toEqual({ mode: 'chip' });
     expect(coord.card('A', false)).toEqual({ mode: 'hidden' });
   });
 
-  it('opens the input from the prompt, with the previous goal offered but not applied', async () => {
+  it('opens the input, with the previous goal offered but not applied', async () => {
     const { coord, controller } = page(withGoal(EMPTY_GOALS, 'Z', 'Understand how LLMs are trained', 1));
     await coord.init();
     coord.setEditing(true);
     expect(coord.card('A', true)).toEqual({ mode: 'entry', value: '', suggestion: 'Understand how LLMs are trained', canStop: false, message: null });
-    expect(controller.session).toBeNull(); // nothing started
+    expect(controller.session).toBeNull();
   });
 
-  it('Start runs the existing Goal Mode pipeline, then collapses to the goal', async () => {
+  it('Start runs the existing Goal Mode pipeline, saves the goal, and collapses to it', async () => {
     const { coord, controller, env, stored } = page();
     await coord.init();
     coord.setEditing(true);
-    const status = await coord.start('A', '  Understand how LLMs are trained  ');
-    expect(status).toMatchObject({ phase: 'mapping', goal: 'Understand how LLMs are trained' });
+    expect(await coord.start('A', '  Understand how LLMs are trained  ')).toMatchObject({ phase: 'mapping', goal: 'Understand how LLMs are trained' });
     expect(controller.session).toMatchObject({ videoId: 'A', goal: 'Understand how LLMs are trained' });
     expect(coord.card('A', true)).toEqual({ mode: 'active', goal: 'Understand how LLMs are trained' });
     await flush();
-    expect(env.rated.length).toBeGreaterThan(0); // blocks are being rated for that goal
-    expect(stored().byVideo.A).toMatchObject({ goal: 'Understand how LLMs are trained', active: true });
-  });
-
-  it('edit reopens the input with the current goal; a new goal restarts analysis from scratch', async () => {
-    const { coord, controller, stored, env } = page();
-    await coord.init();
-    await coord.start('A', 'first goal');
-    await flush();
-    const first = controller.session!;
-    const ratedBefore = env.rated.length;
-    coord.setEditing(true);
-    expect(coord.card('A', true)).toEqual({ mode: 'entry', value: 'first goal', suggestion: null, canStop: true, message: null });
-    await coord.start('A', 'second goal');
-    expect(controller.session).not.toBe(first);
-    expect(controller.session!.goal).toBe('second goal');
-    expect(controller.session!.map).not.toBe(first.map); // a fresh map
-    await flush();
-    expect(env.rated.slice(ratedBefore).every((g) => g === 'second goal')).toBe(true); // re-analysed for the new goal only
-    expect(first.phase).not.toBe('mapping'); // the old one was cancelled or finished; it can't write here
-    expect(stored().byVideo.A).toMatchObject({ goal: 'second goal', active: true });
-    expect(coord.card('A', true)).toEqual({ mode: 'active', goal: 'second goal' });
-  });
-
-  it('collapsing the editor (✕, Cancel, Escape) keeps the running goal and its saved entry untouched', async () => {
-    const { coord, controller, stored } = page();
-    await coord.init();
-    await coord.start('A', 'the goal');
-    const session = controller.session!;
-    const saved = stored().byVideo.A;
-    coord.setEditing(true);
-    expect(coord.card('A', true)).toMatchObject({ mode: 'entry', value: 'the goal' });
-    coord.setEditing(false); // what ✕, Cancel and Escape do
-    expect(coord.card('A', true)).toEqual({ mode: 'active', goal: 'the goal' });
-    expect(controller.session).toBe(session); // not stopped, not restarted
-    expect(session.phase).toBe('mapping');
-    expect(stored().byVideo.A).toEqual(saved);
+    expect(env.rated.length).toBeGreaterThan(0);
+    expect(stored().byVideo.A).toMatchObject({ goal: 'Understand how LLMs are trained' });
   });
 
   it('keeps the input open with the reason when a start is refused', async () => {
@@ -128,91 +94,157 @@ describe('viewing goal on the page', () => {
     expect(controller.session).toBeNull();
     expect(coord.card('A', true)).toMatchObject({ mode: 'entry', message: 'Tell ViewPace what you want from this video.' });
   });
+});
 
-  it('restores a video\'s goal after a reload, once its captions and the AI are ready', async () => {
+describe('viewing goal: saved but not active', () => {
+  it('after a reload the saved goal is shown with Resume, and no analysis runs', async () => {
     const before = page();
     await before.coord.init();
     await before.coord.start('A', 'Understand how LLMs are trained');
-    // Reload: a fresh content script, same storage.
+    // Reload: a fresh content script, same storage. Let plenty of ticks go by.
     const after = page(before.stored());
     await after.coord.init();
-    expect(after.coord.maybeRestore({ videoId: 'A', ready: false })).toBe(false); // waits for captions/AI
-    expect(after.coord.maybeRestore({ videoId: 'A', ready: true })).toBe(true);
     await flush();
-    expect(after.controller.session).toMatchObject({ videoId: 'A', goal: 'Understand how LLMs are trained' });
-    expect(after.coord.card('A', true)).toEqual({ mode: 'active', goal: 'Understand how LLMs are trained' });
-    expect(after.coord.maybeRestore({ videoId: 'A', ready: true })).toBe(false); // once per visit
+    expect(after.controller.session).toBeNull();
+    expect(after.env.nano).toEqual([]); // no Nano call at all
+    expect(after.coord.card('A', true)).toEqual({ mode: 'saved', goal: 'Understand how LLMs are trained' });
   });
 
-  it('never applies a goal to another video; there it is only a suggestion', async () => {
-    const { coord, controller, navigate } = page();
+  it('Resume starts mapping with the saved goal', async () => {
+    const { coord, controller, env } = page(withGoal(EMPTY_GOALS, 'A', 'saved goal', 1));
+    await coord.init();
+    expect(await coord.resume('A')).toMatchObject({ phase: 'mapping', goal: 'saved goal' });
+    await flush();
+    expect(controller.session).toMatchObject({ videoId: 'A', goal: 'saved goal' });
+    expect(env.nano[0]).toBe('breakdown saved goal');
+    expect(coord.card('A', true)).toEqual({ mode: 'active', goal: 'saved goal' });
+  });
+
+  it('Resume with nothing saved does nothing', async () => {
+    const { coord, controller } = page();
+    await coord.init();
+    expect(await coord.resume('A')).toEqual({ error: 'There is no saved goal for this video.' });
+    expect(controller.session).toBeNull();
+  });
+
+  it('editing a saved goal starts with it in the input; closing goes back to Resume', async () => {
+    const { coord } = page(withGoal(EMPTY_GOALS, 'A', 'saved goal', 1));
+    await coord.init();
+    coord.setEditing(true);
+    expect(coord.card('A', true)).toEqual({ mode: 'entry', value: 'saved goal', suggestion: null, canStop: false, message: null });
+    coord.setEditing(false);
+    expect(coord.card('A', true)).toEqual({ mode: 'saved', goal: 'saved goal' });
+  });
+});
+
+describe('viewing goal: active', () => {
+  it('Stop ends Goal Mode, keeps the saved goal, and goes back to Resume', async () => {
+    const { coord, controller, stored, env } = page();
+    await coord.init();
+    await coord.start('A', 'goal for A');
+    await flush();
+    const saved = stored().byVideo.A;
+    coord.stop();
+    expect(controller.session).toBeNull();
+    expect(stored().byVideo.A).toEqual(saved); // untouched
+    expect(coord.card('A', true)).toEqual({ mode: 'saved', goal: 'goal for A' });
+    const calls = env.nano.length;
+    await flush();
+    expect(env.nano.length).toBe(calls); // no more analysis
+  });
+
+  it("edit + Start saves the new goal and analyses afresh; the old goal's work cannot write to it", async () => {
+    const { coord, controller, stored, env } = page();
+    await coord.init();
+    await coord.start('A', 'first goal');
+    await flush();
+    const first = controller.session!;
+    const ratedBefore = env.rated.length;
+    coord.setEditing(true);
+    expect(coord.card('A', true)).toEqual({ mode: 'entry', value: 'first goal', suggestion: null, canStop: true, message: null });
+    await coord.start('A', 'second goal');
+    expect(controller.session).not.toBe(first);
+    expect(controller.session!.map).not.toBe(first.map);
+    expect(first.phase).not.toBe('mapping');
+    await flush();
+    expect(env.rated.slice(ratedBefore).every((g) => g === 'second goal')).toBe(true);
+    expect(stored().byVideo.A).toMatchObject({ goal: 'second goal' });
+    expect(coord.card('A', true)).toEqual({ mode: 'active', goal: 'second goal' });
+  });
+
+  it('collapsing the editor keeps the running goal and its saved entry untouched', async () => {
+    const { coord, controller, stored } = page();
+    await coord.init();
+    await coord.start('A', 'the goal');
+    const session = controller.session!;
+    const saved = stored().byVideo.A;
+    coord.setEditing(true);
+    coord.setEditing(false);
+    expect(coord.card('A', true)).toEqual({ mode: 'active', goal: 'the goal' });
+    expect(controller.session).toBe(session);
+    expect(stored().byVideo.A).toEqual(saved);
+  });
+
+  it('the popup and the page share one state: either can start, edit, stop or resume', async () => {
+    const { coord } = page();
+    await coord.init();
+    await coord.start('A', 'from the popup'); // popup goal:start
+    expect(coord.card('A', true)).toEqual({ mode: 'active', goal: 'from the popup' });
+    await coord.start('A', 'edited on the page');
+    expect(coord.status('A')).toMatchObject({ goal: 'edited on the page' }); // popup goal:status
+    coord.stop(); // popup goal:stop
+    expect(coord.status('A')).toBeNull();
+    expect(coord.card('A', true)).toEqual({ mode: 'saved', goal: 'edited on the page' });
+    await coord.resume('A'); // page Resume
+    expect(coord.status('A')).toMatchObject({ phase: 'mapping', goal: 'edited on the page' });
+  });
+});
+
+describe('viewing goal across videos', () => {
+  it('never activates a goal on another video; there it is only a suggestion', async () => {
+    const { coord, controller, navigate, env } = page();
     await coord.init();
     await coord.start('A', 'goal for A');
     navigate('B');
-    expect(controller.session).toBeNull(); // A's session went with A
-    expect(coord.maybeRestore({ videoId: 'B', ready: true })).toBe(false);
+    await flush();
+    expect(controller.session).toBeNull();
+    const calls = env.nano.length;
     expect(coord.card('B', true)).toEqual({ mode: 'chip' });
     coord.setEditing(true);
     expect(coord.card('B', true)).toMatchObject({ mode: 'entry', value: '', suggestion: 'goal for A' });
-    // Reusing it is an explicit Start.
-    await coord.start('B', 'goal for A');
+    expect(env.nano.length).toBe(calls);
+    await coord.start('B', 'goal for A'); // reusing it is an explicit Start
     expect(controller.session).toMatchObject({ videoId: 'B', goal: 'goal for A' });
   });
 
-  it('follows SPA navigation: back on a video, its own goal comes back', async () => {
-    const { coord, controller, navigate } = page();
+  it('SPA navigation: each video shows its own saved goal, inactive until Resume', async () => {
+    const { coord, controller, navigate, env } = page();
     await coord.init();
     await coord.start('A', 'goal for A');
+    coord.setEditing(true); // an open editor doesn't follow you to the next video
     navigate('B');
+    expect(coord.card('B', true)).toEqual({ mode: 'chip' });
     await coord.start('B', 'goal for B');
     navigate('A');
-    expect(coord.maybeRestore({ videoId: 'A', ready: true })).toBe(true);
     await flush();
-    expect(controller.session).toMatchObject({ videoId: 'A', goal: 'goal for A' });
-    navigate('B');
-    expect(coord.maybeRestore({ videoId: 'B', ready: true })).toBe(true);
-    await flush();
-    expect(controller.session).toMatchObject({ videoId: 'B', goal: 'goal for B' });
-  });
-
-  it('Stop ends the session, keeps the goal for that video as a suggestion, and does not restore it', async () => {
-    const { coord, controller, stored, navigate } = page();
-    await coord.init();
-    await coord.start('A', 'goal for A');
-    await coord.stop('A');
+    const calls = env.nano.length;
     expect(controller.session).toBeNull();
-    expect(stored().byVideo.A).toMatchObject({ goal: 'goal for A', active: false });
-    expect(coord.card('A', true)).toEqual({ mode: 'chip' });
+    expect(coord.card('A', true)).toEqual({ mode: 'saved', goal: 'goal for A' });
     navigate('B');
-    navigate('A');
-    expect(coord.maybeRestore({ videoId: 'A', ready: true })).toBe(false);
-    coord.setEditing(true);
-    expect(coord.card('A', true)).toMatchObject({ suggestion: 'goal for A' });
+    expect(coord.card('B', true)).toEqual({ mode: 'saved', goal: 'goal for B' });
+    await flush();
+    expect(env.nano.length).toBe(calls);
   });
 
-  it('the popup and the page share one state: either can start, edit or stop', async () => {
-    const { coord } = page();
-    await coord.init();
-    // Popup: goal:start goes to coord.start; the page's card shows it.
-    await coord.start('A', 'from the popup');
-    expect(coord.card('A', true)).toEqual({ mode: 'active', goal: 'from the popup' });
-    // Page: edit and restart; the popup's goal:status shows it.
-    await coord.start('A', 'edited on the page');
-    expect(coord.status('A')).toMatchObject({ goal: 'edited on the page' });
-    // Popup: stop; the page's card goes back to the prompt.
-    await coord.stop('A');
-    expect(coord.status('A')).toBeNull();
-    expect(coord.card('A', true)).toEqual({ mode: 'chip' });
-  });
-
-  it('a restore that finishes after navigating away neither runs nor gets remembered for the new video', async () => {
+  it('a start that finishes after navigating away neither runs nor gets saved', async () => {
     let release!: () => void;
     const gate = new Promise<void>((r) => (release = r));
     const { coord, controller, navigate, stored, env } = page(withGoal(EMPTY_GOALS, 'A', 'goal for A', 1), { availableGate: gate });
     await coord.init();
-    expect(coord.maybeRestore({ videoId: 'A', ready: true })).toBe(true); // waiting on the AI check
+    const resumed = coord.resume('A'); // waiting on the AI check
     navigate('B');
     release();
+    await resumed;
     await flush();
     expect(controller.session).toBeNull();
     expect(stored().byVideo.B).toBeUndefined();
@@ -220,26 +252,14 @@ describe('viewing goal on the page', () => {
     expect(coord.card('B', true)).toEqual({ mode: 'chip' });
   });
 
-  it('a restore that fails does not loop; the next visit may try again', async () => {
-    const { coord, env, navigate } = page(withGoal(EMPTY_GOALS, 'A', 'goal for A', 1));
-    await coord.init();
-    env.video = 'elsewhere'; // prepare refuses (e.g. the video element isn't there yet)
-    expect(coord.maybeRestore({ videoId: 'A', ready: true })).toBe(true);
-    await flush();
-    expect(coord.maybeRestore({ videoId: 'A', ready: true })).toBe(false); // not again on this visit
-    navigate('B');
-    navigate('A');
-    expect(coord.maybeRestore({ videoId: 'A', ready: true })).toBe(true);
-  });
-
-  it('pacing is unchanged by restoring', async () => {
+  it('pacing after Resume is the same as before', async () => {
     const before = page();
     await before.coord.init();
     await before.coord.start('A', 'goal');
     await flush();
     const after = page(before.stored());
     await after.coord.init();
-    after.coord.maybeRestore({ videoId: 'A', ready: true });
+    await after.coord.resume('A');
     await flush();
     expect(after.controller.decide('A', 100, PROFILES.normal)).toEqual(before.controller.decide('A', 100, PROFILES.normal));
   });
