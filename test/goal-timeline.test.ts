@@ -28,7 +28,7 @@ describe('Goal Mode timeline', () => {
 
     map.setRating(2, rating(8, 8, 'Training setup'));
     tl = goalTimeline(map, pace, 600, 0, true);
-    expect(tl.segments[2]).toMatchObject({ state: 'mapped', level: 0, topic: 'Training setup', rate: 1, label: 'Key part for your goal' });
+    expect(tl.segments[2]).toMatchObject({ state: 'mapped', level: 0, topic: 'Training setup', rate: 1, label: 'Key' });
     expect(tl.segments.filter((s) => s.state === 'pending')).toHaveLength(n - 1);
     expect(tl.progress).toBeCloseTo(1 / n);
 
@@ -87,11 +87,11 @@ describe('Goal Mode timeline', () => {
   const card1 = (seg: Parameters<typeof mergeSegments>[0][number]) => regionTooltip(mergeSegments([seg])[0]!);
 
   it('hover card: time range, the block topic as the main line, then meaning and speed', () => {
-    expect(card1({ start: 802, end: 845, state: 'mapped', level: 0, label: 'Key part for your goal', rate: 1, topic: 'Analyzing the network' })).toEqual({
+    expect(card1({ start: 802, end: 845, state: 'mapped', level: 0, label: 'Key', rate: 1, topic: 'Analyzing the network' })).toEqual({
       range: '13:22–14:05',
       topics: ['Analyzing the network'],
       more: 0,
-      detail: 'Key part for your goal · 1×',
+      detail: 'Key · 1×',
     });
   });
 
@@ -101,17 +101,17 @@ describe('Goal Mode timeline', () => {
     const t = (map.blocks[2]!.start + map.blocks[2]!.end) / 2;
     expect(regionTooltip(regionAt(t))).toMatchObject({ topics: [], detail: 'Not analyzed yet' });
     map.setRating(2, rating(5, 3, 'Cost function setup'));
-    expect(regionTooltip(regionAt(t))).toMatchObject({ topics: ['Cost function setup'], detail: 'Relevant background · 1.4×' });
+    expect(regionTooltip(regionAt(t))).toMatchObject({ topics: ['Cost function setup'], detail: 'Relevant · 1.4×' });
     expect(map.sections()).toEqual([]); // no section grouping has happened
   });
 
   it('hover card leaves out missing topics instead of showing empty or undefined lines', () => {
     for (const topic of [undefined, '', '   ']) {
-      expect(card1({ start: 0, end: 60, state: 'mapped', level: 4, label: 'Not relevant to your goal', rate: 2, topic })).toEqual({
+      expect(card1({ start: 0, end: 60, state: 'mapped', level: 4, label: 'Not relevant', rate: 2, topic })).toEqual({
         range: '0:00–1:00',
         topics: [],
         more: 0,
-        detail: 'Not relevant to your goal · 2×',
+        detail: 'Not relevant · 2×',
       });
     }
   });
@@ -178,7 +178,7 @@ describe('Goal Map navigation', () => {
 });
 
 describe('Goal Map regions (display aggregation)', () => {
-  const LABEL = ['Key part for your goal', 'Important for your goal', 'Relevant background', 'Less relevant to your goal', 'Not relevant to your goal'];
+  const LABEL = ['Key', 'Important', 'Relevant', 'Low relevance', 'Not relevant'];
   const RATE = [1, 1.15, 1.4, 1.75, 2];
   /** A mapped block starting at `start` (60 s long) in pacing row `level`. */
   const m = (start: number, level: number, topic?: string, len = 60): TimelineSegment => ({
@@ -275,20 +275,20 @@ describe('Goal Map regions (display aggregation)', () => {
   });
 
   it('hover card shows the actual speed, or the range of speeds, inside a region', () => {
-    expect(regionTooltip(mergeSegments(rows([0, 0]))[0]!).detail).toBe('Key part for your goal · 1×');
-    expect(regionTooltip(mergeSegments(rows([1, 0, 1]))[0]!).detail).toBe('Important for your goal · 1–1.15×');
-    expect(regionTooltip(mergeSegments(rows([3, 4, 4]))[0]!).detail).toBe('Not relevant to your goal · 1.75–2×');
-    expect(regionTooltip(mergeSegments(rows([0, 2, 0]))[0]!).detail).toBe('Key part for your goal · 1–1.4×'); // absorbed block's speed is shown
+    expect(regionTooltip(mergeSegments(rows([0, 0]))[0]!).detail).toBe('Key · 1×');
+    expect(regionTooltip(mergeSegments(rows([1, 0, 1]))[0]!).detail).toBe('Important · 1–1.15×');
+    expect(regionTooltip(mergeSegments(rows([3, 4, 4]))[0]!).detail).toBe('Not relevant · 1.75–2×');
+    expect(regionTooltip(mergeSegments(rows([0, 2, 0]))[0]!).detail).toBe('Key · 1–1.4×'); // absorbed block's speed is shown
   });
 
   it('hover card names the meaning covering most of the region\'s time (ties: the slower one)', () => {
-    expect(regionTooltip(mergeSegments([m(0, 0, undefined, 30), m(30, 1, undefined, 90)])[0]!).detail).toBe('Important for your goal · 1–1.15×');
-    expect(regionTooltip(mergeSegments([m(0, 1), m(60, 0)])[0]!).detail).toBe('Key part for your goal · 1–1.15×');
+    expect(regionTooltip(mergeSegments([m(0, 0, undefined, 30), m(30, 1, undefined, 90)])[0]!).detail).toBe('Important · 1–1.15×');
+    expect(regionTooltip(mergeSegments([m(0, 1), m(60, 0)])[0]!).detail).toBe('Key · 1–1.15×');
   });
 
   it('hover card lists the blocks\' own topics, deduplicated', () => {
     const [r] = mergeSegments([m(760, 0, 'Pretraining data'), m(820, 1, 'pretraining  data'), m(880, 0, 'Next-token prediction'), m(940, 0, 'Pretraining data')]);
-    expect(regionTooltip(r!)).toEqual({ range: '12:40–16:40', topics: ['Pretraining data', 'Next-token prediction'], more: 0, detail: 'Key part for your goal · 1–1.15×' });
+    expect(regionTooltip(r!)).toEqual({ range: '12:40–16:40', topics: ['Pretraining data', 'Next-token prediction'], more: 0, detail: 'Key · 1–1.15×' });
   });
 
   it('hover card shows at most 3 topics, then "+N more"', () => {
@@ -297,13 +297,13 @@ describe('Goal Map regions (display aggregation)', () => {
       range: '12:40–15:55',
       topics: ['Pretraining data', 'Next-token prediction', 'Training objective'],
       more: 2,
-      detail: 'Key part for your goal · 1×',
+      detail: 'Key · 1×',
     });
   });
 
   it('hover card skips blocks without a topic and shows the rest', () => {
     const [r] = mergeSegments([m(0, 3, ''), m(60, 3), m(120, 3, 'Sponsor read'), m(180, 3, '  ')]);
-    expect(regionTooltip(r!)).toMatchObject({ topics: ['Sponsor read'], more: 0, detail: 'Less relevant to your goal · 1.75×' });
+    expect(regionTooltip(r!)).toMatchObject({ topics: ['Sponsor read'], more: 0, detail: 'Low relevance · 1.75×' });
   });
 
   it('a click inside a merged region seeks to that point of it, not its start', () => {

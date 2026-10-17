@@ -221,7 +221,7 @@ export class GoalController {
     if (s.phase === 'failed' || s.phase === 'stopped') return { kind: 'hold', note: "Goal Mode couldn't map this video" };
     // Pacing: the block containing t, by its own scores. The section is only a label.
     const block = s.map.pacingBlockAt(t);
-    if (!block) return { kind: 'hold', note: s.phase === 'mapping' ? 'Mapping this part for your goal…' : "This part isn't mapped" };
+    if (!block) return { kind: 'hold', note: s.phase === 'mapping' ? 'Analyzing this part…' : "This part isn't mapped" };
     const target = goalTarget(block, pace);
     return { kind: 'target', rate: target.rate, label: target.label, block, section: s.map.sectionAt(t) };
   }

@@ -17,11 +17,11 @@ export interface PacingCategory {
 
 /** Checked top to bottom; the last entry catches everything. */
 export const GOAL_PACING: PacingCategory[] = [
-  { minRelevance: 7, minAttention: 7, position: 0, label: 'Key part for your goal' },
-  { minRelevance: 7, minAttention: 0, position: 0.15, label: 'Important for your goal' },
-  { minRelevance: 5, minAttention: 0, position: 0.4, label: 'Relevant background' },
-  { minRelevance: 3, minAttention: 0, position: 0.75, label: 'Less relevant to your goal' },
-  { minRelevance: 0, minAttention: 0, position: 1, label: 'Not relevant to your goal' },
+  { minRelevance: 7, minAttention: 7, position: 0, label: 'Key' },
+  { minRelevance: 7, minAttention: 0, position: 0.15, label: 'Important' },
+  { minRelevance: 5, minAttention: 0, position: 0.4, label: 'Relevant' },
+  { minRelevance: 3, minAttention: 0, position: 0.75, label: 'Low relevance' },
+  { minRelevance: 0, minAttention: 0, position: 1, label: 'Not relevant' },
 ];
 
 export interface GoalTarget {

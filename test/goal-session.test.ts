@@ -49,7 +49,7 @@ describe('Goal Mode', () => {
     await flush();
     expect(g.status('A')!.phase).toBe('ready');
     const d = g.decide('A', 100, pace);
-    expect(d).toMatchObject({ kind: 'target', rate: 2, label: 'Not relevant to your goal' });
+    expect(d).toMatchObject({ kind: 'target', rate: 2, label: 'Not relevant' });
   });
 
   it('does nothing without a transcript and explains why', async () => {
@@ -124,7 +124,7 @@ describe('Goal Mode', () => {
     const g = new GoalController();
     const gate = new Promise<void>(() => {}); // never resolves
     await g.start(baseStart(analyzer({ gate })));
-    expect(g.decide('A', 100, pace)).toEqual({ kind: 'hold', note: 'Mapping this part for your goal…' });
+    expect(g.decide('A', 100, pace)).toEqual({ kind: 'hold', note: 'Analyzing this part…' });
   });
 
   it('never overrides a speed the user chose', async () => {
@@ -160,10 +160,10 @@ describe('Goal Mode', () => {
 
   it('paces model relevance scores through the speed table', async () => {
     const expected: [number, number, string][] = [
-      [2, 2, 'Not relevant to your goal'],
-      [3, 1.75, 'Less relevant to your goal'],
-      [5, 1.4, 'Relevant background'],
-      [7, 1.15, 'Important for your goal'],
+      [2, 2, 'Not relevant'],
+      [3, 1.75, 'Low relevance'],
+      [5, 1.4, 'Relevant'],
+      [7, 1.15, 'Important'],
     ];
     for (const [relevance, rate, label] of expected) {
       const g = new GoalController();
@@ -192,7 +192,7 @@ describe('Goal Mode', () => {
     const st = g.status('A')!;
     expect(st.failed).toBe(1);
     expect(g.decide('A', 5, pace).kind).toBe('hold'); // no invented speed for the failed block
-    expect(g.decide('A', 300, pace)).toMatchObject({ kind: 'target', rate: 1, label: 'Key part for your goal' });
+    expect(g.decide('A', 300, pace)).toMatchObject({ kind: 'target', rate: 1, label: 'Key' });
   });
 
   describe('goal breakdown', () => {
@@ -332,7 +332,7 @@ describe('Goal Mode', () => {
       const { a, step } = stepAnalyzer();
       await g.start(baseStart(a));
       await flush();
-      expect(g.decide('A', 10, pace)).toEqual({ kind: 'hold', note: 'Mapping this part for your goal…' });
+      expect(g.decide('A', 10, pace)).toEqual({ kind: 'hold', note: 'Analyzing this part…' });
       await step(); // first block done
       expect(g.status('A')!.phase).toBe('mapping');
       expect(g.decide('A', 10, pace)).toMatchObject({ kind: 'target', rate: 2 });
@@ -387,7 +387,7 @@ describe('Goal Mode', () => {
       video.currentTime = t;
       expect(t).toBe(450);
       expect(goalTimeline(map, pace, video.duration, video.currentTime, true).position).toBe(450); // playhead redraws there
-      expect(g.decide('A', video.currentTime, pace)).toEqual({ kind: 'hold', note: 'Mapping this part for your goal…' }); // unmapped: speed left alone
+      expect(g.decide('A', video.currentTime, pace)).toEqual({ kind: 'hold', note: 'Analyzing this part…' }); // unmapped: speed left alone
       await step(); // block 1 finishes; the next pick follows the new position
       const j = map.blockAt(450);
       expect(order.at(-1)).toBe(blocks[j]);

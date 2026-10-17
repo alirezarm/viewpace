@@ -23,7 +23,7 @@ export interface TimelineSegment {
   state: TimelineState;
   /** Mapped only: pacing row, 0 (slowest) … LEVELS - 1 (fastest). */
   level?: number;
-  /** Mapped only: what the row means for the goal, e.g. "Important for your goal". */
+  /** Mapped only: what the row means for the goal, e.g. "Important". */
   label?: string;
   /** Mapped only: the speed Goal Mode targets here. */
   rate?: number;
@@ -252,7 +252,7 @@ export interface RegionTooltip {
   topics: string[];
   /** Distinct topics left out, shown as "+N more" (0 = none). */
   more: number;
-  /** e.g. "Key part for your goal · 1×", or the state of a part that isn't analyzed. */
+  /** e.g. "Key · 1×", or the state of a part that isn't analyzed. */
   detail: string;
 }
 

@@ -23,12 +23,12 @@ function speech(seconds: number, pauseEvery = 50): TimedWord[] {
 describe('deterministic relevance/attention → pacing', () => {
   const normal = PROFILES.normal; // 1.0–2.0×
   it('maps the categories onto the pace range', () => {
-    expect(goalTarget({ relevance: 1, attention: 9 }, normal)).toEqual({ rate: 2, label: 'Not relevant to your goal' });
-    expect(goalTarget({ relevance: 4, attention: 2 }, normal)).toEqual({ rate: 1.75, label: 'Less relevant to your goal' });
-    expect(goalTarget({ relevance: 6, attention: 9 }, normal)).toEqual({ rate: 1.4, label: 'Relevant background' });
+    expect(goalTarget({ relevance: 1, attention: 9 }, normal)).toEqual({ rate: 2, label: 'Not relevant' });
+    expect(goalTarget({ relevance: 4, attention: 2 }, normal)).toEqual({ rate: 1.75, label: 'Low relevance' });
+    expect(goalTarget({ relevance: 6, attention: 9 }, normal)).toEqual({ rate: 1.4, label: 'Relevant' });
     expect(goalTarget({ relevance: 8, attention: 4 }, normal).rate).toBeCloseTo(1.15);
-    expect(goalTarget({ relevance: 8, attention: 4 }, normal).label).toBe('Important for your goal');
-    expect(goalTarget({ relevance: 9, attention: 8 }, normal)).toEqual({ rate: 1, label: 'Key part for your goal' });
+    expect(goalTarget({ relevance: 8, attention: 4 }, normal).label).toBe('Important');
+    expect(goalTarget({ relevance: 9, attention: 8 }, normal)).toEqual({ rate: 1, label: 'Key' });
   });
 
   it('is slower for higher relevance, and slowest for high relevance + high attention', () => {

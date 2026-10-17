@@ -144,7 +144,7 @@ const jaccard = (a: Set<number>, b: Set<number>) => {
 };
 
 const normal = PROFILES.normal;
-const bucket = (rel: number) => goalTarget({ relevance: rel, attention: 0 }, normal).label.replace('Important for your goal', 'High (≥7)');
+const bucket = (rel: number) => goalTarget({ relevance: rel, attention: 0 }, normal).label.replace(/^Important$/, 'High (≥7)');
 
 // ---------- latency ----------
 /** Simulate playback from 0:00 at a constant rate: seconds of content played while its block was not yet rated. */
