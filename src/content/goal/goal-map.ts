@@ -45,6 +45,8 @@ export class GoalMap {
   private failed = new Set<number>();
   /** Validated sections per window index. */
   private validSections = new Map<number, SectionRange[]>();
+  /** DISPLAY: names for the completed map's regions, keyed by region time range (presentation only). */
+  private regionNames = new Map<string, string>();
 
   constructor(readonly blocks: Block[]) {}
 
@@ -76,6 +78,15 @@ export class GoalMap {
     const [first, last] = this.windowRange(w);
     for (let i = first; i <= last; i++) if (!this.ratings.has(i)) return false;
     return true;
+  }
+
+  /** DISPLAY: names for regions of the completed map; never affects ratings or pacing. */
+  setRegionNames(names: Map<string, string>): void {
+    this.regionNames = new Map(names);
+  }
+
+  regionName(key: string): string | undefined {
+    return this.regionNames.get(key);
   }
 
   setSections(w: number, sections: SectionRange[]): void {

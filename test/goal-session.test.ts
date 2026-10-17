@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { PROFILES } from '../src/content/controller';
 import { GoalController, type GoalAnalyzer } from '../src/content/goal/goal-session';
 import { goalTarget } from '../src/content/goal/goal-pacing';
-import { goalTimeline, seekFromPointer } from '../src/content/goal/goal-timeline';
+import { goalTimeline, regionTooltip, seekFromPointer } from '../src/content/goal/goal-timeline';
 import { parseBlockRating } from '../src/shared/goal-prompt';
 import type { TimedWord } from '../src/shared/types';
 
@@ -433,6 +433,92 @@ describe('Goal Mode', () => {
       expect(sections.length).toBeGreaterThan(0);
       expect(map.rating(0)).toEqual(first);
       expect(g.decide('A', 10, pace)).toMatchObject({ kind: 'target', rate: (firstDecision as { rate: number }).rate, label: (firstDecision as { label: string }).label });
+    });
+
+    it('names the regions in one batched call, only once every block is done', async () => {
+      const g = new GoalController();
+      const { a, step, events } = stepAnalyzer({ relevance: (block) => (Number(block.slice(1)) % 3 === 0 ? 9 : 2) });
+      const calls: { goal: string; regions: { id: string; topics: string[] }[] }[] = [];
+      a.labelRegions = async (goal, regions) => {
+        events.push('regions');
+        calls.push({ goal, regions });
+        return Object.fromEntries(regions.map((r) => [r.id, `Region ${r.id}`]));
+      };
+      await g.start(baseStart(a));
+      const map = g.session!.map;
+      const n = map.blocks.length;
+      for (let i = 0; i < n - 1; i++) await step();
+      expect(calls).toHaveLength(0); // nothing before the map is complete
+      expect(g.decide('A', 10, pace).kind).toBe('target'); // and playback didn't wait for it
+      await step(); // last block
+      await flush();
+      expect(calls).toHaveLength(1);
+      expect(calls[0]!.goal).toBe(baseStart(a).goal);
+      expect(events.filter((e) => e === 'regions')).toHaveLength(1); // never one call per region
+      const mapped = goalTimeline(map, pace, 600, 0, false).regions.filter((r) => r.state === 'mapped');
+      expect(calls[0]!.regions).toHaveLength(mapped.length); // every final region
+      const named = goalTimeline(map, pace, 600, 0, false).regions.filter((r) => r.state === 'mapped');
+      expect(named.map((r) => r.name)).toEqual(mapped.map((_, i) => `Region ${i + 1}`));
+    });
+
+    it('a failed block does not hold up naming; nothing is named when nothing was rated', async () => {
+      const named: string[] = [];
+      const mk = (fail: (text: string) => boolean) => {
+        const a: GoalAnalyzer = {
+          available: async () => true,
+          breakdownGoal: async () => ['a', 'b', 'c'],
+          rateBlock: async (_g, text) => {
+            if (fail(text)) throw new Error('timeout');
+            return modelOutput(9);
+          },
+          labelRegions: async (_g, regions) => {
+            named.push(`${regions.length}`);
+            return {};
+          },
+          groupSections: async () => null,
+        };
+        return a;
+      };
+      const g = new GoalController();
+      await g.start(baseStart(mk((t) => t.startsWith('w0 '))));
+      await flush();
+      expect(g.status('A')!.failed).toBe(1);
+      expect(named).toHaveLength(1);
+      const g2 = new GoalController();
+      await g2.start(baseStart(mk(() => true)));
+      await flush();
+      expect(g2.status('A')!.phase).toBe('failed');
+      expect(named).toHaveLength(1); // no call for a map with nothing rated
+    });
+
+    it('a failed or malformed naming leaves the map, ratings and pacing as they were', async () => {
+      for (const labelRegions of [async () => Promise.reject(new Error('timeout')), async () => ({ '999': 'Nope' })]) {
+        const g = new GoalController();
+        const a = analyzer({ relevance: 8 });
+        a.labelRegions = labelRegions as GoalAnalyzer['labelRegions'];
+        await g.start(baseStart(a));
+        await flush();
+        const tl = goalTimeline(g.session!.map, pace, 600, 0, false);
+        expect(g.status('A')!.phase).toBe('ready');
+        expect(tl.regions.every((r) => r.name === undefined)).toBe(true);
+        expect(regionTooltip(tl.regions[0]!).topics).toEqual(['training details']); // block topics, as before
+        expect(g.decide('A', 100, pace)).toMatchObject({ kind: 'target', rate: 1.15 });
+      }
+    });
+
+    it('a late naming answer cannot reach a stopped, restarted or other-video session', async () => {
+      let release!: (v: Record<string, string>) => void;
+      const a = analyzer({ relevance: 8 });
+      a.labelRegions = () => new Promise((r) => (release = r));
+      const g = new GoalController();
+      await g.start(baseStart(a));
+      await flush(); // every block rated; naming in flight
+      const old = g.session!;
+      await g.start({ ...baseStart(analyzer({ relevance: 2 })), goal: 'A different goal.' }); // edit + Start
+      release({ '1': 'Stale name' });
+      await flush();
+      expect(goalTimeline(old.map, pace, 600, 0, false).regions.every((r) => r.name === undefined)).toBe(true);
+      expect(goalTimeline(g.session!.map, pace, 600, 0, false).regions.every((r) => r.name === undefined)).toBe(true);
     });
 
     it('groups sections only after the blocks, so labels never hold up the map', async () => {

@@ -8,12 +8,13 @@
  * Everything lives in memory for the current video only and is discarded on video change.
  * "No data, no change": without a mapped region, Goal Mode never moves the speed.
  */
-import type { BlockRating, PartSummary, SectionRange } from '../../shared/goal-prompt';
+import type { BlockRating, PartSummary, RegionTopics, SectionRange } from '../../shared/goal-prompt';
 import type { TimedWord } from '../../shared/types';
 import type { Profile } from '../controller';
 import { makeBlocks, type Block } from './blocks';
 import { GoalMap, type DisplaySection, type PacingBlock } from './goal-map';
 import { goalTarget } from './goal-pacing';
+import { regionLabelRequest } from './goal-timeline';
 
 /** On-device analysis used by Goal Mode (Gemini Nano in production, a fake in tests). */
 export interface GoalAnalyzer {
@@ -22,6 +23,12 @@ export interface GoalAnalyzer {
   breakdownGoal(goal: string): Promise<string[]>;
   /** Rate one block against the goal and its breakdown (`needs`; null = none). Throws if unusable. */
   rateBlock(goal: string, text: string, title?: string, needs?: string[] | null): Promise<BlockRating>;
+  /**
+   * Short names for the completed map's regions, keyed by the ids sent (one batched call;
+   * presentation only). Missing or invalid names are left out. Optional: without it, the map
+   * keeps showing block topics.
+   */
+  labelRegions?(goal: string, regions: RegionTopics[]): Promise<Record<string, string>>;
   /** Validated sections covering exactly first..last, or null (keep block-level regions). */
   groupSections(goal: string, parts: PartSummary[], first: number, last: number): Promise<SectionRange[] | null>;
 }
@@ -98,8 +105,25 @@ export class GoalSession {
       else this.map.setFailed(i);
     }
     if (!live()) return;
-    // The map is complete: Goal Mode is ready even before any section labels exist.
+    // The map is complete: Goal Mode is ready even before any labels exist.
     this.phase = this.map.rated > 0 ? 'ready' : 'failed';
+
+    // Name the final regions: one batched call, after every block is done (rated or failed), so it
+    // never delays mapping or playback. Presentation only; on any failure the map keeps its topics.
+    if (this.phase === 'ready' && analyzer.labelRegions) {
+      const { regions, keys } = regionLabelRequest(this.map);
+      if (regions.length) {
+        try {
+          const labels = await analyzer.labelRegions(this.goal, regions);
+          if (!live()) return; // a late answer for a stopped or replaced session is dropped
+          const names = new Map<string, string>();
+          for (const [id, label] of Object.entries(labels)) if (keys.has(id) && label) names.set(keys.get(id)!, label);
+          this.map.setRegionNames(names);
+        } catch {
+          if (!live()) return;
+        }
+      }
+    }
 
     // Labels only: every window whose blocks are all rated (a window with a failed block keeps
     // block-level regions).

@@ -3,7 +3,7 @@ import { PROFILES } from '../src/content/controller';
 import { makeBlocks } from '../src/content/goal/blocks';
 import { GoalMap } from '../src/content/goal/goal-map';
 import { goalTarget, pacingLevel } from '../src/content/goal/goal-pacing';
-import { LEVELS, goalTimeline, seekFromKey, seekFromPointer, seekTimeAt, mergeSegments, regionTooltip, visualTier, type TimelineSegment } from '../src/content/goal/goal-timeline';
+import { LEVELS, goalTimeline, seekFromKey, seekFromPointer, seekTimeAt, mergeSegments, regionKey, regionLabelRequest, regionTooltip, visualTier, type TimelineSegment } from '../src/content/goal/goal-timeline';
 import type { TimedWord } from '../src/shared/types';
 
 const pace = PROFILES.normal;
@@ -325,5 +325,68 @@ describe('Goal Map regions (display aggregation)', () => {
     const tl = goalTimeline(map, pace, 600, 333.3, false);
     expect(tl.regions).toHaveLength(1);
     expect(tl.position).toBe(333.3);
+  });
+});
+
+describe('region names (presentation only)', () => {
+  /** A complete map: blocks rated in runs so they form a few regions, with their own topics. */
+  function completeMap() {
+    const map = newMap();
+    const plan: [number, number, string][] = [
+      [9, 9, 'LLM definition'],
+      [8, 2, 'Llama 2 weights'],
+      [0, 0, 'Sponsor'],
+      [1, 0, 'Sponsor'],
+      [5, 3, 'Scaling laws'],
+      [5, 3, 'Scaling laws'],
+      [9, 9, 'Fine-tuning'],
+      [9, 9, 'RLHF'],
+    ];
+    map.blocks.forEach((b, i) => {
+      const [r, a, t] = plan[i % plan.length]!;
+      map.setRating(i, rating(r, a, t));
+    });
+    return map;
+  }
+
+  it('asks once for every analyzed region, with its blocks\' distinct topics and a stable id', () => {
+    const map = completeMap();
+    const mapped = goalTimeline(map, pace, 600, 0, false).regions.filter((r) => r.state === 'mapped');
+    const { regions, keys } = regionLabelRequest(map);
+    expect(regions).toHaveLength(mapped.length);
+    expect(regions.map((r) => r.id)).toEqual(mapped.map((_, i) => String(i + 1)));
+    expect(regions[0]!.topics).toEqual(['LLM definition', 'Llama 2 weights']);
+    expect([...keys.values()]).toEqual(mapped.map(regionKey));
+  });
+
+  it('leaves failed parts out and stays bounded', () => {
+    const map = newMap();
+    map.blocks.forEach((b, i) => (i % 2 ? map.setFailed(i) : map.setRating(i, rating(i % 4 ? 9 : 0, 9, `topic ${i}`))));
+    const { regions } = regionLabelRequest(map);
+    expect(regions.every((r) => r.topics.length > 0 && r.topics.length <= 6)).toBe(true);
+    expect(regions.length).toBeLessThanOrEqual(24);
+    expect(regions.length).toBe(goalTimeline(map, pace, 600, 0, false).regions.filter((r) => r.state === 'mapped').length);
+  });
+
+  it('a name replaces the topic list in the hover card; time range, meaning and speed stay', () => {
+    const map = completeMap();
+    const before = goalTimeline(map, pace, 600, 0, false);
+    const r0 = before.regions[0]!;
+    expect(regionTooltip(r0).topics).toEqual(['LLM definition', 'Llama 2 weights']); // until named
+    map.setRegionNames(new Map([[regionKey(r0), 'LLM basics']]));
+    const after = goalTimeline(map, pace, 600, 0, false);
+    expect(regionTooltip(after.regions[0]!)).toEqual({ ...regionTooltip(r0), topics: ['LLM basics'], more: 0 });
+    // Presentation only: same regions, same blocks, same speeds.
+    expect(after.regions.map(({ name: _n, ...r }) => r)).toEqual(before.regions);
+    expect(after.segments).toEqual(before.segments);
+  });
+
+  it('regions without a name keep their topic list', () => {
+    const map = completeMap();
+    const tl = goalTimeline(map, pace, 600, 0, false);
+    map.setRegionNames(new Map([[regionKey(tl.regions[0]!), 'LLM basics']]));
+    const second = goalTimeline(map, pace, 600, 0, false).regions[1]!;
+    expect(second.name).toBeUndefined();
+    expect(regionTooltip(second).topics.length).toBeGreaterThan(0);
   });
 });

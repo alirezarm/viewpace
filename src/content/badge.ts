@@ -445,7 +445,7 @@ export class Badge {
       return;
     }
     const pct = (t: number) => `${((t / tl.duration) * 100).toFixed(3)}%`;
-    const key = `${tl.duration}|${tl.regions.map((r) => `${r.start},${r.end},${r.state},${r.tier ?? ''},${r.label ?? ''},${r.minRate ?? ''}-${r.maxRate ?? ''},${r.topics.join('/')}`).join(';')}`;
+    const key = `${tl.duration}|${tl.regions.map((r) => `${r.start},${r.end},${r.state},${r.tier ?? ''},${r.label ?? ''},${r.minRate ?? ''}-${r.maxRate ?? ''},${r.topics.join('/')},${r.name ?? ''}`).join(';')}`;
     if (key !== this.timelineKey) {
       this.timelineKey = key;
       const bar = this.el.bar!;

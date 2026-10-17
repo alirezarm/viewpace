@@ -6,7 +6,8 @@
  * pacing row (0 = slowest, for the key parts of the goal … 4 = fastest). Parts not mapped yet are
  * their own state and never look like low relevance.
  */
-import type { Profile } from '../controller';
+import { PROFILES, type Profile } from '../controller';
+import { MAX_LABEL_REGIONS, MAX_REGION_TOPICS, type RegionTopics } from '../../shared/goal-prompt';
 import type { GoalMap } from './goal-map';
 import { GOAL_PACING, goalTarget, pacingLevel } from './goal-pacing';
 
@@ -76,7 +77,12 @@ export interface TimelineRegion {
   blocks: number;
   /** The segments drawn as this region, unchanged. */
   parts: TimelineSegment[];
+  /** Once the map is complete: a short name for what the region is about (presentation only). */
+  name?: string;
 }
+
+/** A region's identity on a completed map: its time range (boundaries never change once every block is done). */
+export const regionKey = (r: { start: number; end: number }) => `${r.start}|${r.end}`;
 
 const tierOf = (s: TimelineSegment) => (s.state === 'mapped' ? visualTier(s.level ?? 0) : undefined);
 
@@ -160,8 +166,45 @@ export function goalTimeline(map: GoalMap, pace: Profile, duration: number, posi
     progress: blocks.length ? attempted / blocks.length : 0,
     mapping,
     segments,
-    regions: mergeSegments(segments),
+    regions: mergeSegments(segments).map((r) => {
+      const name = r.state === 'mapped' ? map.regionName(regionKey(r)) : undefined;
+      return name ? { ...r, name } : r;
+    }),
   };
+}
+
+/** Distinct, non-empty topics in time order (case and spacing ignored). */
+function distinctTopics(topics: string[]): string[] {
+  const out: string[] = [];
+  for (const t of topics) {
+    const topic = t.trim().replace(/\s+/g, ' ');
+    if (topic && !out.some((d) => d.toLowerCase() === topic.toLowerCase())) out.push(topic);
+  }
+  return out;
+}
+
+/**
+ * The one naming request for a completed map: its analyzed regions with their blocks' own topics,
+ * bounded (the MAX_LABEL_REGIONS longest regions, MAX_REGION_TOPICS topics each) so it is always a
+ * single call; regions left out keep their topic list. `keys` maps the request ids back to regions.
+ */
+export function regionLabelRequest(map: GoalMap): { regions: RegionTopics[]; keys: Map<string, string> } {
+  // Region boundaries depend only on pacing rows, so any pace gives the same regions.
+  const regions = goalTimeline(map, PROFILES.normal, 0, 0, false)
+    .regions.filter((r) => r.state === 'mapped')
+    .map((r) => ({ r, topics: distinctTopics(r.topics).slice(0, MAX_REGION_TOPICS) }))
+    .filter((x) => x.topics.length > 0);
+  const kept = [...regions]
+    .sort((a, b) => b.r.end - b.r.start - (a.r.end - a.r.start))
+    .slice(0, MAX_LABEL_REGIONS)
+    .sort((a, b) => a.r.start - b.r.start);
+  const keys = new Map<string, string>();
+  const out: RegionTopics[] = kept.map((x, i) => {
+    const id = String(i + 1);
+    keys.set(id, regionKey(x.r));
+    return { id, topics: x.topics };
+  });
+  return { regions: out, keys };
 }
 
 const clock = (t: number) => {
@@ -192,11 +235,8 @@ export function regionTooltip(r: TimelineRegion): RegionTooltip {
   if (r.state === 'pending') return { range, topics: [], more: 0, detail: 'Not analyzed yet' };
   if (r.state === 'failed') return { range, topics: [], more: 0, detail: "Couldn't be analyzed" };
   if (r.state === 'none') return { range, topics: [], more: 0, detail: 'No captions' };
-  const distinct: string[] = [];
-  for (const t of r.topics) {
-    const topic = t.trim().replace(/\s+/g, ' ');
-    if (topic && !distinct.some((d) => d.toLowerCase() === topic.toLowerCase())) distinct.push(topic);
-  }
+  // Once named, the region's name replaces its list of block topics.
+  const distinct = r.name ? [r.name] : distinctTopics(r.topics);
   const fmt = (x: number) => String(Number(x.toFixed(2)));
   const speed =
     r.minRate === undefined || r.maxRate === undefined ? '' : r.minRate === r.maxRate ? `${fmt(r.minRate)}×` : `${fmt(r.minRate)}–${fmt(r.maxRate)}×`;

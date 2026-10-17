@@ -1,5 +1,5 @@
 import type { ChunkContext } from './complexity-prompt';
-import type { BlockRating, PartSummary, SectionRange } from './goal-prompt';
+import type { BlockRating, PartSummary, RegionTopics, SectionRange } from './goal-prompt';
 import type { AiAvailability, ComplexityResult } from './types';
 
 // --- content script / popup <-> background service worker (chrome.runtime messaging) ---
@@ -12,6 +12,8 @@ export type AiRequest =
   | { kind: 'ai:goal-breakdown'; goal: string }
   // …rate one transcript block against the goal and that breakdown (null: none)…
   | { kind: 'ai:goal-block'; goal: string; text: string; title?: string; needs?: string[] | null }
+  // …name the completed map's regions in one call (presentation only)…
+  | { kind: 'ai:goal-regions'; goal: string; regions: RegionTopics[] }
   // …and group consecutive rated blocks into sections.
   | { kind: 'ai:goal-sections'; goal: string; parts: PartSummary[]; first: number; last: number };
 
@@ -20,6 +22,7 @@ export type AiResponse =
   | { ok: true; result: ComplexityResult }
   | { ok: true; goalBlock: BlockRating }
   | { ok: true; needs: string[] }
+  | { ok: true; regionLabels: Record<string, string> }
   | { ok: true; sections: SectionRange[] | null }
   | { ok: false; error: string; status?: AiAvailability };
 

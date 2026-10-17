@@ -12,8 +12,54 @@ import {
   buildSectionPrompt,
   parseBlockRating,
   parseBreakdown,
+  parseRegionLabels,
   parseSections,
+  buildRegionPrompt,
+  regionSchema,
+  MAX_LABEL_REGIONS,
 } from '../src/shared/goal-prompt';
+
+describe('region names from the model', () => {
+  const ids = ['1', '2', '3'];
+  const raw = (labels: unknown) => JSON.stringify({ labels });
+
+  it('attaches short labels by id', () => {
+    expect(parseRegionLabels(raw([{ id: '1', label: 'LLM basics' }, { id: '3', label: '  Fine-tuning &  RLHF. ' }]), ids)).toEqual({
+      '1': 'LLM basics',
+      '3': 'Fine-tuning & RLHF',
+    });
+  });
+
+  it('drops unknown ids, duplicates, empty or sentence-like labels; never throws', () => {
+    const labels = [
+      { id: '9', label: 'Not asked for' },
+      { id: '1', label: 'Pretraining' },
+      { id: '1', label: 'Second answer' },
+      { id: '2', label: '   ' },
+      { id: '3', label: 'This part explains how the model is trained in great detail' },
+    ];
+    expect(parseRegionLabels(raw(labels), ids)).toEqual({ '1': 'Pretraining' });
+    expect(parseRegionLabels('not json', ids)).toEqual({});
+    expect(parseRegionLabels('{"labels":"nope"}', ids)).toEqual({});
+    expect(parseRegionLabels(raw([{ id: 1, label: 'x' }]), ids)).toEqual({});
+  });
+
+  it('asks for exactly the ids sent, from the goal and block topics only (no transcript)', () => {
+    expect(regionSchema(ids).properties.labels.items.properties.id.enum).toEqual(ids);
+    const p = buildRegionPrompt('Understand how LLMs are trained', [
+      { id: '1', topics: ['LLM definition and Llama 2 model', 'Llama 2 weights'] },
+      { id: '2', topics: ['Next-word prediction'] },
+    ]);
+    expect(p).toBe("Viewer's goal: Understand how LLMs are trained\n\nParts:\nPart 1:\n- LLM definition and Llama 2 model\n- Llama 2 weights\n\nPart 2:\n- Next-word prediction");
+  });
+
+  it('stays bounded however many regions or topics come in', () => {
+    const many = Array.from({ length: 60 }, (_, i) => ({ id: String(i + 1), topics: Array(20).fill('t'.repeat(300)) }));
+    const p = buildRegionPrompt('g', many);
+    expect(p.match(/^Part /gm)).toHaveLength(MAX_LABEL_REGIONS);
+    expect(p.length).toBeLessThan(MAX_LABEL_REGIONS * 6 * 90 + 1000);
+  });
+});
 
 describe('goal breakdown from the model', () => {
   const raw = (needs: unknown) => JSON.stringify({ needs });

@@ -1,5 +1,5 @@
 import type { ChunkContext } from '../shared/complexity-prompt';
-import type { BlockRating, PartSummary, SectionRange } from '../shared/goal-prompt';
+import type { BlockRating, PartSummary, RegionTopics, SectionRange } from '../shared/goal-prompt';
 import type { AiRequest, AiResponse } from '../shared/messages';
 import type { GoalAnalyzer } from './goal/goal-session';
 import type { AiAvailability, ComplexityResult } from '../shared/types';
@@ -72,6 +72,12 @@ export class NanoGoalAnalyzer implements GoalAnalyzer {
   async rateBlock(goal: string, text: string, title?: string, needs?: string[] | null): Promise<BlockRating> {
     const r = (await chrome.runtime.sendMessage({ kind: 'ai:goal-block', goal, text, title, needs } satisfies AiRequest)) as AiResponse;
     if (r.ok && 'goalBlock' in r) return r.goalBlock;
+    throw new Error(r.ok ? 'unexpected response' : r.error);
+  }
+
+  async labelRegions(goal: string, regions: RegionTopics[]): Promise<Record<string, string>> {
+    const r = (await chrome.runtime.sendMessage({ kind: 'ai:goal-regions', goal, regions } satisfies AiRequest)) as AiResponse;
+    if (r.ok && 'regionLabels' in r) return r.regionLabels;
     throw new Error(r.ok ? 'unexpected response' : r.error);
   }
 

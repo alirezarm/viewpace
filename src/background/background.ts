@@ -8,9 +8,13 @@ import {
   blockSystemPrompt,
   buildBlockPrompt,
   buildBreakdownPrompt,
+  buildRegionPrompt,
   buildSectionPrompt,
   parseBlockRating,
   parseBreakdown,
+  parseRegionLabels,
+  REGION_SYSTEM_PROMPT,
+  regionSchema,
   parseSections,
 } from '../shared/goal-prompt';
 import { NanoComplexityEngine, NanoPrompter, nanoAvailability } from '../shared/nano';
@@ -28,7 +32,7 @@ const engine = new NanoComplexityEngine(prompter);
 const GOAL_TIMEOUT_MS = 30000;
 
 chrome.runtime.onMessage.addListener((msg: AiRequest, _sender, sendResponse: (r: AiResponse) => void) => {
-  if (msg?.kind !== 'ai:status' && msg?.kind !== 'ai:score' && msg?.kind !== 'ai:goal-block' && msg?.kind !== 'ai:goal-breakdown' && msg?.kind !== 'ai:goal-sections') {
+  if (msg?.kind !== 'ai:status' && msg?.kind !== 'ai:score' && msg?.kind !== 'ai:goal-block' && msg?.kind !== 'ai:goal-breakdown' && msg?.kind !== 'ai:goal-regions' && msg?.kind !== 'ai:goal-sections') {
     return false;
   }
 
@@ -48,6 +52,11 @@ chrome.runtime.onMessage.addListener((msg: AiRequest, _sender, sendResponse: (r:
       if (msg.kind === 'ai:goal-block') {
         const raw = await prompter.prompt(blockSystemPrompt(msg.needs), buildBlockPrompt(msg.goal, msg.text, msg.title, msg.needs), BLOCK_SCHEMA, GOAL_TIMEOUT_MS);
         return { ok: true, goalBlock: parseBlockRating(raw) };
+      }
+      if (msg.kind === 'ai:goal-regions') {
+        const ids = msg.regions.map((r) => r.id);
+        const raw = await prompter.prompt(REGION_SYSTEM_PROMPT, buildRegionPrompt(msg.goal, msg.regions), regionSchema(ids), GOAL_TIMEOUT_MS);
+        return { ok: true, regionLabels: parseRegionLabels(raw, ids) };
       }
       if (msg.kind === 'ai:goal-sections') {
         const raw = await prompter.prompt(SECTION_SYSTEM_PROMPT, buildSectionPrompt(msg.goal, msg.parts), SECTION_SCHEMA, GOAL_TIMEOUT_MS);
