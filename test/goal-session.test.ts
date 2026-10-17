@@ -414,6 +414,27 @@ describe('Goal Mode', () => {
       expect(g.status('A')!.failed).toBe(1);
     });
 
+    it('never changes a completed block\'s rating as mapping continues and sections are grouped', async () => {
+      const g = new GoalController();
+      const { a, step } = stepAnalyzer({ relevance: (block) => (Number(block.slice(1)) % 3 === 0 ? 9 : 2) });
+      const sections: [number, number][] = [];
+      a.groupSections = async (_g, _p, first, last) => {
+        sections.push([first, last]);
+        return [{ from: first, to: last, topic: 'Everything' }];
+      };
+      await g.start(baseStart(a));
+      const map = g.session!.map;
+      const n = map.blocks.length;
+      await step(); // block 0 done
+      const first = { ...map.rating(0)! };
+      const firstDecision = g.decide('A', 10, pace);
+      for (let i = 1; i < n; i++) await step(); // every other block, then sections
+      await flush();
+      expect(sections.length).toBeGreaterThan(0);
+      expect(map.rating(0)).toEqual(first);
+      expect(g.decide('A', 10, pace)).toMatchObject({ kind: 'target', rate: (firstDecision as { rate: number }).rate, label: (firstDecision as { label: string }).label });
+    });
+
     it('groups sections only after the blocks, so labels never hold up the map', async () => {
       const g = new GoalController();
       const { a, events, step } = stepAnalyzer({ sections: () => new Promise(() => {}) }); // grouping never answers

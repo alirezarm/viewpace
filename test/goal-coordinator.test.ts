@@ -105,6 +105,21 @@ describe('viewing goal on the page', () => {
     expect(coord.card('A', true)).toEqual({ mode: 'active', goal: 'second goal' });
   });
 
+  it('collapsing the editor (✕, Cancel, Escape) keeps the running goal and its saved entry untouched', async () => {
+    const { coord, controller, stored } = page();
+    await coord.init();
+    await coord.start('A', 'the goal');
+    const session = controller.session!;
+    const saved = stored().byVideo.A;
+    coord.setEditing(true);
+    expect(coord.card('A', true)).toMatchObject({ mode: 'entry', value: 'the goal' });
+    coord.setEditing(false); // what ✕, Cancel and Escape do
+    expect(coord.card('A', true)).toEqual({ mode: 'active', goal: 'the goal' });
+    expect(controller.session).toBe(session); // not stopped, not restarted
+    expect(session.phase).toBe('mapping');
+    expect(stored().byVideo.A).toEqual(saved);
+  });
+
   it('keeps the input open with the reason when a start is refused', async () => {
     const { coord, controller } = page();
     await coord.init();

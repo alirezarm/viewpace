@@ -99,7 +99,12 @@ button:focus-visible { outline: 2px solid #ffc857; outline-offset: 2px; }
 .gedit { flex: none; padding: 0 4px; border-radius: 6px; background: none; color: #aaa; font-size: 13px; }
 .gedit:hover { color: #fff; background: rgba(255,255,255,.1); }
 .gentry { display: flex; flex-direction: column; gap: 6px; margin: 0; font-size: 12px; }
-.gq { color: #d6d6d6; }
+.ghead { display: flex; align-items: center; gap: 6px; }
+.gq { flex: 1; color: #d6d6d6; }
+.gclose { flex: none; padding: 0 5px; border-radius: 6px; background: none; color: #aaa; font-size: 14px; line-height: 1.2; }
+.gclose:hover { color: #fff; background: rgba(255,255,255,.1); }
+.gtext { cursor: pointer; }
+.gtext:hover { color: #fff; text-decoration: underline; text-decoration-color: rgba(255,255,255,.4); }
 .grow { display: flex; gap: 6px; }
 .grow input { flex: 1; min-width: 0; padding: 6px 8px; border: 1px solid rgba(255,255,255,.2); border-radius: 8px;
   background: rgba(0,0,0,.35); color: #f1f1f1; font: inherit; }
@@ -170,13 +175,13 @@ export class Badge {
           <div class="goal" data-k="goal">
             <button class="gchip" data-k="gchip" hidden>🎯 Set a viewing goal</button>
             <form class="gentry" data-k="gentry" hidden>
-              <label class="gq" for="vp-goal">🎯 What do you want to get from this video?</label>
+              <div class="ghead"><label class="gq" for="vp-goal">🎯 What do you want to get from this video?</label><button type="button" class="gclose" data-k="gclose" aria-label="Close the goal editor" title="Close (keeps the current goal)">✕</button></div>
               <div class="grow"><input id="vp-goal" data-k="ginput" maxlength="300" autocomplete="off" placeholder="Enter a viewing goal…" /><button class="gstart" type="submit">Start</button></div>
               <button class="gprev" type="button" data-k="gprev" hidden></button>
               <div class="gmsg" data-k="gmsg" role="status" hidden></div>
               <div class="gacts"><button type="button" data-k="gcancel">Cancel</button><button type="button" data-k="gstop" hidden>Stop Goal Mode</button></div>
             </form>
-            <div class="gline" data-k="gline" hidden><span class="gtext" data-k="gtext"></span><button class="gedit" data-k="gedit" aria-label="Edit viewing goal" title="Edit goal">✎</button></div>
+            <div class="gline" data-k="gline" hidden><span class="gtext" data-k="gtext" role="button" tabindex="0" aria-label="Edit viewing goal"></span><button class="gedit" data-k="gedit" aria-label="Edit viewing goal" title="Edit goal">✎</button></div>
           </div>
           <div class="map" data-k="map">
           <div class="bar" data-k="bar" role="slider" tabindex="0" aria-valuemin="0">
@@ -212,8 +217,9 @@ export class Badge {
       const f = t.closest<HTMLElement>('[data-f]')?.dataset.f;
       if (f) return handlers.onFeedback(f as Feedback);
       const k = t.closest<HTMLElement>('[data-k]')?.dataset.k;
-      if (k === 'gchip' || k === 'gedit') return handlers.onGoalEditing(true);
-      if (k === 'gcancel') return handlers.onGoalEditing(false);
+      // The goal row (or ✎) opens the editor; ✕ / Cancel close it. Closing never stops or changes the goal.
+      if (k === 'gchip' || k === 'gedit' || k === 'gtext') return handlers.onGoalEditing(true);
+      if (k === 'gcancel' || k === 'gclose') return handlers.onGoalEditing(false);
       if (k === 'gstop') return handlers.onGoalStop();
       if (k === 'gprev') {
         // Reuse the previous goal: fill it in; the viewer still presses Start.
@@ -241,6 +247,10 @@ export class Badge {
     this.root.addEventListener('keydown', (e) => {
       const key = (e as KeyboardEvent).key;
       if (key === 'Escape' && this.goalMode === 'entry') handlers.onGoalEditing(false);
+      if ((key === 'Enter' || key === ' ') && (e.target as HTMLElement).dataset?.k === 'gtext') {
+        e.preventDefault();
+        handlers.onGoalEditing(true);
+      }
       if (key === 'Escape') this.setOpen(false);
       if ((e.target as HTMLElement).dataset?.k === 'bar' && this.timeline) {
         const time = seekFromKey(key, this.timeline.position, this.timeline.duration);

@@ -18,7 +18,7 @@ import { GoalController, type GoalDecision } from './goal/goal-session';
 import { GoalCoordinator } from './goal/goal-coordinator';
 import { loadGoals, onGoalsChanged, rememberGoal, stopGoal } from '../shared/goal-store';
 import { goalTarget } from './goal/goal-pacing';
-import { goalTimeline } from './goal/goal-timeline';
+import { goalTimeline, type GoalTimeline } from './goal/goal-timeline';
 import type { GoalMapRow } from './overlay';
 import { UsageMeter, addStats, analysisOf, type Analysis as ScoringKind } from '../shared/stats';
 import { CaptionAttempts, captionAttemptAllowed, captionPlan, hasEnoughData, transcriptPanelTarget, isExtensionAlive, type TranscriptKind } from './guards';
@@ -695,21 +695,23 @@ function tick(): void {
   meter.tick(performance.now(), counting, video.playbackRate, aiResult ? 'content' : 'speech');
 
   const flashing = performance.now() < flashUntil;
+  const pillLine = flashing
+    ? flashText
+    : goalDecision.kind === 'target'
+      ? goalDecision.label
+      : goalDecision.kind === 'hold'
+        ? goalDecision.note
+        : a.source === 'none' || a.source.startsWith('live')
+          ? captionHint(captionNotice)
+          : null;
   badge.update({
     ...badgeBase,
     rate: video.playbackRate,
     state: owner.suspended ? 'paused-by-user' : 'active',
-    line: flashing
-      ? flashText
-      : goalDecision.kind === 'target'
-        ? goalDecision.label
-        : goalDecision.kind === 'hold'
-          ? goalDecision.note
-          : a.source === 'none' || a.source.startsWith('live')
-            ? captionHint(captionNotice)
-            : null,
+    line: pillLine,
     flash: flashing,
   });
+  if (settings.keepDecisionLog && goalSession) traceGoal(goalDecision, badgeBase.timeline, pillLine);
   tabStatus = {
     onVideo: true,
     state: live ? 'unsupported' : ad ? 'ad' : owner.suspended ? 'paused-by-user' : 'active',
@@ -755,6 +757,31 @@ function describeGoalNow(d: GoalDecision): string {
     `Block topic: ${b.topic || '—'}`,
     `Section: ${d.section ? d.section.topic : '— (not grouped yet)'}`,
   ].join('\n');
+}
+
+/**
+ * Debug (temporary, only with "Log every decision" on): one console line whenever the block under the
+ * playhead or the pill's text changes, to tell "another block" apart from "the same block changed".
+ */
+let lastGoalTrace = '';
+function traceGoal(d: GoalDecision, tl: GoalTimeline | null, pill: string | null): void {
+  if (!video) return;
+  const t = video.currentTime;
+  const b = d.kind === 'target' ? d.block : null;
+  const ri = tl ? tl.regions.findIndex((r) => t >= r.start && t < r.end) : -1;
+  const r = ri >= 0 ? tl!.regions[ri]! : null;
+  const pillText = `${Number(video.playbackRate.toFixed(2))}× · ${pill ?? ''}`;
+  const key = `${b?.index ?? d.kind}|${pillText}`;
+  if (key === lastGoalTrace) return;
+  lastGoalTrace = key;
+  console.info('[ViewPace Goal]', {
+    at: new Date().toISOString().slice(11, 19),
+    currentTime: Number(t.toFixed(1)),
+    block: b ? { index: b.index, range: `${clock(b.start)}–${clock(b.end)}`, relevance: b.relevance, attention: b.attention, targetSpeed: Number(d.kind === 'target' ? d.rate.toFixed(2) : 0), label: d.kind === 'target' ? d.label : null } : d.kind,
+    actualSpeed: Number(video.playbackRate.toFixed(2)),
+    region: r ? { index: ri, range: `${clock(r.start)}–${clock(r.end)}`, tier: r.tier ?? r.state, speeds: r.minRate === r.maxRate ? r.minRate : `${r.minRate}–${r.maxRate}` } : null,
+    pill: pillText,
+  });
 }
 
 /** Debug: the whole map: section headings (labels only) and every block with its own pacing. */
