@@ -82,7 +82,7 @@ async function runGoalEval(key: string, capture: { url: string; body: string }, 
   const available = await real.available();
   const session = new GoalSession('eval', goal, blocks);
   t0 = performance.now();
-  if (available) await session.run(analyzer, { isCurrent: () => true, startAt: 0, title });
+  if (available) await session.run(analyzer, { isCurrent: () => true, playhead: () => 0, title });
   const totalMs = now();
 
   const pace = PROFILES.normal;

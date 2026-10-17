@@ -90,6 +90,25 @@ export class GoalMap {
     return this.failed.size;
   }
 
+  /** Blocks already attempted (rated, or failed after its retry): never rated again. */
+  done(index: number): boolean {
+    return this.ratings.has(index) || this.failed.has(index);
+  }
+
+  /**
+   * SCHEDULING: the next block to rate for a viewer at time `t`: the first block not yet attempted
+   * at or after the one containing `t`, wrapping round to the start. Null once every block is done.
+   */
+  nextToRate(t: number): number | null {
+    const n = this.blocks.length;
+    const k = this.blockAt(t);
+    for (let i = 0; i < n; i++) {
+      const j = (k + i) % n;
+      if (!this.done(j)) return j;
+    }
+    return null;
+  }
+
   /** Index of the block containing time `t` (clamped to the first/last block). */
   blockAt(t: number): number {
     let lo = 0;

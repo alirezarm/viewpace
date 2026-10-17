@@ -1,4 +1,5 @@
 import type { Feedback } from '../shared/types';
+import { LEVELS, segmentDetail, timelineClock, type GoalTimeline } from './goal/goal-timeline';
 
 /** What the minimal in-video badge shows. Debug details live in overlay.ts instead. */
 export interface BadgeView {
@@ -12,6 +13,8 @@ export interface BadgeView {
   /** Keep the badge visible even when YouTube hides its controls (e.g. right after a speed change). */
   flash: boolean;
   ack: string | null;
+  /** Goal Mode's whole-video timeline, or null when Goal Mode is off. */
+  timeline: GoalTimeline | null;
 }
 
 export interface BadgeHandlers {
@@ -62,6 +65,28 @@ button:focus-visible { outline: 2px solid #ffc857; outline-offset: 2px; }
 .ack { margin: 0; color: #ffc857; }
 .secondary { display: block; width: 100%; }
 .resume { padding: 6px 12px; border-radius: 12px; background: #ffc857; color: #1a1a1a; font-weight: 600; }
+
+/* Goal Mode timeline: bar height = how much attention Goal Mode gives that part (taller = slower).
+   Parts not mapped yet are striped, never short, so they can't be mistaken for "not relevant". */
+.tl { width: 272px; padding: 7px 9px 5px; border-radius: 12px; background: rgba(28,28,28,.9); }
+.bar { position: relative; height: 16px; }
+.bar::before { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 2px; border-radius: 1px;
+  background: rgba(255,255,255,.18); }
+.seg { position: absolute; bottom: 0; box-shadow: inset -1px 0 rgba(28,28,28,.9); } /* 1px gap between parts */
+.seg.pending { height: 100%; background: repeating-linear-gradient(135deg, rgba(255,255,255,.16) 0 2px, transparent 2px 5px); }
+.seg.failed { height: 100%; background: repeating-linear-gradient(135deg, rgba(255,120,110,.28) 0 2px, transparent 2px 5px); }
+.seg.mapped { border-radius: 1px 1px 0 0; }
+.seg.l0 { height: 100%; background: #ffc857; }
+.seg.l1 { height: 78%; background: rgba(255,200,87,.8); }
+.seg.l2 { height: 52%; background: rgba(255,200,87,.5); }
+.seg.l3 { height: 36%; background: rgba(255,255,255,.4); }
+.seg.l4 { height: 24%; background: rgba(255,255,255,.28); }
+.seg:hover { filter: brightness(1.35); }
+.now { position: absolute; top: -3px; bottom: -3px; width: 2px; margin-left: -1px; border-radius: 1px; background: #fff;
+  box-shadow: 0 0 0 1px rgba(0,0,0,.5); pointer-events: none; }
+.foot { display: flex; justify-content: space-between; gap: 8px; margin-top: 4px; font-size: 11px; color: #aaa;
+  font-variant-numeric: tabular-nums; }
+.foot .st { color: #d6d6d6; }
 @media (prefers-reduced-motion: reduce) { .dot { transition: none; } }
 `;
 
@@ -70,6 +95,7 @@ export class Badge {
   private root: ShadowRoot;
   private el: Record<string, HTMLElement> = {};
   private open = false;
+  private timelineKey = '';
 
   constructor(private handlers: BadgeHandlers) {
     if (!document.getElementById('autospeed-badge-style')) {
@@ -93,6 +119,12 @@ export class Badge {
           </div>
           <p class="ack" data-k="ack" aria-live="polite"></p>
           <button class="secondary" data-k="toggle"></button>
+        </div>
+        <div class="tl" data-k="tl" hidden>
+          <div class="bar" data-k="bar" role="img">
+            <span class="now" data-k="now"></span>
+          </div>
+          <div class="foot"><span data-k="tlStart">0:00</span><span class="st" data-k="tlStatus"></span><span data-k="tlEnd"></span></div>
         </div>
         <button class="resume" data-k="resume" hidden>Resume ViewPace</button>
         <button class="pill" data-k="pill" aria-expanded="false" aria-label="ViewPace: show options">
@@ -171,6 +203,42 @@ export class Badge {
     set('toggle', v.state === 'off' ? 'Turn on ViewPace' : 'Turn off ViewPace');
     this.el.resume!.hidden = v.state !== 'paused-by-user';
     this.host.toggleAttribute('data-flash', v.flash || v.state === 'paused-by-user');
+    this.renderTimeline(v.timeline);
+  }
+
+  /** Segments are rebuilt only when the map changes; the playhead marker moves every update. */
+  private renderTimeline(tl: GoalTimeline | null): void {
+    const box = this.el.tl!;
+    box.hidden = !tl;
+    if (!tl || tl.duration <= 0) {
+      this.timelineKey = '';
+      return;
+    }
+    const pct = (t: number) => `${((t / tl.duration) * 100).toFixed(3)}%`;
+    const key = `${tl.duration}|${tl.segments.map((s) => `${s.start},${s.end},${s.state},${s.level ?? ''},${s.topic ?? ''},${s.rate ?? ''}`).join(';')}`;
+    if (key !== this.timelineKey) {
+      this.timelineKey = key;
+      const bar = this.el.bar!;
+      const segs = tl.segments.map((s) => {
+        const e = document.createElement('span');
+        e.className = `seg ${s.state}` + (s.state === 'mapped' ? ` l${Math.min(LEVELS - 1, s.level ?? LEVELS - 1)}` : '');
+        e.style.left = pct(s.start);
+        e.style.width = pct(s.end - s.start);
+        e.title = segmentDetail(s);
+        return e;
+      });
+      bar.replaceChildren(...segs, this.el.now!);
+    }
+    this.el.now!.style.left = pct(tl.position);
+    const done = Math.floor(tl.progress * 100);
+    const status = tl.mapping ? `Mapping… ${done}% · taller = slower` : 'Taller = slower for your goal';
+    const set = (k: string, text: string) => {
+      const e = this.el[k];
+      if (e && e.textContent !== text) e.textContent = text;
+    };
+    set('tlStatus', status);
+    set('tlEnd', timelineClock(tl.duration));
+    this.el.bar!.setAttribute('aria-label', `Goal Mode timeline, ${done}% mapped. Taller parts play slower; striped parts aren't mapped yet.`);
   }
 }
 

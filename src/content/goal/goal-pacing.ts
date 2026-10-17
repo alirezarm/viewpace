@@ -29,8 +29,14 @@ export interface GoalTarget {
   label: string;
 }
 
+/** Which GOAL_PACING row a block falls in: 0 = slowest (key part) … last = fastest (first match wins). */
+export function pacingLevel(block: Pick<PacingBlock, 'relevance' | 'attention'>, table = GOAL_PACING): number {
+  const i = table.findIndex((x) => block.relevance >= x.minRelevance && block.attention >= x.minAttention);
+  return i >= 0 ? i : table.length - 1;
+}
+
 /** Pacing comes from a single block's own scores (never from a merged section). */
 export function goalTarget(block: Pick<PacingBlock, 'relevance' | 'attention'>, pace: Profile, table = GOAL_PACING): GoalTarget {
-  const c = table.find((x) => block.relevance >= x.minRelevance && block.attention >= x.minAttention) ?? table[table.length - 1]!;
+  const c = table[pacingLevel(block, table)]!;
   return { rate: pace.minRate + c.position * (pace.maxRate - pace.minRate), label: c.label };
 }

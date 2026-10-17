@@ -16,6 +16,7 @@ import { RateOwner } from './rate-owner';
 import { toggleCaptionsForTrack } from './caption-toggle';
 import { GoalController, type GoalDecision } from './goal/goal-session';
 import { goalTarget } from './goal/goal-pacing';
+import { goalTimeline } from './goal/goal-timeline';
 import type { GoalMapRow } from './overlay';
 import { UsageMeter, addStats, analysisOf, type Analysis as ScoringKind } from '../shared/stats';
 import { CaptionAttempts, captionAttemptAllowed, captionPlan, hasEnoughData, transcriptPanelTarget, isExtensionAlive, type TranscriptKind } from './guards';
@@ -489,11 +490,14 @@ function tick(): void {
   }
   if (++ticksSinceFlush >= FLUSH_EVERY_TICKS) flushStats();
   const range = PROFILES[settings.profile];
+  const goalSession = goal.active(id) ? goal.session! : null;
   const badgeBase: Omit<BadgeView, 'state' | 'line' | 'flash'> = {
     rate: video.playbackRate,
     minRate: range.minRate,
     maxRate: range.maxRate,
     ack: badgeAck,
+    // Rebuilt every tick from the live map, so it fills in as each block's rating lands.
+    timeline: goalSession ? goalTimeline(goalSession.map, range, video.duration, video.currentTime, goalSession.phase === 'mapping') : null,
   };
 
   const base = {
@@ -518,7 +522,7 @@ function tick(): void {
   if (!settings.enabled) {
     releaseControl();
     overlay.update({ ...base, speech: '—', ai: '—', transcript: '—', chunk: '', reason: 'ViewPace disabled', notice: null, goalMap: null, goalNow: null });
-    badge.update({ ...badgeBase, state: 'off', line: null, flash: false });
+    badge.update({ ...badgeBase, state: 'off', line: null, flash: false, timeline: null });
     tabStatus = { onVideo: true, state: 'off', rate: video.playbackRate };
     meter.tick(performance.now(), false, 1, 'speech');
     return;
@@ -773,7 +777,7 @@ async function startGoal(text: string): Promise<{ error: string } | ReturnType<G
     transcriptEnd,
     analyzer: goalAnalyzer,
     isCurrent: () => currentVideoId() === id,
-    startAt: video.currentTime,
+    playhead: () => video?.currentTime ?? 0,
     title: videoTitle(),
   });
 }

@@ -12,7 +12,7 @@ import type { BlockRating, PartSummary, SectionRange } from '../../shared/goal-p
 import type { TimedWord } from '../../shared/types';
 import type { Profile } from '../controller';
 import { makeBlocks, type Block } from './blocks';
-import { GoalMap, SECTION_WINDOW, type DisplaySection, type PacingBlock } from './goal-map';
+import { GoalMap, type DisplaySection, type PacingBlock } from './goal-map';
 import { goalTarget } from './goal-pacing';
 
 /** On-device analysis used by Goal Mode (Gemini Nano in production, a fake in tests). */
@@ -34,6 +34,8 @@ export interface GoalStatus {
   rated: number;
   total: number;
   failed: number;
+  /** Share of blocks attempted so far (rated or failed), 0..1. */
+  progress: number;
   message: string;
 }
 
@@ -44,6 +46,8 @@ export class GoalSession {
   phase: GoalPhase = 'mapping';
   /** The goal's breakdown, given unchanged to every block; null if it couldn't be made (blocks are rated from the goal alone). */
   needs: string[] | null = null;
+  /** False until the breakdown call has finished (succeeded or not) and block rating can start. */
+  breakdownDone = false;
   private cancelled = false;
 
   constructor(
@@ -61,16 +65,14 @@ export class GoalSession {
 
   /**
    * Break the goal down (one call, goal only; if it fails, blocks are rated without a breakdown).
-   * Then rate every block (upcoming-first from `startAt`, one retry each), grouping each window into
-   * sections once all of its blocks are rated. Stops as soon as the session is cancelled or the
-   * user is no longer on this video; results land only in this session's own map.
+   * Then rate every block once (one retry each), always picking the next unrated block at or after
+   * the viewer's current position (`playhead`, read before each block), so a seek redirects the
+   * work there. Each rating is usable by playback as soon as it lands. Section labels are grouped
+   * last, so they never delay a block. Stops as soon as the session is cancelled or the user is no
+   * longer on this video; results land only in this session's own map.
    */
-  async run(analyzer: GoalAnalyzer, ctx: { isCurrent: () => boolean; startAt: number; title?: string }): Promise<void> {
+  async run(analyzer: GoalAnalyzer, ctx: { isCurrent: () => boolean; playhead: () => number; title?: string }): Promise<void> {
     const live = () => !this.cancelled && ctx.isCurrent();
-    const n = this.map.blocks.length;
-    const k = this.map.blockAt(ctx.startAt);
-    const order = [...Array(n).keys()].map((i) => (k + i) % n);
-    const grouped = new Set<number>();
 
     try {
       this.needs = await analyzer.breakdownGoal(this.goal);
@@ -78,8 +80,9 @@ export class GoalSession {
       this.needs = null;
     }
     if (!live()) return; // stopped or navigated away while the breakdown ran
+    this.breakdownDone = true;
 
-    for (const i of order) {
+    for (let i = this.map.nextToRate(ctx.playhead()); i !== null; i = this.map.nextToRate(ctx.playhead())) {
       if (!live()) return;
       const block = this.map.blocks[i]!;
       let rating: BlockRating | null = null;
@@ -93,10 +96,16 @@ export class GoalSession {
       if (!live()) return; // a result that arrives after navigating away is discarded
       if (rating) this.map.setRating(i, rating);
       else this.map.setFailed(i);
+    }
+    if (!live()) return;
+    // The map is complete: Goal Mode is ready even before any section labels exist.
+    this.phase = this.map.rated > 0 ? 'ready' : 'failed';
 
-      const w = Math.floor(i / SECTION_WINDOW);
-      if (!grouped.has(w) && this.map.windowRated(w)) {
-        grouped.add(w);
+    // Labels only: every window whose blocks are all rated (a window with a failed block keeps
+    // block-level regions).
+    for (let w = 0; w < this.map.windowCount; w++) {
+      if (!live()) return;
+      if (this.map.windowRated(w)) {
         const [first, last] = this.map.windowRange(w);
         const parts: PartSummary[] = [];
         for (let j = first; j <= last; j++) parts.push({ index: j, topic: this.map.rating(j)!.topic });
@@ -110,7 +119,6 @@ export class GoalSession {
         if (sections) this.map.setSections(w, sections);
       }
     }
-    if (live()) this.phase = this.map.rated > 0 ? 'ready' : 'failed';
   }
 }
 
@@ -137,7 +145,8 @@ export class GoalController {
     transcriptEnd: number;
     analyzer: GoalAnalyzer;
     isCurrent: () => boolean;
-    startAt: number;
+    /** The viewer's current position; read before each block, so analysis follows seeks. */
+    playhead: () => number;
     title?: string;
   }): Promise<GoalStatus | null> {
     this.stop();
@@ -154,7 +163,7 @@ export class GoalController {
     const session = new GoalSession(opts.videoId, goal, makeBlocks(opts.words, opts.transcriptEnd));
     this.session = session;
     void session
-      .run(opts.analyzer, { isCurrent: opts.isCurrent, startAt: opts.startAt, title: opts.title })
+      .run(opts.analyzer, { isCurrent: opts.isCurrent, playhead: opts.playhead, title: opts.title })
       .catch(() => {
         if (this.session === session && session.phase === 'mapping') session.phase = 'failed';
       });
@@ -197,9 +206,12 @@ export class GoalController {
     const s = this.session;
     if (s && s.videoId === videoId) {
       const total = s.map.blocks.length;
+      const progress = total ? (s.map.rated + s.map.failedCount) / total : 0;
       const message =
         s.phase === 'mapping'
-          ? `Mapping the video for your goal: ${s.map.rated + s.map.failedCount} of ${total} parts`
+          ? s.breakdownDone
+            ? `Mapping… ${Math.floor(progress * 100)}%. Mapped parts are already paced; the timeline on the video shows them.`
+            : 'Reading your goal…'
           : s.phase === 'ready'
             ? s.map.failedCount
               ? `Goal Mode is on. ${s.map.failedCount} part(s) couldn't be mapped; their speed is left alone.`
@@ -207,14 +219,14 @@ export class GoalController {
             : s.phase === 'failed'
               ? "Goal Mode couldn't map this video. Playback is unchanged."
               : 'Goal Mode stopped.';
-      return { phase: s.phase, goal: s.goal, rated: s.map.rated, total, failed: s.map.failedCount, message };
+      return { phase: s.phase, goal: s.goal, rated: s.map.rated, total, failed: s.map.failedCount, progress, message };
     }
     if (this.notice && this.notice.videoId === videoId) {
       const message =
         this.notice.phase === 'no-transcript'
           ? "Goal Mode isn't available: this video's captions couldn't be loaded. Playback is unchanged."
           : 'Goal Mode requires Smart Pacing (Chrome\'s on-device AI), which isn\'t available here.';
-      return { phase: this.notice.phase, goal: this.notice.goal, rated: 0, total: 0, failed: 0, message };
+      return { phase: this.notice.phase, goal: this.notice.goal, rated: 0, total: 0, failed: 0, progress: 0, message };
     }
     return null;
   }

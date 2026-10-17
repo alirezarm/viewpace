@@ -37,7 +37,7 @@ const flush = async () => {
 };
 const baseStart = (a: GoalAnalyzer, isCurrent = () => true) => ({
   videoId: 'A', goal: 'I want to understand how the agent was trained and evaluated.', words, transcriptEnd: 600,
-  analyzer: a, isCurrent, startAt: 0,
+  analyzer: a, isCurrent, playhead: () => 0,
 });
 
 describe('Goal Mode', () => {
@@ -289,6 +289,135 @@ describe('Goal Mode', () => {
       expect(session.map.rated).toBe(0);
       expect(g.session).toBeNull();
       expect(g.decide('B', 100, pace)).toEqual({ kind: 'off' });
+    });
+  });
+
+  describe('progressive mapping', () => {
+    /**
+     * Each block call waits until the test releases it, so the test can look at the state between
+     * blocks. `order` records which block (by its first word) each call was for.
+     */
+    function stepAnalyzer(opts: { relevance?: (block: string) => number; sections?: () => Promise<null> } = {}) {
+      const order: string[] = [];
+      const waiting: (() => void)[] = [];
+      const events: string[] = [];
+      const a: GoalAnalyzer = {
+        available: async () => true,
+        breakdownGoal: async () => ['a', 'b', 'c'],
+        rateBlock: async (_g, text) => {
+          const block = text.split(' ')[0]!;
+          order.push(block);
+          events.push(`block ${block}`);
+          await new Promise<void>((r) => waiting.push(r));
+          return modelOutput(opts.relevance?.(block) ?? 1);
+        },
+        groupSections: async () => {
+          events.push('sections');
+          return opts.sections ? opts.sections() : null;
+        },
+      };
+      /** Let the oldest waiting call finish, then let the loop pick its next block. */
+      const step = async () => {
+        await flush();
+        waiting.shift()?.();
+        await flush();
+      };
+      return { a, order, events, step, waiting: () => waiting.length };
+    }
+    const firstWords = (g: GoalController) => g.session!.map.blocks.map((b) => b.text.split(' ')[0]!);
+
+    it('makes each block usable for playback as soon as it is rated, before the map is complete', async () => {
+      const g = new GoalController();
+      const { a, step } = stepAnalyzer();
+      await g.start(baseStart(a));
+      await flush();
+      expect(g.decide('A', 10, pace)).toEqual({ kind: 'hold', note: 'Mapping this part for your goal…' });
+      await step(); // first block done
+      expect(g.status('A')!.phase).toBe('mapping');
+      expect(g.decide('A', 10, pace)).toMatchObject({ kind: 'target', rate: 2 });
+      expect(g.decide('A', 300, pace).kind).toBe('hold'); // later parts aren't mapped yet
+      expect(g.status('A')!.message).toMatch(/^Mapping… \d+%/);
+    });
+
+    it('starts at the playhead and works forward, then wraps to the start', async () => {
+      const g = new GoalController();
+      const { a, order, step } = stepAnalyzer();
+      await g.start({ ...baseStart(a), playhead: () => 300 });
+      const blocks = firstWords(g);
+      const k = g.session!.map.blockAt(300);
+      expect(k).toBeGreaterThan(0);
+      for (let i = 0; i < blocks.length; i++) await step();
+      expect(order).toEqual([...blocks.slice(k), ...blocks.slice(0, k)]);
+    });
+
+    it('follows a seek into an unmapped part, and never rates a block twice', async () => {
+      const g = new GoalController();
+      let playhead = 0;
+      const { a, order, step } = stepAnalyzer();
+      await g.start({ ...baseStart(a), playhead: () => playhead });
+      const blocks = firstWords(g);
+      const map = g.session!.map;
+      await step(); // block 0 rated
+      expect(order).toEqual([blocks[0], blocks[1]]); // block 1 is in flight
+      playhead = 450; // the viewer jumps ahead into unmapped video
+      await step(); // block 1 finishes; the next pick follows the playhead
+      const j = map.blockAt(450);
+      expect(order.at(-1)).toBe(blocks[j]);
+      await step();
+      expect(order.at(-1)).toBe(blocks[(j + 1) % blocks.length]);
+      playhead = 5; // back into the part that's already mapped: carry on with the first unmapped block after it
+      for (let i = 0; i < blocks.length; i++) await step();
+      expect(new Set(order).size).toBe(order.length); // each block rated exactly once
+      expect([...order].sort()).toEqual([...blocks].sort());
+      expect(g.status('A')!.phase).toBe('ready');
+    });
+
+    it('does not keep retrying a failed block while the viewer stays on it', async () => {
+      const g = new GoalController();
+      let calls = 0;
+      const a: GoalAnalyzer = {
+        available: async () => true,
+        breakdownGoal: async () => ['a', 'b', 'c'],
+        rateBlock: async (_g, text) => {
+          calls++;
+          if (text.startsWith('w0 ')) throw new Error('timeout');
+          return modelOutput(5);
+        },
+        groupSections: async () => null,
+      };
+      await g.start(baseStart(a)); // the playhead stays on the failing first block throughout
+      await flush();
+      const n = g.session!.map.blocks.length;
+      expect(calls).toBe(n + 1); // the first block: two attempts; every other block: one
+      expect(g.status('A')!.failed).toBe(1);
+    });
+
+    it('groups sections only after the blocks, so labels never hold up the map', async () => {
+      const g = new GoalController();
+      const { a, events, step } = stepAnalyzer({ sections: () => new Promise(() => {}) }); // grouping never answers
+      await g.start(baseStart(a));
+      const n = g.session!.map.blocks.length;
+      for (let i = 0; i < n; i++) await step();
+      expect(events.slice(0, n).every((e) => e.startsWith('block'))).toBe(true);
+      expect(events.slice(n)).toEqual(['sections']);
+      expect(g.session!.map.rated).toBe(n);
+      expect(g.status('A')!.phase).toBe('ready'); // ready without waiting for labels
+      expect(g.decide('A', 300, pace)).toMatchObject({ kind: 'target', section: null });
+    });
+
+    it('ignores late results from a session replaced by a new goal', async () => {
+      const g = new GoalController();
+      const first = stepAnalyzer({ relevance: () => 10 });
+      await g.start(baseStart(first.a));
+      await flush();
+      const old = g.session!;
+      const second = stepAnalyzer({ relevance: () => 0 });
+      await g.start({ ...baseStart(second.a), goal: 'Something else entirely.' });
+      await first.step(); // the old session's in-flight block finishes now
+      expect(old.map.rated).toBe(0);
+      expect(g.session).not.toBe(old);
+      await second.step();
+      expect(g.decide('A', 10, pace)).toMatchObject({ kind: 'target', rate: 2 }); // only the new goal's rating counts
     });
   });
 
