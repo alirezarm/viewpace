@@ -1,5 +1,5 @@
 import type { Feedback } from '../shared/types';
-import { LEVELS, segmentDetail, timelineClock, type GoalTimeline } from './goal/goal-timeline';
+import { LEVELS, seekFromKey, seekFromPointer, segmentDetail, timelineClock, type GoalTimeline } from './goal/goal-timeline';
 
 /** What the minimal in-video badge shows. Debug details live in overlay.ts instead. */
 export interface BadgeView {
@@ -21,6 +21,8 @@ export interface BadgeHandlers {
   onFeedback(f: Feedback): void;
   onToggleEnabled(): void;
   onResume(): void;
+  /** The viewer picked a point on the Goal Map: seek the video there (seconds). */
+  onSeek(time: number): void;
 }
 
 const HOST_ID = 'autospeed-badge';
@@ -69,7 +71,8 @@ button:focus-visible { outline: 2px solid #ffc857; outline-offset: 2px; }
 /* Goal Mode timeline: bar height = how much attention Goal Mode gives that part (taller = slower).
    Parts not mapped yet are striped, never short, so they can't be mistaken for "not relevant". */
 .tl { width: 272px; padding: 7px 9px 5px; border-radius: 12px; background: rgba(28,28,28,.9); }
-.bar { position: relative; height: 16px; }
+.bar { position: relative; height: 16px; cursor: pointer; border-radius: 2px; }
+.bar:focus-visible { outline: 2px solid #ffc857; outline-offset: 3px; }
 .bar::before { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 2px; border-radius: 1px;
   background: rgba(255,255,255,.18); }
 .seg { position: absolute; bottom: 0; box-shadow: inset -1px 0 rgba(28,28,28,.9); } /* 1px gap between parts */
@@ -96,6 +99,8 @@ export class Badge {
   private el: Record<string, HTMLElement> = {};
   private open = false;
   private timelineKey = '';
+  /** The map last drawn (duration and playhead), for keyboard seeking. */
+  private timeline: GoalTimeline | null = null;
 
   constructor(private handlers: BadgeHandlers) {
     if (!document.getElementById('autospeed-badge-style')) {
@@ -121,7 +126,7 @@ export class Badge {
           <button class="secondary" data-k="toggle"></button>
         </div>
         <div class="tl" data-k="tl" hidden>
-          <div class="bar" data-k="bar" role="img">
+          <div class="bar" data-k="bar" role="slider" tabindex="0" aria-valuemin="0">
             <span class="now" data-k="now"></span>
           </div>
           <div class="foot"><span data-k="tlStart">0:00</span><span class="st" data-k="tlStatus"></span><span data-k="tlEnd"></span></div>
@@ -141,6 +146,14 @@ export class Badge {
     }
     this.root.addEventListener('click', (e) => {
       const t = e.target as HTMLElement;
+      const bar = t.closest<HTMLElement>('[data-k="bar"]');
+      if (bar && this.timeline) {
+        // Click or tap on the Goal Map: jump there (hover never seeks).
+        const r = bar.getBoundingClientRect();
+        const time = seekFromPointer(e.type, (e as MouseEvent).clientX, r.left, r.width, this.timeline.duration);
+        if (time !== null) handlers.onSeek(time);
+        return;
+      }
       const f = t.closest<HTMLElement>('[data-f]')?.dataset.f;
       if (f) return handlers.onFeedback(f as Feedback);
       const k = t.closest<HTMLElement>('[data-k]')?.dataset.k;
@@ -151,7 +164,15 @@ export class Badge {
       } else if (k === 'resume') handlers.onResume();
     });
     this.root.addEventListener('keydown', (e) => {
-      if ((e as KeyboardEvent).key === 'Escape') this.setOpen(false);
+      const key = (e as KeyboardEvent).key;
+      if (key === 'Escape') this.setOpen(false);
+      if ((e.target as HTMLElement).dataset?.k === 'bar' && this.timeline) {
+        const time = seekFromKey(key, this.timeline.position, this.timeline.duration);
+        if (time !== null) {
+          e.preventDefault();
+          handlers.onSeek(time);
+        }
+      }
     });
   }
 
@@ -210,6 +231,7 @@ export class Badge {
   private renderTimeline(tl: GoalTimeline | null): void {
     const box = this.el.tl!;
     box.hidden = !tl;
+    this.timeline = tl && tl.duration > 0 ? tl : null;
     if (!tl || tl.duration <= 0) {
       this.timelineKey = '';
       return;
@@ -231,14 +253,18 @@ export class Badge {
     }
     this.el.now!.style.left = pct(tl.position);
     const done = Math.floor(tl.progress * 100);
-    const status = tl.mapping ? `Mapping… ${done}% · taller = slower` : 'Taller = slower for your goal';
+    const status = tl.mapping ? `Mapping… ${done}%` : 'Goal Map';
     const set = (k: string, text: string) => {
       const e = this.el[k];
       if (e && e.textContent !== text) e.textContent = text;
     };
     set('tlStatus', status);
     set('tlEnd', timelineClock(tl.duration));
-    this.el.bar!.setAttribute('aria-label', `Goal Mode timeline, ${done}% mapped. Taller parts play slower; striped parts aren't mapped yet.`);
+    const bar = this.el.bar!;
+    bar.setAttribute('aria-label', `Goal Map, ${done}% analyzed. Click or use the arrow keys to jump in the video.`);
+    bar.setAttribute('aria-valuemax', String(Math.round(tl.duration)));
+    bar.setAttribute('aria-valuenow', String(Math.round(tl.position)));
+    bar.setAttribute('aria-valuetext', `${timelineClock(tl.position)} of ${timelineClock(tl.duration)}`);
   }
 }
 

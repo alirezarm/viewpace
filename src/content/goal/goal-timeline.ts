@@ -75,8 +75,38 @@ export { clock as timelineClock };
 /** Compact hover detail for one segment, e.g. "18:40–20:05 · Evaluation metrics · Important for your goal · 1.15×". */
 export function segmentDetail(s: TimelineSegment): string {
   const range = `${clock(s.start)}–${clock(s.end)}`;
-  if (s.state === 'pending') return `${range}\nNot mapped yet: speed unchanged for now`;
-  if (s.state === 'failed') return `${range}\nCouldn't be mapped: speed unchanged`;
-  if (s.state === 'none') return `${range}\nNo captions: not mapped`;
+  if (s.state === 'pending') return `${range}\nNot analyzed yet`;
+  if (s.state === 'failed') return `${range}\nCouldn't be analyzed`;
+  if (s.state === 'none') return `${range}\nNo captions`;
   return [range, s.topic, s.label, s.rate !== undefined ? `${Number(s.rate.toFixed(2))}×` : ''].filter(Boolean).join('\n');
+}
+
+// ---------- navigation: the Goal Map doubles as a seek bar ----------
+
+/** Seeking exactly to the end would end the video, so a click at the far right lands just before it. */
+const END_MARGIN_SEC = 0.5;
+
+/** The video time for a point on the map, as a fraction of its width (clamped to the video). */
+export function seekTimeAt(fraction: number, duration: number): number {
+  if (!(duration > 0)) return 0;
+  const f = Math.min(1, Math.max(0, Number.isFinite(fraction) ? fraction : 0));
+  return Math.min(f * duration, Math.max(0, duration - END_MARGIN_SEC));
+}
+
+/**
+ * Only a click (or tap) on the map seeks; hovering or moving over it never does.
+ * Returns the time to seek to, or null for any other event.
+ */
+export function seekFromPointer(type: string, clientX: number, left: number, width: number, duration: number): number | null {
+  if (type !== 'click' || !(width > 0)) return null;
+  return seekTimeAt((clientX - left) / width, duration);
+}
+
+/** Keyboard on the focused map: arrows step 10 s, Page Up/Down 60 s, Home/End jump to the ends. */
+export function seekFromKey(key: string, current: number, duration: number): number | null {
+  const step: Record<string, number> = { ArrowLeft: -10, ArrowDown: -10, ArrowRight: 10, ArrowUp: 10, PageDown: -60, PageUp: 60 };
+  if (key === 'Home') return 0;
+  if (key === 'End') return seekTimeAt(1, duration);
+  if (key in step) return seekTimeAt((current + step[key]!) / duration, duration);
+  return null;
 }

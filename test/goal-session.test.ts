@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { PROFILES } from '../src/content/controller';
 import { GoalController, type GoalAnalyzer } from '../src/content/goal/goal-session';
 import { goalTarget } from '../src/content/goal/goal-pacing';
+import { goalTimeline, seekFromPointer } from '../src/content/goal/goal-timeline';
 import { parseBlockRating } from '../src/shared/goal-prompt';
 import type { TimedWord } from '../src/shared/types';
 
@@ -370,6 +371,27 @@ describe('Goal Mode', () => {
       expect(new Set(order).size).toBe(order.length); // each block rated exactly once
       expect([...order].sort()).toEqual([...blocks].sort());
       expect(g.status('A')!.phase).toBe('ready');
+    });
+
+    it('a Goal Map click moves the real video, the map follows it, and mapping goes there next', async () => {
+      const g = new GoalController();
+      const video = { currentTime: 0, duration: 600 }; // the only playback state: the video's own
+      const { a, order, step } = stepAnalyzer();
+      await g.start({ ...baseStart(a), playhead: () => video.currentTime });
+      const blocks = firstWords(g);
+      const map = g.session!.map;
+      await step(); // block 0 rated, block 1 in flight
+      // What the badge's onSeek does: a click at 75% of the map sets the video's time.
+      const t = seekFromPointer('click', 100 + 0.75 * 272, 100, 272, video.duration)!;
+      video.currentTime = t;
+      expect(t).toBe(450);
+      expect(goalTimeline(map, pace, video.duration, video.currentTime, true).position).toBe(450); // playhead redraws there
+      expect(g.decide('A', video.currentTime, pace)).toEqual({ kind: 'hold', note: 'Mapping this part for your goal…' }); // unmapped: speed left alone
+      await step(); // block 1 finishes; the next pick follows the new position
+      const j = map.blockAt(450);
+      expect(order.at(-1)).toBe(blocks[j]);
+      await step();
+      expect(g.decide('A', video.currentTime, pace).kind).toBe('target'); // usable as soon as it lands
     });
 
     it('does not keep retrying a failed block while the viewer stays on it', async () => {

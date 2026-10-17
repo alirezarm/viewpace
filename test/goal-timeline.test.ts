@@ -3,7 +3,7 @@ import { PROFILES } from '../src/content/controller';
 import { makeBlocks } from '../src/content/goal/blocks';
 import { GoalMap } from '../src/content/goal/goal-map';
 import { goalTarget, pacingLevel } from '../src/content/goal/goal-pacing';
-import { LEVELS, goalTimeline, segmentDetail } from '../src/content/goal/goal-timeline';
+import { LEVELS, goalTimeline, seekFromKey, seekFromPointer, seekTimeAt, segmentDetail } from '../src/content/goal/goal-timeline';
 import type { TimedWord } from '../src/shared/types';
 
 const pace = PROFILES.normal;
@@ -87,7 +87,65 @@ describe('Goal Mode timeline', () => {
     expect(segmentDetail({ start: 1120, end: 1205, state: 'mapped', level: 1, label: 'Important for your goal', rate: 1.15, topic: 'Evaluation metrics' })).toBe(
       '18:40–20:05\nEvaluation metrics\nImportant for your goal\n1.15×',
     );
-    expect(segmentDetail({ start: 3600, end: 3725, state: 'pending' })).toBe('1:00:00–1:02:05\nNot mapped yet: speed unchanged for now');
-    expect(segmentDetail({ start: 0, end: 60, state: 'failed' })).toContain("Couldn't be mapped");
+  });
+
+  it('says only "Not analyzed yet" for unmapped parts, inventing no topic or relevance', () => {
+    expect(segmentDetail({ start: 3600, end: 3725, state: 'pending' })).toBe('1:00:00–1:02:05\nNot analyzed yet');
+    expect(segmentDetail({ start: 0, end: 60, state: 'failed' })).toBe("0:00–1:00\nCouldn't be analyzed");
+    expect(segmentDetail({ start: 600, end: 720, state: 'none' })).toBe('10:00–12:00\nNo captions');
+  });
+});
+
+describe('Goal Map navigation', () => {
+  const duration = 40 * 60; // a 40-minute video
+  // The map as drawn: 272 px wide, starting 100 px from the left of the viewport.
+  const click = (fraction: number) => seekFromPointer('click', 100 + fraction * 272, 100, 272, duration);
+
+  it('seeks proportionally to where the map is clicked', () => {
+    expect(click(0)).toBe(0);
+    expect(click(0.5)).toBe(20 * 60);
+    expect(click(0.25)).toBe(10 * 60);
+    expect(click(0.999)).toBeCloseTo(duration * 0.999);
+  });
+
+  it('lands just before the end at the far right, so the video does not end', () => {
+    expect(click(1)).toBe(duration - 0.5);
+    expect(seekFromPointer('click', 9999, 100, 272, duration)).toBe(duration - 0.5); // beyond the edge
+    expect(seekFromPointer('click', 0, 100, 272, duration)).toBe(0); // before the start
+  });
+
+  it('seeks the same way over mapped and unmapped parts (position alone decides)', () => {
+    const map = newMap();
+    map.setRating(1, rating(9, 9));
+    const tl = goalTimeline(map, pace, 600, 0, true);
+    const mapped = tl.segments[1]!;
+    const unmapped = tl.segments[4]!;
+    expect(unmapped.state).toBe('pending');
+    const mid = (s: { start: number; end: number }) => (s.start + s.end) / 2;
+    expect(seekTimeAt(mid(mapped) / 600, 600)).toBeCloseTo(mid(mapped));
+    expect(seekTimeAt(mid(unmapped) / 600, 600)).toBeCloseTo(mid(unmapped));
+  });
+
+  it('never seeks on hover or pointer movement, only on click', () => {
+    for (const type of ['mouseover', 'mousemove', 'mouseenter', 'pointermove', 'mousedown']) {
+      expect(seekFromPointer(type, 236, 100, 272, duration)).toBeNull();
+    }
+    expect(seekFromPointer('click', 236, 100, 272, duration)).toBe(20 * 60);
+  });
+
+  it('supports the keyboard on the focused map', () => {
+    expect(seekFromKey('ArrowRight', 600, duration)).toBe(610);
+    expect(seekFromKey('ArrowLeft', 600, duration)).toBe(590);
+    expect(seekFromKey('PageUp', 600, duration)).toBe(660);
+    expect(seekFromKey('PageDown', 30, duration)).toBe(0); // clamped at the start
+    expect(seekFromKey('Home', 600, duration)).toBe(0);
+    expect(seekFromKey('End', 600, duration)).toBe(duration - 0.5);
+    expect(seekFromKey('Enter', 600, duration)).toBeNull();
+    expect(seekFromKey('a', 600, duration)).toBeNull();
+  });
+
+  it('does nothing harmful before the duration is known', () => {
+    expect(seekTimeAt(0.5, Number.NaN)).toBe(0);
+    expect(seekFromPointer('click', 236, 100, 0, duration)).toBeNull(); // map not laid out
   });
 });

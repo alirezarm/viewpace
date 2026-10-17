@@ -86,6 +86,13 @@ const badge = new Badge({
   onFeedback: (f) => void giveFeedback(f),
   onToggleEnabled: () => void saveSettings({ enabled: !settings.enabled }),
   onResume: () => resumeAfterOverride(),
+  // Goal Map navigation: move the real video; the next tick redraws the playhead from it, and
+  // Goal Mode's scheduler reads the new position before its next block.
+  onSeek: (time) => {
+    if (!video) return;
+    video.currentTime = time;
+    tick();
+  },
 });
 
 function resumeAfterOverride(): void {
