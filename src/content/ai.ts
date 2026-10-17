@@ -76,18 +76,9 @@ export class NanoGoalAnalyzer implements GoalAnalyzer {
   }
 
   async labelRegions(goal: string, regions: RegionTopics[]): Promise<Record<string, string>> {
-    const t0 = performance.now();
     const r = (await chrome.runtime.sendMessage({ kind: 'ai:goal-regions', goal, regions } satisfies AiRequest)) as AiResponse;
-    const ms = Math.round(performance.now() - t0);
-    // Diagnostics: one line per completed map, so a map left without names can be explained.
-    if (r.ok && 'regionLabels' in r) {
-      const named = Object.keys(r.regionLabels).length;
-      console.info(`[ViewPace Goal] region names: ${named} of ${regions.length} (${ms} ms)`, { labels: r.regionLabels, raw: r.raw, sent: regions });
-      return r.regionLabels;
-    }
-    const error = r.ok ? 'unexpected response' : r.error;
-    console.warn(`[ViewPace Goal] region names failed after ${ms} ms: ${error}`, { sent: regions });
-    throw new Error(error);
+    if (r.ok && 'regionLabels' in r) return r.regionLabels;
+    throw new Error(r.ok ? 'unexpected response' : r.error);
   }
 
   async groupSections(goal: string, parts: PartSummary[], first: number, last: number): Promise<SectionRange[] | null> {

@@ -56,7 +56,7 @@ chrome.runtime.onMessage.addListener((msg: AiRequest, _sender, sendResponse: (r:
       if (msg.kind === 'ai:goal-regions') {
         const ids = msg.regions.map((r) => r.id);
         const raw = await prompter.prompt(REGION_SYSTEM_PROMPT, buildRegionPrompt(msg.goal, msg.regions), regionSchema(ids), GOAL_TIMEOUT_MS);
-        return { ok: true, regionLabels: parseRegionLabels(raw, ids), raw };
+        return { ok: true, regionLabels: parseRegionLabels(raw, ids) };
       }
       if (msg.kind === 'ai:goal-sections') {
         const raw = await prompter.prompt(SECTION_SYSTEM_PROMPT, buildSectionPrompt(msg.goal, msg.parts), SECTION_SCHEMA, GOAL_TIMEOUT_MS);

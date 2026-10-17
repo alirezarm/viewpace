@@ -22,8 +22,7 @@ export type AiResponse =
   | { ok: true; result: ComplexityResult }
   | { ok: true; goalBlock: BlockRating }
   | { ok: true; needs: string[] }
-  /** `raw`: the model's own answer, for diagnosing labels that were dropped. */
-  | { ok: true; regionLabels: Record<string, string>; raw?: string }
+  | { ok: true; regionLabels: Record<string, string> }
   | { ok: true; sections: SectionRange[] | null }
   | { ok: false; error: string; status?: AiAvailability };
 
