@@ -3,7 +3,7 @@ import { PROFILES } from '../src/content/controller';
 import { makeBlocks } from '../src/content/goal/blocks';
 import { GoalMap } from '../src/content/goal/goal-map';
 import { goalTarget, pacingLevel } from '../src/content/goal/goal-pacing';
-import { LEVELS, goalTimeline, seekFromKey, seekFromPointer, seekTimeAt, segmentDetail } from '../src/content/goal/goal-timeline';
+import { LEVELS, goalTimeline, seekFromKey, seekFromPointer, seekTimeAt, segmentTooltip } from '../src/content/goal/goal-timeline';
 import type { TimedWord } from '../src/shared/types';
 
 const pace = PROFILES.normal;
@@ -83,16 +83,39 @@ describe('Goal Mode timeline', () => {
     expect(goalTimeline(map, pace, 600, 0, false).mapping).toBe(false);
   });
 
-  it('gives compact detail for a part: time, topic, meaning and speed', () => {
-    expect(segmentDetail({ start: 1120, end: 1205, state: 'mapped', level: 1, label: 'Important for your goal', rate: 1.15, topic: 'Evaluation metrics' })).toBe(
-      '18:40–20:05\nEvaluation metrics\nImportant for your goal\n1.15×',
-    );
+  it('hover card: time range, the block topic as the main line, then meaning and speed', () => {
+    expect(segmentTooltip({ start: 802, end: 845, state: 'mapped', level: 0, label: 'Key part for your goal', rate: 1, topic: 'Analyzing the network' })).toEqual({
+      range: '13:22–14:05',
+      topic: 'Analyzing the network',
+      detail: 'Key part for your goal · 1×',
+    });
+    expect(segmentTooltip({ start: 1120, end: 1205, state: 'mapped', level: 1, label: 'Important for your goal', rate: 1.15, topic: 'Evaluation metrics' })).toEqual({
+      range: '18:40–20:05',
+      topic: 'Evaluation metrics',
+      detail: 'Important for your goal · 1.15×',
+    });
   });
 
-  it('says only "Not analyzed yet" for unmapped parts, inventing no topic or relevance', () => {
-    expect(segmentDetail({ start: 3600, end: 3725, state: 'pending' })).toBe('1:00:00–1:02:05\nNot analyzed yet');
-    expect(segmentDetail({ start: 0, end: 60, state: 'failed' })).toBe("0:00–1:00\nCouldn't be analyzed");
-    expect(segmentDetail({ start: 600, end: 720, state: 'none' })).toBe('10:00–12:00\nNo captions');
+  it('hover card shows the topic as soon as that block is rated, from the block itself (no sections)', () => {
+    const map = newMap();
+    const card = (i: number) => segmentTooltip(goalTimeline(map, pace, 600, 0, true).segments[i]!);
+    expect(card(2)).toMatchObject({ topic: null, detail: 'Not analyzed yet' });
+    map.setRating(2, rating(5, 3, 'Cost function setup'));
+    expect(card(2)).toMatchObject({ topic: 'Cost function setup', detail: 'Relevant background · 1.4×' });
+    expect(map.sections()).toEqual([]); // no section grouping has happened
+  });
+
+  it('hover card leaves out a missing topic instead of showing an empty or undefined line', () => {
+    for (const topic of [undefined, '', '   ']) {
+      const t = segmentTooltip({ start: 0, end: 60, state: 'mapped', level: 4, label: 'Not relevant to your goal', rate: 2, topic });
+      expect(t).toEqual({ range: '0:00–1:00', topic: null, detail: 'Not relevant to your goal · 2×' });
+    }
+  });
+
+  it('hover card says only "Not analyzed yet" for unmapped parts, inventing no topic or relevance', () => {
+    expect(segmentTooltip({ start: 3600, end: 3725, state: 'pending' })).toEqual({ range: '1:00:00–1:02:05', topic: null, detail: 'Not analyzed yet' });
+    expect(segmentTooltip({ start: 0, end: 60, state: 'failed' })).toEqual({ range: '0:00–1:00', topic: null, detail: "Couldn't be analyzed" });
+    expect(segmentTooltip({ start: 600, end: 720, state: 'none' })).toEqual({ range: '10:00–12:00', topic: null, detail: 'No captions' });
   });
 });
 

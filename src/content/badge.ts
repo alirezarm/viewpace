@@ -1,5 +1,5 @@
 import type { Feedback } from '../shared/types';
-import { LEVELS, seekFromKey, seekFromPointer, segmentDetail, timelineClock, type GoalTimeline } from './goal/goal-timeline';
+import { LEVELS, seekFromKey, seekFromPointer, segmentTooltip, timelineClock, type GoalTimeline } from './goal/goal-timeline';
 
 /** What the minimal in-video badge shows. Debug details live in overlay.ts instead. */
 export interface BadgeView {
@@ -70,7 +70,13 @@ button:focus-visible { outline: 2px solid #ffc857; outline-offset: 2px; }
 
 /* Goal Mode timeline: bar height = how much attention Goal Mode gives that part (taller = slower).
    Parts not mapped yet are striped, never short, so they can't be mistaken for "not relevant". */
-.tl { width: 272px; padding: 7px 9px 5px; border-radius: 12px; background: rgba(28,28,28,.9); }
+.tl { position: relative; width: 272px; padding: 7px 9px 5px; border-radius: 12px; background: rgba(28,28,28,.9); }
+/* Hover card for one part of the map: the topic leads; time range above, pacing below. */
+.tip { position: absolute; bottom: calc(100% + 6px); max-width: 240px; padding: 6px 9px; border-radius: 8px;
+  background: rgba(20,20,20,.96); box-shadow: 0 2px 8px rgba(0,0,0,.4); pointer-events: none; white-space: normal; }
+.tip .tr { font-size: 11px; color: #aaa; font-variant-numeric: tabular-nums; }
+.tip .tt { font-size: 13px; font-weight: 600; color: #fff; margin-top: 1px; }
+.tip .td { font-size: 12px; color: #d6d6d6; margin-top: 1px; }
 .bar { position: relative; height: 16px; cursor: pointer; border-radius: 2px; }
 .bar:focus-visible { outline: 2px solid #ffc857; outline-offset: 3px; }
 .bar::before { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 2px; border-radius: 1px;
@@ -101,6 +107,8 @@ export class Badge {
   private timelineKey = '';
   /** The map last drawn (duration and playhead), for keyboard seeking. */
   private timeline: GoalTimeline | null = null;
+  /** Index of the map segment under the pointer, or -1. */
+  private hovered = -1;
 
   constructor(private handlers: BadgeHandlers) {
     if (!document.getElementById('autospeed-badge-style')) {
@@ -130,6 +138,7 @@ export class Badge {
             <span class="now" data-k="now"></span>
           </div>
           <div class="foot"><span data-k="tlStart">0:00</span><span class="st" data-k="tlStatus"></span><span data-k="tlEnd"></span></div>
+          <div class="tip" data-k="tip" hidden><div class="tr" data-k="tipRange"></div><div class="tt" data-k="tipTopic"></div><div class="td" data-k="tipDetail"></div></div>
         </div>
         <button class="resume" data-k="resume" hidden>Resume ViewPace</button>
         <button class="pill" data-k="pill" aria-expanded="false" aria-label="ViewPace: show options">
@@ -163,6 +172,12 @@ export class Badge {
         this.setOpen(false);
       } else if (k === 'resume') handlers.onResume();
     });
+    // Hover shows what a part is about; it never seeks (only a click does).
+    this.root.addEventListener('mouseover', (e) => {
+      const seg = (e.target as HTMLElement).closest<HTMLElement>('.seg');
+      this.showTip(seg ? Number(seg.dataset.i) : -1);
+    });
+    this.el.bar!.addEventListener('mouseleave', () => this.showTip(-1));
     this.root.addEventListener('keydown', (e) => {
       const key = (e as KeyboardEvent).key;
       if (key === 'Escape') this.setOpen(false);
@@ -227,6 +242,28 @@ export class Badge {
     this.renderTimeline(v.timeline);
   }
 
+  /** Show the hover card for segment `i` of the current map, above that part (or hide it for -1). */
+  private showTip(i: number): void {
+    const seg = i >= 0 ? this.timeline?.segments[i] : undefined;
+    const tip = this.el.tip!;
+    this.hovered = seg ? i : -1;
+    if (!seg || !this.timeline) {
+      tip.hidden = true;
+      return;
+    }
+    const t = segmentTooltip(seg);
+    this.el.tipRange!.textContent = t.range;
+    this.el.tipTopic!.textContent = t.topic ?? '';
+    this.el.tipTopic!.hidden = !t.topic;
+    this.el.tipDetail!.textContent = t.detail;
+    tip.hidden = false;
+    // Centre the card on the part, kept inside the map's box.
+    const bar = this.el.bar!;
+    const box = this.el.tl!;
+    const mid = bar.offsetLeft + (((seg.start + seg.end) / 2) / this.timeline.duration) * bar.offsetWidth;
+    tip.style.left = `${Math.max(0, Math.min(box.clientWidth - tip.offsetWidth, mid - tip.offsetWidth / 2))}px`;
+  }
+
   /** Segments are rebuilt only when the map changes; the playhead marker moves every update. */
   private renderTimeline(tl: GoalTimeline | null): void {
     const box = this.el.tl!;
@@ -234,6 +271,7 @@ export class Badge {
     this.timeline = tl && tl.duration > 0 ? tl : null;
     if (!tl || tl.duration <= 0) {
       this.timelineKey = '';
+      this.showTip(-1);
       return;
     }
     const pct = (t: number) => `${((t / tl.duration) * 100).toFixed(3)}%`;
@@ -241,15 +279,16 @@ export class Badge {
     if (key !== this.timelineKey) {
       this.timelineKey = key;
       const bar = this.el.bar!;
-      const segs = tl.segments.map((s) => {
+      const segs = tl.segments.map((s, i) => {
         const e = document.createElement('span');
         e.className = `seg ${s.state}` + (s.state === 'mapped' ? ` l${Math.min(LEVELS - 1, s.level ?? LEVELS - 1)}` : '');
         e.style.left = pct(s.start);
         e.style.width = pct(s.end - s.start);
-        e.title = segmentDetail(s);
+        e.dataset.i = String(i);
         return e;
       });
       bar.replaceChildren(...segs, this.el.now!);
+      this.showTip(this.hovered); // a part that was just analyzed shows its topic straight away
     }
     this.el.now!.style.left = pct(tl.position);
     const done = Math.floor(tl.progress * 100);

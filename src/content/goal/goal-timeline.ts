@@ -72,13 +72,23 @@ const clock = (t: number) => {
 };
 export { clock as timelineClock };
 
-/** Compact hover detail for one segment, e.g. "18:40–20:05 · Evaluation metrics · Important for your goal · 1.15×". */
-export function segmentDetail(s: TimelineSegment): string {
+/** What the Goal Map's hover card says about one part: when, what it's about, and what Goal Mode does there. */
+export interface SegmentTooltip {
+  range: string; // e.g. "13:22–14:05"
+  /** The block's topic, the card's main line; null when there isn't one (never invented). */
+  topic: string | null;
+  /** e.g. "Key part for your goal · 1×", or the state of a part that isn't analyzed. */
+  detail: string;
+}
+
+export function segmentTooltip(s: TimelineSegment): SegmentTooltip {
   const range = `${clock(s.start)}–${clock(s.end)}`;
-  if (s.state === 'pending') return `${range}\nNot analyzed yet`;
-  if (s.state === 'failed') return `${range}\nCouldn't be analyzed`;
-  if (s.state === 'none') return `${range}\nNo captions`;
-  return [range, s.topic, s.label, s.rate !== undefined ? `${Number(s.rate.toFixed(2))}×` : ''].filter(Boolean).join('\n');
+  if (s.state === 'pending') return { range, topic: null, detail: 'Not analyzed yet' };
+  if (s.state === 'failed') return { range, topic: null, detail: "Couldn't be analyzed" };
+  if (s.state === 'none') return { range, topic: null, detail: 'No captions' };
+  const topic = s.topic?.trim() || null;
+  const detail = [s.label, s.rate !== undefined ? `${Number(s.rate.toFixed(2))}×` : ''].filter(Boolean).join(' · ');
+  return { range, topic, detail };
 }
 
 // ---------- navigation: the Goal Map doubles as a seek bar ----------
