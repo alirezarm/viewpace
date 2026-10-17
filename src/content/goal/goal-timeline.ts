@@ -37,7 +37,47 @@ export interface GoalTimeline {
   /** Share of blocks attempted so far (rated or failed), 0..1. */
   progress: number;
   mapping: boolean;
+  /** One per block (plus any caption-less tail): what Goal Mode knows. */
   segments: TimelineSegment[];
+  /** What the map draws: runs of neighbouring segments merged by `mergeSegments` (display only). */
+  regions: TimelineRegion[];
+}
+
+/**
+ * A stretch of the map drawn as one piece: consecutive blocks with the same state and, when mapped,
+ * the same pacing (so the same speed). Display only: playback always uses each block's own rating.
+ */
+export interface TimelineRegion {
+  start: number;
+  end: number;
+  state: TimelineState;
+  level?: number;
+  label?: string;
+  rate?: number;
+  /** The underlying blocks' own topics, in time order (as rated; may repeat or be empty). */
+  topics: string[];
+  /** How many segments were merged into this region. */
+  blocks: number;
+}
+
+/**
+ * Merge runs of neighbouring segments that look the same on the map: same state, and for mapped
+ * parts the same pacing row. A mapped run never merges across an unmapped or failed part, so the
+ * map regroups naturally as blocks are rated.
+ */
+export function mergeSegments(segments: TimelineSegment[]): TimelineRegion[] {
+  const out: TimelineRegion[] = [];
+  for (const s of segments) {
+    const last = out[out.length - 1];
+    if (last && last.state === s.state && last.level === s.level && last.end === s.start) {
+      last.end = s.end;
+      last.blocks++;
+      if (s.topic !== undefined) last.topics.push(s.topic);
+      continue;
+    }
+    out.push({ start: s.start, end: s.end, state: s.state, level: s.level, label: s.label, rate: s.rate, topics: s.topic !== undefined ? [s.topic] : [], blocks: 1 });
+  }
+  return out;
 }
 
 export const LEVELS = GOAL_PACING.length;
@@ -60,6 +100,7 @@ export function goalTimeline(map: GoalMap, pace: Profile, duration: number, posi
     progress: blocks.length ? attempted / blocks.length : 0,
     mapping,
     segments,
+    regions: mergeSegments(segments),
   };
 }
 
@@ -72,23 +113,32 @@ const clock = (t: number) => {
 };
 export { clock as timelineClock };
 
-/** What the Goal Map's hover card says about one part: when, what it's about, and what Goal Mode does there. */
-export interface SegmentTooltip {
-  range: string; // e.g. "13:22–14:05"
-  /** The block's topic, the card's main line; null when there isn't one (never invented). */
-  topic: string | null;
+/** Topics listed on a hover card before the rest are summarised as "+N more". */
+export const MAX_TOOLTIP_TOPICS = 3;
+
+/** What the Goal Map's hover card says about one region: when, what it's about, and what Goal Mode does there. */
+export interface RegionTooltip {
+  range: string; // e.g. "12:40–15:55"
+  /** The blocks' own topics, deduplicated, at most MAX_TOOLTIP_TOPICS; empty when there are none (never invented). */
+  topics: string[];
+  /** Distinct topics left out, shown as "+N more" (0 = none). */
+  more: number;
   /** e.g. "Key part for your goal · 1×", or the state of a part that isn't analyzed. */
   detail: string;
 }
 
-export function segmentTooltip(s: TimelineSegment): SegmentTooltip {
-  const range = `${clock(s.start)}–${clock(s.end)}`;
-  if (s.state === 'pending') return { range, topic: null, detail: 'Not analyzed yet' };
-  if (s.state === 'failed') return { range, topic: null, detail: "Couldn't be analyzed" };
-  if (s.state === 'none') return { range, topic: null, detail: 'No captions' };
-  const topic = s.topic?.trim() || null;
-  const detail = [s.label, s.rate !== undefined ? `${Number(s.rate.toFixed(2))}×` : ''].filter(Boolean).join(' · ');
-  return { range, topic, detail };
+export function regionTooltip(r: TimelineRegion): RegionTooltip {
+  const range = `${clock(r.start)}–${clock(r.end)}`;
+  if (r.state === 'pending') return { range, topics: [], more: 0, detail: 'Not analyzed yet' };
+  if (r.state === 'failed') return { range, topics: [], more: 0, detail: "Couldn't be analyzed" };
+  if (r.state === 'none') return { range, topics: [], more: 0, detail: 'No captions' };
+  const distinct: string[] = [];
+  for (const t of r.topics) {
+    const topic = t.trim().replace(/\s+/g, ' ');
+    if (topic && !distinct.some((d) => d.toLowerCase() === topic.toLowerCase())) distinct.push(topic);
+  }
+  const detail = [r.label, r.rate !== undefined ? `${Number(r.rate.toFixed(2))}×` : ''].filter(Boolean).join(' · ');
+  return { range, topics: distinct.slice(0, MAX_TOOLTIP_TOPICS), more: Math.max(0, distinct.length - MAX_TOOLTIP_TOPICS), detail };
 }
 
 // ---------- navigation: the Goal Map doubles as a seek bar ----------

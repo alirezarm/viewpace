@@ -1,5 +1,5 @@
 import type { Feedback } from '../shared/types';
-import { LEVELS, seekFromKey, seekFromPointer, segmentTooltip, timelineClock, type GoalTimeline } from './goal/goal-timeline';
+import { LEVELS, regionTooltip, seekFromKey, seekFromPointer, timelineClock, type GoalTimeline } from './goal/goal-timeline';
 
 /** What the minimal in-video badge shows. Debug details live in overlay.ts instead. */
 export interface BadgeView {
@@ -76,6 +76,7 @@ button:focus-visible { outline: 2px solid #ffc857; outline-offset: 2px; }
   background: rgba(20,20,20,.96); box-shadow: 0 2px 8px rgba(0,0,0,.4); pointer-events: none; white-space: normal; }
 .tip .tr { font-size: 11px; color: #aaa; font-variant-numeric: tabular-nums; }
 .tip .tt { font-size: 13px; font-weight: 600; color: #fff; margin-top: 1px; }
+.tip .more { font-size: 12px; color: #aaa; margin-top: 1px; }
 .tip .td { font-size: 12px; color: #d6d6d6; margin-top: 1px; }
 .bar { position: relative; height: 16px; cursor: pointer; border-radius: 2px; }
 .bar:focus-visible { outline: 2px solid #ffc857; outline-offset: 3px; }
@@ -107,7 +108,7 @@ export class Badge {
   private timelineKey = '';
   /** The map last drawn (duration and playhead), for keyboard seeking. */
   private timeline: GoalTimeline | null = null;
-  /** Index of the map segment under the pointer, or -1. */
+  /** Index of the map region under the pointer, or -1. */
   private hovered = -1;
 
   constructor(private handlers: BadgeHandlers) {
@@ -138,7 +139,7 @@ export class Badge {
             <span class="now" data-k="now"></span>
           </div>
           <div class="foot"><span data-k="tlStart">0:00</span><span class="st" data-k="tlStatus"></span><span data-k="tlEnd"></span></div>
-          <div class="tip" data-k="tip" hidden><div class="tr" data-k="tipRange"></div><div class="tt" data-k="tipTopic"></div><div class="td" data-k="tipDetail"></div></div>
+          <div class="tip" data-k="tip" hidden><div class="tr" data-k="tipRange"></div><div data-k="tipTopics"></div><div class="td" data-k="tipDetail"></div></div>
         </div>
         <button class="resume" data-k="resume" hidden>Resume ViewPace</button>
         <button class="pill" data-k="pill" aria-expanded="false" aria-label="ViewPace: show options">
@@ -242,19 +243,24 @@ export class Badge {
     this.renderTimeline(v.timeline);
   }
 
-  /** Show the hover card for segment `i` of the current map, above that part (or hide it for -1). */
+  /** Show the hover card for region `i` of the current map, above that part (or hide it for -1). */
   private showTip(i: number): void {
-    const seg = i >= 0 ? this.timeline?.segments[i] : undefined;
+    const seg = i >= 0 ? this.timeline?.regions[i] : undefined;
     const tip = this.el.tip!;
     this.hovered = seg ? i : -1;
     if (!seg || !this.timeline) {
       tip.hidden = true;
       return;
     }
-    const t = segmentTooltip(seg);
+    const t = regionTooltip(seg);
     this.el.tipRange!.textContent = t.range;
-    this.el.tipTopic!.textContent = t.topic ?? '';
-    this.el.tipTopic!.hidden = !t.topic;
+    const line = (cls: string, text: string) => {
+      const d = document.createElement('div');
+      d.className = cls;
+      d.textContent = text;
+      return d;
+    };
+    this.el.tipTopics!.replaceChildren(...t.topics.map((x) => line('tt', x)), ...(t.more ? [line('more', `+${t.more} more`)] : []));
     this.el.tipDetail!.textContent = t.detail;
     tip.hidden = false;
     // Centre the card on the part, kept inside the map's box.
@@ -275,11 +281,12 @@ export class Badge {
       return;
     }
     const pct = (t: number) => `${((t / tl.duration) * 100).toFixed(3)}%`;
-    const key = `${tl.duration}|${tl.segments.map((s) => `${s.start},${s.end},${s.state},${s.level ?? ''},${s.topic ?? ''},${s.rate ?? ''}`).join(';')}`;
+    const key = `${tl.duration}|${tl.regions.map((r) => `${r.start},${r.end},${r.state},${r.level ?? ''},${r.rate ?? ''},${r.topics.join('/')}`).join(';')}`;
     if (key !== this.timelineKey) {
       this.timelineKey = key;
       const bar = this.el.bar!;
-      const segs = tl.segments.map((s, i) => {
+      // Drawn by region: neighbouring blocks with the same pacing are one piece (display only).
+      const segs = tl.regions.map((s, i) => {
         const e = document.createElement('span');
         e.className = `seg ${s.state}` + (s.state === 'mapped' ? ` l${Math.min(LEVELS - 1, s.level ?? LEVELS - 1)}` : '');
         e.style.left = pct(s.start);

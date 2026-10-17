@@ -3,7 +3,7 @@ import { PROFILES } from '../src/content/controller';
 import { makeBlocks } from '../src/content/goal/blocks';
 import { GoalMap } from '../src/content/goal/goal-map';
 import { goalTarget, pacingLevel } from '../src/content/goal/goal-pacing';
-import { LEVELS, goalTimeline, seekFromKey, seekFromPointer, seekTimeAt, segmentTooltip } from '../src/content/goal/goal-timeline';
+import { LEVELS, goalTimeline, seekFromKey, seekFromPointer, seekTimeAt, mergeSegments, regionTooltip, type TimelineSegment } from '../src/content/goal/goal-timeline';
 import type { TimedWord } from '../src/shared/types';
 
 const pace = PROFILES.normal;
@@ -83,39 +83,43 @@ describe('Goal Mode timeline', () => {
     expect(goalTimeline(map, pace, 600, 0, false).mapping).toBe(false);
   });
 
+  /** A hover card for a single block, as the map shows it. */
+  const card1 = (seg: Parameters<typeof mergeSegments>[0][number]) => regionTooltip(mergeSegments([seg])[0]!);
+
   it('hover card: time range, the block topic as the main line, then meaning and speed', () => {
-    expect(segmentTooltip({ start: 802, end: 845, state: 'mapped', level: 0, label: 'Key part for your goal', rate: 1, topic: 'Analyzing the network' })).toEqual({
+    expect(card1({ start: 802, end: 845, state: 'mapped', level: 0, label: 'Key part for your goal', rate: 1, topic: 'Analyzing the network' })).toEqual({
       range: '13:22–14:05',
-      topic: 'Analyzing the network',
+      topics: ['Analyzing the network'],
+      more: 0,
       detail: 'Key part for your goal · 1×',
-    });
-    expect(segmentTooltip({ start: 1120, end: 1205, state: 'mapped', level: 1, label: 'Important for your goal', rate: 1.15, topic: 'Evaluation metrics' })).toEqual({
-      range: '18:40–20:05',
-      topic: 'Evaluation metrics',
-      detail: 'Important for your goal · 1.15×',
     });
   });
 
   it('hover card shows the topic as soon as that block is rated, from the block itself (no sections)', () => {
     const map = newMap();
-    const card = (i: number) => segmentTooltip(goalTimeline(map, pace, 600, 0, true).segments[i]!);
-    expect(card(2)).toMatchObject({ topic: null, detail: 'Not analyzed yet' });
+    const regionAt = (t: number) => goalTimeline(map, pace, 600, 0, true).regions.find((r) => t >= r.start && t < r.end)!;
+    const t = (map.blocks[2]!.start + map.blocks[2]!.end) / 2;
+    expect(regionTooltip(regionAt(t))).toMatchObject({ topics: [], detail: 'Not analyzed yet' });
     map.setRating(2, rating(5, 3, 'Cost function setup'));
-    expect(card(2)).toMatchObject({ topic: 'Cost function setup', detail: 'Relevant background · 1.4×' });
+    expect(regionTooltip(regionAt(t))).toMatchObject({ topics: ['Cost function setup'], detail: 'Relevant background · 1.4×' });
     expect(map.sections()).toEqual([]); // no section grouping has happened
   });
 
-  it('hover card leaves out a missing topic instead of showing an empty or undefined line', () => {
+  it('hover card leaves out missing topics instead of showing empty or undefined lines', () => {
     for (const topic of [undefined, '', '   ']) {
-      const t = segmentTooltip({ start: 0, end: 60, state: 'mapped', level: 4, label: 'Not relevant to your goal', rate: 2, topic });
-      expect(t).toEqual({ range: '0:00–1:00', topic: null, detail: 'Not relevant to your goal · 2×' });
+      expect(card1({ start: 0, end: 60, state: 'mapped', level: 4, label: 'Not relevant to your goal', rate: 2, topic })).toEqual({
+        range: '0:00–1:00',
+        topics: [],
+        more: 0,
+        detail: 'Not relevant to your goal · 2×',
+      });
     }
   });
 
   it('hover card says only "Not analyzed yet" for unmapped parts, inventing no topic or relevance', () => {
-    expect(segmentTooltip({ start: 3600, end: 3725, state: 'pending' })).toEqual({ range: '1:00:00–1:02:05', topic: null, detail: 'Not analyzed yet' });
-    expect(segmentTooltip({ start: 0, end: 60, state: 'failed' })).toEqual({ range: '0:00–1:00', topic: null, detail: "Couldn't be analyzed" });
-    expect(segmentTooltip({ start: 600, end: 720, state: 'none' })).toEqual({ range: '10:00–12:00', topic: null, detail: 'No captions' });
+    expect(card1({ start: 3600, end: 3725, state: 'pending' })).toEqual({ range: '1:00:00–1:02:05', topics: [], more: 0, detail: 'Not analyzed yet' });
+    expect(card1({ start: 0, end: 60, state: 'failed' })).toEqual({ range: '0:00–1:00', topics: [], more: 0, detail: "Couldn't be analyzed" });
+    expect(card1({ start: 600, end: 720, state: 'none' })).toEqual({ range: '10:00–12:00', topics: [], more: 0, detail: 'No captions' });
   });
 });
 
@@ -170,5 +174,112 @@ describe('Goal Map navigation', () => {
   it('does nothing harmful before the duration is known', () => {
     expect(seekTimeAt(0.5, Number.NaN)).toBe(0);
     expect(seekFromPointer('click', 236, 100, 0, duration)).toBeNull(); // map not laid out
+  });
+});
+
+describe('Goal Map regions (display aggregation)', () => {
+  const m = (start: number, level: number, topic?: string): TimelineSegment => ({
+    start,
+    end: start + 60,
+    state: 'mapped',
+    level,
+    label: ['Key part for your goal', 'Important for your goal', 'Relevant background', 'Less relevant to your goal', 'Not relevant to your goal'][level],
+    rate: [1, 1.15, 1.4, 1.75, 2][level],
+    topic,
+  });
+  const p = (start: number): TimelineSegment => ({ start, end: start + 60, state: 'pending' });
+  const f = (start: number): TimelineSegment => ({ start, end: start + 60, state: 'failed' });
+  const shape = (rs: ReturnType<typeof mergeSegments>) => rs.map((r) => [r.start, r.end, r.state, r.rate ?? null]);
+
+  it('merges neighbouring blocks with the same pacing into one region', () => {
+    const regions = mergeSegments([m(0, 4), m(60, 4), m(120, 3), m(180, 3), m(240, 1), m(300, 1)]);
+    expect(shape(regions)).toEqual([
+      [0, 120, 'mapped', 2],
+      [120, 240, 'mapped', 1.75],
+      [240, 360, 'mapped', 1.15],
+    ]);
+    expect(regions.map((r) => r.blocks)).toEqual([2, 2, 2]);
+  });
+
+  it('never merges neighbours with different pacing', () => {
+    expect(mergeSegments([m(0, 0), m(60, 1), m(120, 0)])).toHaveLength(3);
+  });
+
+  it('never merges mapped parts across an unmapped or failed part', () => {
+    expect(shape(mergeSegments([m(0, 2), p(60), m(120, 2), f(180), m(240, 2)]))).toEqual([
+      [0, 60, 'mapped', 1.4],
+      [60, 120, 'pending', null],
+      [120, 180, 'mapped', 1.4],
+      [180, 240, 'failed', null],
+      [240, 300, 'mapped', 1.4],
+    ]);
+  });
+
+  it('is display only: the blocks, and playback pacing, stay block by block', () => {
+    const map = newMap();
+    map.setRating(0, rating(8, 8, 'A'));
+    map.setRating(1, rating(9, 9, 'B'));
+    const tl = goalTimeline(map, pace, 600, 0, true);
+    expect(tl.regions[0]).toMatchObject({ start: tl.segments[0]!.start, end: tl.segments[1]!.end, blocks: 2, topics: ['A', 'B'] });
+    expect(tl.segments.slice(0, 2).map((s) => s.topic)).toEqual(['A', 'B']); // still one segment per block
+    for (const i of [0, 1]) {
+      const b = map.blocks[i]!;
+      expect(map.pacingBlockAt((b.start + b.end) / 2)).toMatchObject({ index: i, relevance: map.rating(i)!.relevance }); // each block paces itself
+    }
+  });
+
+  it('regroups as blocks arrive progressively', () => {
+    const map = newMap();
+    const regions = () => goalTimeline(map, pace, 600, 0, true).regions.map((r) => `${r.state}${r.rate ?? ''}x${r.blocks}`);
+    const n = map.blocks.length;
+    expect(regions()).toEqual([`pendingx${n}`]); // nothing rated: one unanalyzed stretch
+    map.setRating(0, rating(0));
+    map.setRating(2, rating(0));
+    expect(regions()).toEqual(['mapped2x1', 'pendingx1', 'mapped2x1', `pendingx${n - 3}`]); // split by the gap
+    map.setRating(1, rating(0));
+    expect(regions()).toEqual(['mapped2x3', `pendingx${n - 3}`]); // the gap filled with the same pacing: one region
+    map.setRating(3, rating(9, 9));
+    expect(regions()).toEqual(['mapped2x3', 'mapped1x1', `pendingx${n - 4}`]);
+  });
+
+  it('hover card lists the blocks\' own topics, deduplicated', () => {
+    const [r] = mergeSegments([m(760, 0, 'Pretraining data'), m(820, 0, 'pretraining  data'), m(880, 0, 'Next-token prediction'), m(940, 0, 'Pretraining data')]);
+    expect(regionTooltip(r!)).toEqual({ range: '12:40–16:40', topics: ['Pretraining data', 'Next-token prediction'], more: 0, detail: 'Key part for your goal · 1×' });
+  });
+
+  it('hover card shows at most 3 topics, then "+N more"', () => {
+    const [r] = mergeSegments(['Pretraining data', 'Next-token prediction', 'Training objective', 'Tokenization', 'Compute budget'].map((t, i) => m(760 + i * 39, 0, t)).map((s, i, all) => ({ ...s, end: all[i + 1]?.start ?? 955 })));
+    expect(regionTooltip(r!)).toEqual({
+      range: '12:40–15:55',
+      topics: ['Pretraining data', 'Next-token prediction', 'Training objective'],
+      more: 2,
+      detail: 'Key part for your goal · 1×',
+    });
+  });
+
+  it('hover card skips blocks without a topic and shows the rest', () => {
+    const [r] = mergeSegments([m(0, 3, ''), m(60, 3), m(120, 3, 'Sponsor read'), m(180, 3, '  ')]);
+    expect(regionTooltip(r!)).toMatchObject({ topics: ['Sponsor read'], more: 0, detail: 'Less relevant to your goal · 1.75×' });
+  });
+
+  it('a click inside a merged region seeks to that point of it, not its start', () => {
+    // A 40-minute video; region 10:00–15:00 drawn on a 272 px map starting at x = 100.
+    const duration = 2400;
+    const x = (t: number) => 100 + (t / duration) * 272;
+    const regionStartX = x(600);
+    const regionWidth = x(900) - x(600);
+    const clickAt = (f: number) => seekFromPointer('click', regionStartX + f * regionWidth, 100, 272, duration)!;
+    expect(clickAt(0.1)).toBeCloseTo(630); // ~10:30
+    expect(clickAt(0.5)).toBeCloseTo(750); // ~12:30
+    expect(clickAt(0.9)).toBeCloseTo(870); // ~14:30
+    expect(seekFromPointer('mouseover', regionStartX + regionWidth / 2, 100, 272, duration)).toBeNull(); // hover never seeks
+  });
+
+  it('the playhead stays the real video time, inside a merged region too', () => {
+    const map = newMap();
+    for (let i = 0; i < map.blocks.length; i++) map.setRating(i, rating(0));
+    const tl = goalTimeline(map, pace, 600, 333.3, false);
+    expect(tl.regions).toHaveLength(1);
+    expect(tl.position).toBe(333.3);
   });
 });
