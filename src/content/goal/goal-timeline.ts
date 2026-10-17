@@ -44,40 +44,100 @@ export interface GoalTimeline {
 }
 
 /**
- * A stretch of the map drawn as one piece: consecutive blocks with the same state and, when mapped,
- * the same pacing (so the same speed). Display only: playback always uses each block's own rating.
+ * Visual tiers: the map draws Goal Mode's five speeds as three, so one-step speed changes between
+ * neighbouring blocks don't turn it into a barcode. Index = pacing row (GOAL_PACING), value = tier:
+ * 0 = slow (key / important), 1 = medium (relevant background), 2 = fast (less / not relevant).
+ * Display only: playback always uses each block's own speed.
+ */
+const ROW_TIER = [0, 0, 1, 2, 2];
+export const VISUAL_TIERS = 3;
+export function visualTier(level: number): number {
+  return ROW_TIER[Math.min(ROW_TIER.length - 1, Math.max(0, level))]!;
+}
+
+/**
+ * A stretch of the map drawn as one piece (display only; playback uses each block's own rating).
+ * Mapped regions may hold blocks with different actual speeds; `parts` keeps them all.
  */
 export interface TimelineRegion {
   start: number;
   end: number;
   state: TimelineState;
-  level?: number;
+  /** Mapped only: visual tier, 0 (slow) … VISUAL_TIERS - 1 (fast). */
+  tier?: number;
+  /** Mapped only: the meaning covering most of the region's time (ties: the slower one). */
   label?: string;
-  rate?: number;
+  /** Mapped only: the actual speeds Goal Mode uses inside the region. */
+  minRate?: number;
+  maxRate?: number;
   /** The underlying blocks' own topics, in time order (as rated; may repeat or be empty). */
   topics: string[];
   /** How many segments were merged into this region. */
   blocks: number;
+  /** The segments drawn as this region, unchanged. */
+  parts: TimelineSegment[];
+}
+
+const tierOf = (s: TimelineSegment) => (s.state === 'mapped' ? visualTier(s.level ?? 0) : undefined);
+
+function region(parts: TimelineSegment[], tier: number | undefined): TimelineRegion {
+  const first = parts[0]!;
+  const r: TimelineRegion = {
+    start: first.start,
+    end: parts[parts.length - 1]!.end,
+    state: first.state,
+    topics: parts.filter((p) => p.topic !== undefined).map((p) => p.topic!),
+    blocks: parts.length,
+    parts,
+  };
+  if (first.state !== 'mapped') return r;
+  const rates = parts.map((p) => p.rate!).filter((x) => x !== undefined);
+  const time = new Map<string, { sec: number; level: number }>();
+  for (const p of parts) {
+    const e = time.get(p.label ?? '') ?? { sec: 0, level: p.level ?? 0 };
+    e.sec += p.end - p.start;
+    time.set(p.label ?? '', e);
+  }
+  const label = [...time].sort((a, b) => b[1].sec - a[1].sec || a[1].level - b[1].level)[0]![0];
+  return { ...r, tier, label: label || undefined, minRate: Math.min(...rates), maxRate: Math.max(...rates) };
 }
 
 /**
- * Merge runs of neighbouring segments that look the same on the map: same state, and for mapped
- * parts the same pacing row. A mapped run never merges across an unmapped or failed part, so the
- * map regroups naturally as blocks are rated.
+ * Group segments into what the map draws (display only):
+ *  1. merge runs of neighbours with the same state and, when mapped, the same visual tier;
+ *  2. absorb a single mapped block of another tier sitting between two regions of one tier (A–B–A
+ *     becomes one A region). Longer runs are kept.
+ * Mapped regions never merge across an unmapped or failed part, so the map regroups naturally as
+ * blocks are rated.
  */
 export function mergeSegments(segments: TimelineSegment[]): TimelineRegion[] {
-  const out: TimelineRegion[] = [];
+  const runs: { parts: TimelineSegment[]; tier: number | undefined }[] = [];
   for (const s of segments) {
-    const last = out[out.length - 1];
-    if (last && last.state === s.state && last.level === s.level && last.end === s.start) {
-      last.end = s.end;
-      last.blocks++;
-      if (s.topic !== undefined) last.topics.push(s.topic);
+    const last = runs[runs.length - 1];
+    const lastPart = last?.parts[last.parts.length - 1];
+    if (last && lastPart!.state === s.state && last.tier === tierOf(s) && lastPart!.end === s.start) last.parts.push(s);
+    else runs.push({ parts: [s], tier: tierOf(s) });
+  }
+  const out: { parts: TimelineSegment[]; tier: number | undefined }[] = [];
+  for (let i = 0; i < runs.length; i++) {
+    const run = runs[i]!;
+    const prev = out[out.length - 1];
+    const next = runs[i + 1];
+    const flicker =
+      run.parts.length === 1 &&
+      run.tier !== undefined &&
+      prev?.tier !== undefined &&
+      next?.tier !== undefined &&
+      prev.tier === next.tier &&
+      prev.tier !== run.tier;
+    if (flicker) {
+      prev!.parts.push(...run.parts, ...next!.parts);
+      i++; // `next` is now part of `prev`
       continue;
     }
-    out.push({ start: s.start, end: s.end, state: s.state, level: s.level, label: s.label, rate: s.rate, topics: s.topic !== undefined ? [s.topic] : [], blocks: 1 });
+    out.push({ parts: [...run.parts], tier: run.tier });
   }
-  return out;
+  return out.map((r) => region(r.parts, r.tier));
 }
 
 export const LEVELS = GOAL_PACING.length;
@@ -137,7 +197,10 @@ export function regionTooltip(r: TimelineRegion): RegionTooltip {
     const topic = t.trim().replace(/\s+/g, ' ');
     if (topic && !distinct.some((d) => d.toLowerCase() === topic.toLowerCase())) distinct.push(topic);
   }
-  const detail = [r.label, r.rate !== undefined ? `${Number(r.rate.toFixed(2))}×` : ''].filter(Boolean).join(' · ');
+  const fmt = (x: number) => String(Number(x.toFixed(2)));
+  const speed =
+    r.minRate === undefined || r.maxRate === undefined ? '' : r.minRate === r.maxRate ? `${fmt(r.minRate)}×` : `${fmt(r.minRate)}–${fmt(r.maxRate)}×`;
+  const detail = [r.label, speed].filter(Boolean).join(' · ');
   return { range, topics: distinct.slice(0, MAX_TOOLTIP_TOPICS), more: Math.max(0, distinct.length - MAX_TOOLTIP_TOPICS), detail };
 }
 

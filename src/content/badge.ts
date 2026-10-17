@@ -1,5 +1,8 @@
 import type { Feedback } from '../shared/types';
-import { LEVELS, regionTooltip, seekFromKey, seekFromPointer, timelineClock, type GoalTimeline } from './goal/goal-timeline';
+import { VISUAL_TIERS, regionTooltip, seekFromKey, seekFromPointer, timelineClock, type GoalTimeline } from './goal/goal-timeline';
+
+/** Slow / medium / fast tiers drawn with the existing key-part, background and not-relevant styles. */
+const TIER_CLASS = ['l0', 'l2', 'l4'];
 
 /** What the minimal in-video badge shows. Debug details live in overlay.ts instead. */
 export interface BadgeView {
@@ -87,9 +90,7 @@ button:focus-visible { outline: 2px solid #ffc857; outline-offset: 2px; }
 .seg.failed { height: 100%; background: repeating-linear-gradient(135deg, rgba(255,120,110,.28) 0 2px, transparent 2px 5px); }
 .seg.mapped { border-radius: 1px 1px 0 0; }
 .seg.l0 { height: 100%; background: #ffc857; }
-.seg.l1 { height: 78%; background: rgba(255,200,87,.8); }
 .seg.l2 { height: 52%; background: rgba(255,200,87,.5); }
-.seg.l3 { height: 36%; background: rgba(255,255,255,.4); }
 .seg.l4 { height: 24%; background: rgba(255,255,255,.28); }
 .seg:hover { filter: brightness(1.35); }
 .now { position: absolute; top: -3px; bottom: -3px; width: 2px; margin-left: -1px; border-radius: 1px; background: #fff;
@@ -281,14 +282,14 @@ export class Badge {
       return;
     }
     const pct = (t: number) => `${((t / tl.duration) * 100).toFixed(3)}%`;
-    const key = `${tl.duration}|${tl.regions.map((r) => `${r.start},${r.end},${r.state},${r.level ?? ''},${r.rate ?? ''},${r.topics.join('/')}`).join(';')}`;
+    const key = `${tl.duration}|${tl.regions.map((r) => `${r.start},${r.end},${r.state},${r.tier ?? ''},${r.label ?? ''},${r.minRate ?? ''}-${r.maxRate ?? ''},${r.topics.join('/')}`).join(';')}`;
     if (key !== this.timelineKey) {
       this.timelineKey = key;
       const bar = this.el.bar!;
-      // Drawn by region: neighbouring blocks with the same pacing are one piece (display only).
+      // Drawn by region, in three visual tiers (display only; playback keeps every block's own speed).
       const segs = tl.regions.map((s, i) => {
         const e = document.createElement('span');
-        e.className = `seg ${s.state}` + (s.state === 'mapped' ? ` l${Math.min(LEVELS - 1, s.level ?? LEVELS - 1)}` : '');
+        e.className = `seg ${s.state}` + (s.state === 'mapped' ? ` ${TIER_CLASS[s.tier ?? VISUAL_TIERS - 1]}` : '');
         e.style.left = pct(s.start);
         e.style.width = pct(s.end - s.start);
         e.dataset.i = String(i);

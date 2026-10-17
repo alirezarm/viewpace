@@ -49,11 +49,17 @@ export function density(file: string): string {
   const blocks = tl.segments.filter((s) => s.state !== 'none');
   const regions = tl.regions;
   const lens = regions.map((r) => r.end - r.start);
-  const speed = (r: { state: string; rate?: number }) => (r.state === 'mapped' ? `${Number(r.rate!.toFixed(2))}×` : r.state);
+  const fmt = (x: number) => String(Number(x.toFixed(2)));
+  const speed = (r: { state: string; rate?: number }) => (r.state === 'mapped' ? `${fmt(r.rate!)}×` : r.state);
+  const TIER = ['slow', 'medium', 'fast'];
+  const regionSpeed = (r: (typeof regions)[number]) =>
+    r.state !== 'mapped' ? r.state : `${TIER[r.tier!]} ${r.minRate === r.maxRate ? `${fmt(r.minRate!)}×` : `${fmt(r.minRate!)}–${fmt(r.maxRate!)}×`}`;
+  // What the map drew before visual tiers: runs of blocks with exactly the same speed.
+  const exactRuns = blocks.filter((s, i) => i === 0 || speed(s) !== speed(blocks[i - 1]!)).length;
 
   const perSpeed = new Map<string, { regions: number; blocks: number; sec: number }>();
   for (const r of regions) {
-    const k = speed(r);
+    const k = r.state === 'mapped' ? TIER[r.tier!]! : r.state;
     const e = perSpeed.get(k) ?? { regions: 0, blocks: 0, sec: 0 };
     e.regions++;
     e.blocks += r.blocks;
@@ -65,26 +71,27 @@ export function density(file: string): string {
   const steps = blocks.slice(1).map((s, i) => (s.state === 'mapped' && blocks[i]!.state === 'mapped' ? Math.abs(s.level! - blocks[i]!.level!) : null)).filter((x): x is number => x !== null);
   const singleBlock = regions.filter((r) => r.blocks === 1).length;
   // A–B–A flicker: a one-block region whose neighbours share a speed different from its own.
-  const flicker = regions.filter((r, i) => r.blocks === 1 && i > 0 && i < regions.length - 1 && speed(regions[i - 1]!) === speed(regions[i + 1]!)).length;
+  const tierKey = (r: (typeof regions)[number]) => (r.state === 'mapped' ? `t${r.tier}` : r.state);
+  const flicker = regions.filter((r, i) => r.blocks === 1 && i > 0 && i < regions.length - 1 && tierKey(regions[i - 1]!) === tierKey(regions[i + 1]!)).length;
   const blockLens = blocks.map((s) => s.end - s.start);
 
   const out: string[] = [];
   out.push(`# ${run.title}`, `Goal: ${run.goal}`, '');
   out.push(`1. Blocks: ${blocks.length} (length median ${min(median(blockLens))}, range ${min(Math.min(...blockLens))}–${min(Math.max(...blockLens))})`);
-  out.push(`2. Drawn regions: ${regions.length}`);
+  out.push(`2. Drawn regions: ${regions.length} (exact-speed merging alone: ${exactRuns})`);
   out.push(`3. Reduction: ${blocks.length} → ${regions.length} (×${r2(blocks.length / regions.length)}; ${Math.round((1 - regions.length / blocks.length) * 100)}% fewer pieces)`);
-  out.push(`4. By speed:`);
+  out.push(`4. By visual tier:`);
   for (const [k, v] of [...perSpeed].sort()) out.push(`   ${k.padEnd(7)} ${String(v.regions).padStart(3)} regions, ${String(v.blocks).padStart(3)} blocks, ${min(v.sec)}`);
   out.push(`5. Region length: min ${min(Math.min(...lens))}, median ${min(median(lens))}, mean ${min(lens.reduce((a, b) => a + b, 0) / lens.length)}, p90 ${min(pctl(lens, 0.9))}, max ${min(Math.max(...lens))}`);
   const bucket = (lo: number, hi: number) => lens.filter((l) => l >= lo * 60 && l < hi * 60).length;
   out.push(`6. Regions <1 min: ${bucket(0, 1)}, 1–2 min: ${bucket(1, 2)}, 2–5 min: ${bucket(2, 5)}, >5 min: ${bucket(5, Infinity)}`);
   out.push(`7. Speed changes between consecutive blocks: ${changes} of ${blocks.length - 1} (${Math.round((changes / (blocks.length - 1)) * 100)}%)`);
   out.push(`   Size of each change (pacing rows): ${[1, 2, 3, 4].map((d) => `${d}: ${steps.filter((x) => x === d).length}`).join(', ')}`);
-  out.push(`   One-block regions: ${singleBlock} of ${regions.length}; A–B–A flickers (one block between two of the same speed): ${flicker}`);
+  out.push(`   One-block regions drawn: ${singleBlock} of ${regions.length}; remaining A–B–A patterns between drawn regions: ${flicker}`);
   out.push(`8. Regions:`);
   for (const r of regions) {
     const topics = [...new Set(r.topics.map((t) => t.trim()).filter(Boolean))];
-    out.push(`   ${`${timelineClock(r.start)}–${timelineClock(r.end)}`.padEnd(13)} ${speed(r).padEnd(7)} ${String(r.blocks).padStart(2)} blk  ${topics.slice(0, 3).join(' / ')}${topics.length > 3 ? ` +${topics.length - 3}` : ''}`);
+    out.push(`   ${`${timelineClock(r.start)}–${timelineClock(r.end)}`.padEnd(13)} ${regionSpeed(r).padEnd(18)} ${String(r.blocks).padStart(2)} blk  ${topics.slice(0, 3).join(' / ')}${topics.length > 3 ? ` +${topics.length - 3}` : ''}`);
   }
   return out.join('\n');
 }

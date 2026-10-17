@@ -3,7 +3,7 @@ import { PROFILES } from '../src/content/controller';
 import { makeBlocks } from '../src/content/goal/blocks';
 import { GoalMap } from '../src/content/goal/goal-map';
 import { goalTarget, pacingLevel } from '../src/content/goal/goal-pacing';
-import { LEVELS, goalTimeline, seekFromKey, seekFromPointer, seekTimeAt, mergeSegments, regionTooltip, type TimelineSegment } from '../src/content/goal/goal-timeline';
+import { LEVELS, goalTimeline, seekFromKey, seekFromPointer, seekTimeAt, mergeSegments, regionTooltip, visualTier, type TimelineSegment } from '../src/content/goal/goal-timeline';
 import type { TimedWord } from '../src/shared/types';
 
 const pace = PROFILES.normal;
@@ -178,77 +178,121 @@ describe('Goal Map navigation', () => {
 });
 
 describe('Goal Map regions (display aggregation)', () => {
-  const m = (start: number, level: number, topic?: string): TimelineSegment => ({
+  const LABEL = ['Key part for your goal', 'Important for your goal', 'Relevant background', 'Less relevant to your goal', 'Not relevant to your goal'];
+  const RATE = [1, 1.15, 1.4, 1.75, 2];
+  /** A mapped block starting at `start` (60 s long) in pacing row `level`. */
+  const m = (start: number, level: number, topic?: string, len = 60): TimelineSegment => ({
     start,
-    end: start + 60,
+    end: start + len,
     state: 'mapped',
     level,
-    label: ['Key part for your goal', 'Important for your goal', 'Relevant background', 'Less relevant to your goal', 'Not relevant to your goal'][level],
-    rate: [1, 1.15, 1.4, 1.75, 2][level],
+    label: LABEL[level],
+    rate: RATE[level],
     topic,
   });
   const p = (start: number): TimelineSegment => ({ start, end: start + 60, state: 'pending' });
   const f = (start: number): TimelineSegment => ({ start, end: start + 60, state: 'failed' });
-  const shape = (rs: ReturnType<typeof mergeSegments>) => rs.map((r) => [r.start, r.end, r.state, r.rate ?? null]);
+  /** Consecutive mapped blocks from a list of pacing rows. */
+  const rows = (levels: number[]) => levels.map((l, i) => m(i * 60, l));
+  const shape = (rs: ReturnType<typeof mergeSegments>) => rs.map((r) => [r.start, r.end, r.state, r.tier ?? null, r.blocks]);
 
-  it('merges neighbouring blocks with the same pacing into one region', () => {
-    const regions = mergeSegments([m(0, 4), m(60, 4), m(120, 3), m(180, 3), m(240, 1), m(300, 1)]);
-    expect(shape(regions)).toEqual([
-      [0, 120, 'mapped', 2],
-      [120, 240, 'mapped', 1.75],
-      [240, 360, 'mapped', 1.15],
-    ]);
-    expect(regions.map((r) => r.blocks)).toEqual([2, 2, 2]);
+  it('draws the five speeds as three tiers: slow (1×, 1.15×), medium (1.4×), fast (1.75×, 2×)', () => {
+    expect([0, 1, 2, 3, 4].map(visualTier)).toEqual([0, 0, 1, 2, 2]);
   });
 
-  it('never merges neighbours with different pacing', () => {
-    expect(mergeSegments([m(0, 0), m(60, 1), m(120, 0)])).toHaveLength(3);
+  it('merges 1× and 1.15× neighbours into one slow region', () => {
+    expect(shape(mergeSegments(rows([0, 1, 0, 1])))).toEqual([[0, 240, 'mapped', 0, 4]]);
   });
 
-  it('never merges mapped parts across an unmapped or failed part', () => {
-    expect(shape(mergeSegments([m(0, 2), p(60), m(120, 2), f(180), m(240, 2)]))).toEqual([
-      [0, 60, 'mapped', 1.4],
-      [60, 120, 'pending', null],
-      [120, 180, 'mapped', 1.4],
-      [180, 240, 'failed', null],
-      [240, 300, 'mapped', 1.4],
+  it('merges 1.75× and 2× neighbours into one fast region', () => {
+    expect(shape(mergeSegments(rows([3, 4, 4, 3])))).toEqual([[0, 240, 'mapped', 2, 4]]);
+  });
+
+  it('keeps slow, medium and fast runs apart', () => {
+    expect(shape(mergeSegments(rows([0, 1, 2, 2, 3, 4])))).toEqual([
+      [0, 120, 'mapped', 0, 2],
+      [120, 240, 'mapped', 1, 2],
+      [240, 360, 'mapped', 2, 2],
     ]);
   });
 
-  it('is display only: the blocks, and playback pacing, stay block by block', () => {
+  it('absorbs a single block of another tier between two regions of one tier (A–B–A)', () => {
+    const regions = mergeSegments(rows([0, 1, 2, 0, 1])); // slow, slow, MEDIUM, slow, slow
+    expect(shape(regions)).toEqual([[0, 300, 'mapped', 0, 5]]);
+    expect(shape(mergeSegments(rows([4, 0, 4])))).toEqual([[0, 180, 'mapped', 2, 3]]); // fast, SLOW, fast
+  });
+
+  it('does not absorb a run of two or more blocks', () => {
+    expect(shape(mergeSegments(rows([0, 2, 2, 0])))).toEqual([
+      [0, 60, 'mapped', 0, 1],
+      [60, 180, 'mapped', 1, 2],
+      [180, 240, 'mapped', 0, 1],
+    ]);
+  });
+
+  it('does not absorb a block at either end, or between two different tiers', () => {
+    expect(mergeSegments(rows([2, 0, 0]))).toHaveLength(2);
+    expect(mergeSegments(rows([0, 0, 2]))).toHaveLength(2);
+    expect(mergeSegments(rows([0, 2, 4]))).toHaveLength(3);
+  });
+
+  it('never merges or absorbs across an unmapped or failed part', () => {
+    expect(shape(mergeSegments([m(0, 0), p(60), m(120, 1), f(180), m(240, 0)]))).toEqual([
+      [0, 60, 'mapped', 0, 1],
+      [60, 120, 'pending', null, 1],
+      [120, 180, 'mapped', 0, 1],
+      [180, 240, 'failed', null, 1],
+      [240, 300, 'mapped', 0, 1],
+    ]);
+    // A–B–A needs the three to touch: a gap on either side keeps B on its own.
+    expect(mergeSegments([m(0, 0), m(60, 2), p(120), m(180, 0)])).toHaveLength(4);
+  });
+
+  it('is display only: every block keeps its own exact speed for playback', () => {
     const map = newMap();
-    map.setRating(0, rating(8, 8, 'A'));
-    map.setRating(1, rating(9, 9, 'B'));
+    const ratings = [rating(9, 9, 'A'), rating(8, 2, 'B'), rating(5, 3, 'C'), rating(9, 9, 'D')]; // 1×, 1.15×, 1.4×, 1×
+    ratings.forEach((r, i) => map.setRating(i, r));
     const tl = goalTimeline(map, pace, 600, 0, true);
-    expect(tl.regions[0]).toMatchObject({ start: tl.segments[0]!.start, end: tl.segments[1]!.end, blocks: 2, topics: ['A', 'B'] });
-    expect(tl.segments.slice(0, 2).map((s) => s.topic)).toEqual(['A', 'B']); // still one segment per block
-    for (const i of [0, 1]) {
-      const b = map.blocks[i]!;
-      expect(map.pacingBlockAt((b.start + b.end) / 2)).toMatchObject({ index: i, relevance: map.rating(i)!.relevance }); // each block paces itself
-    }
+    expect(tl.regions[0]).toMatchObject({ tier: 0, blocks: 4, minRate: 1, maxRate: 1.4 }); // drawn as one slow region
+    expect(tl.segments.slice(0, 4).map((s) => s.rate)).toEqual([1, 1.15, 1.4, 1]); // still one segment per block
+    const g = map.blocks.map((b) => map.pacingBlockAt((b.start + b.end) / 2));
+    expect([0, 1, 2, 3].map((i) => goalTarget(g[i]!, pace).rate)).toEqual([1, goalTarget(ratings[1]!, pace).rate, 1.4, 1]);
   });
 
   it('regroups as blocks arrive progressively', () => {
     const map = newMap();
-    const regions = () => goalTimeline(map, pace, 600, 0, true).regions.map((r) => `${r.state}${r.rate ?? ''}x${r.blocks}`);
     const n = map.blocks.length;
-    expect(regions()).toEqual([`pendingx${n}`]); // nothing rated: one unanalyzed stretch
-    map.setRating(0, rating(0));
-    map.setRating(2, rating(0));
-    expect(regions()).toEqual(['mapped2x1', 'pendingx1', 'mapped2x1', `pendingx${n - 3}`]); // split by the gap
-    map.setRating(1, rating(0));
-    expect(regions()).toEqual(['mapped2x3', `pendingx${n - 3}`]); // the gap filled with the same pacing: one region
-    map.setRating(3, rating(9, 9));
-    expect(regions()).toEqual(['mapped2x3', 'mapped1x1', `pendingx${n - 4}`]);
+    const regions = () => goalTimeline(map, pace, 600, 0, true).regions.map((r) => `${r.state}${r.tier ?? ''}x${r.blocks}`);
+    expect(regions()).toEqual([`pendingx${n}`]);
+    map.setRating(0, rating(9, 9)); // slow
+    map.setRating(2, rating(8, 2)); // slow
+    expect(regions()).toEqual(['mapped0x1', 'pendingx1', 'mapped0x1', `pendingx${n - 3}`]); // split by the gap
+    map.setRating(1, rating(5)); // medium, between two slow: absorbed
+    expect(regions()).toEqual(['mapped0x3', `pendingx${n - 3}`]);
+    map.setRating(3, rating(5)); // medium
+    map.setRating(4, rating(5)); // medium: a two-block run stays
+    expect(regions()).toEqual(['mapped0x3', 'mapped1x2', `pendingx${n - 5}`]);
+  });
+
+  it('hover card shows the actual speed, or the range of speeds, inside a region', () => {
+    expect(regionTooltip(mergeSegments(rows([0, 0]))[0]!).detail).toBe('Key part for your goal · 1×');
+    expect(regionTooltip(mergeSegments(rows([1, 0, 1]))[0]!).detail).toBe('Important for your goal · 1–1.15×');
+    expect(regionTooltip(mergeSegments(rows([3, 4, 4]))[0]!).detail).toBe('Not relevant to your goal · 1.75–2×');
+    expect(regionTooltip(mergeSegments(rows([0, 2, 0]))[0]!).detail).toBe('Key part for your goal · 1–1.4×'); // absorbed block's speed is shown
+  });
+
+  it('hover card names the meaning covering most of the region\'s time (ties: the slower one)', () => {
+    expect(regionTooltip(mergeSegments([m(0, 0, undefined, 30), m(30, 1, undefined, 90)])[0]!).detail).toBe('Important for your goal · 1–1.15×');
+    expect(regionTooltip(mergeSegments([m(0, 1), m(60, 0)])[0]!).detail).toBe('Key part for your goal · 1–1.15×');
   });
 
   it('hover card lists the blocks\' own topics, deduplicated', () => {
-    const [r] = mergeSegments([m(760, 0, 'Pretraining data'), m(820, 0, 'pretraining  data'), m(880, 0, 'Next-token prediction'), m(940, 0, 'Pretraining data')]);
-    expect(regionTooltip(r!)).toEqual({ range: '12:40–16:40', topics: ['Pretraining data', 'Next-token prediction'], more: 0, detail: 'Key part for your goal · 1×' });
+    const [r] = mergeSegments([m(760, 0, 'Pretraining data'), m(820, 1, 'pretraining  data'), m(880, 0, 'Next-token prediction'), m(940, 0, 'Pretraining data')]);
+    expect(regionTooltip(r!)).toEqual({ range: '12:40–16:40', topics: ['Pretraining data', 'Next-token prediction'], more: 0, detail: 'Key part for your goal · 1–1.15×' });
   });
 
   it('hover card shows at most 3 topics, then "+N more"', () => {
-    const [r] = mergeSegments(['Pretraining data', 'Next-token prediction', 'Training objective', 'Tokenization', 'Compute budget'].map((t, i) => m(760 + i * 39, 0, t)).map((s, i, all) => ({ ...s, end: all[i + 1]?.start ?? 955 })));
+    const [r] = mergeSegments(['Pretraining data', 'Next-token prediction', 'Training objective', 'Tokenization', 'Compute budget'].map((t, i) => m(760 + i * 39, 0, t, 39)));
     expect(regionTooltip(r!)).toEqual({
       range: '12:40–15:55',
       topics: ['Pretraining data', 'Next-token prediction', 'Training objective'],
@@ -268,7 +312,7 @@ describe('Goal Map regions (display aggregation)', () => {
     const x = (t: number) => 100 + (t / duration) * 272;
     const regionStartX = x(600);
     const regionWidth = x(900) - x(600);
-    const clickAt = (f: number) => seekFromPointer('click', regionStartX + f * regionWidth, 100, 272, duration)!;
+    const clickAt = (fr: number) => seekFromPointer('click', regionStartX + fr * regionWidth, 100, 272, duration)!;
     expect(clickAt(0.1)).toBeCloseTo(630); // ~10:30
     expect(clickAt(0.5)).toBeCloseTo(750); // ~12:30
     expect(clickAt(0.9)).toBeCloseTo(870); // ~14:30
@@ -277,7 +321,7 @@ describe('Goal Map regions (display aggregation)', () => {
 
   it('the playhead stays the real video time, inside a merged region too', () => {
     const map = newMap();
-    for (let i = 0; i < map.blocks.length; i++) map.setRating(i, rating(0));
+    for (let i = 0; i < map.blocks.length; i++) map.setRating(i, rating(i % 2 ? 0 : 3)); // 2× and 1.75× alternating: one fast region
     const tl = goalTimeline(map, pace, 600, 333.3, false);
     expect(tl.regions).toHaveLength(1);
     expect(tl.position).toBe(333.3);
