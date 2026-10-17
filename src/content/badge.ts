@@ -1,6 +1,6 @@
 import type { Feedback } from '../shared/types';
 import type { GoalCardView } from './goal/goal-coordinator';
-import { VISUAL_TIERS, regionTooltip, seekFromKey, seekFromPointer, timelineClock, type GoalTimeline } from './goal/goal-timeline';
+import { VISUAL_TIERS, mapStatus, regionTooltip, seekFromKey, seekFromPointer, timelineClock, type GoalTimeline } from './goal/goal-timeline';
 
 /** Slow / medium / fast tiers drawn with the existing key-part, background and not-relevant styles. */
 const TIER_CLASS = ['l0', 'l2', 'l4'];
@@ -462,8 +462,7 @@ export class Badge {
       this.showTip(this.hovered); // a part that was just analyzed shows its topic straight away
     }
     this.el.now!.style.left = pct(tl.position);
-    const done = Math.floor(tl.progress * 100);
-    const status = tl.mapping ? `Mapping… ${done}%` : 'Goal Map';
+    const status = mapStatus(tl);
     const set = (k: string, text: string) => {
       const e = this.el[k];
       if (e && e.textContent !== text) e.textContent = text;
@@ -471,7 +470,7 @@ export class Badge {
     set('tlStatus', status);
     set('tlEnd', timelineClock(tl.duration));
     const bar = this.el.bar!;
-    bar.setAttribute('aria-label', `Goal Map, ${done}% analyzed. Click or use the arrow keys to jump in the video.`);
+    bar.setAttribute('aria-label', `Goal Map${status ? `, ${status}` : ''}. Click or use the arrow keys to jump in the video.`);
     bar.setAttribute('aria-valuemax', String(Math.round(tl.duration)));
     bar.setAttribute('aria-valuenow', String(Math.round(tl.position)));
     bar.setAttribute('aria-valuetext', `${timelineClock(tl.position)} of ${timelineClock(tl.duration)}`);

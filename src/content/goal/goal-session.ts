@@ -234,7 +234,7 @@ export class GoalController {
       const message =
         s.phase === 'mapping'
           ? s.breakdownDone
-            ? `Mapping… ${Math.floor(progress * 100)}%. Mapped parts are already paced; the timeline on the video shows them.`
+            ? 'Analyzing ahead… Parts already analyzed are paced now; the map on the video shows them.'
             : 'Reading your goal…'
           : s.phase === 'ready'
             ? s.map.failedCount

@@ -3,7 +3,7 @@ import { PROFILES } from '../src/content/controller';
 import { makeBlocks } from '../src/content/goal/blocks';
 import { GoalMap } from '../src/content/goal/goal-map';
 import { goalTarget, pacingLevel } from '../src/content/goal/goal-pacing';
-import { LEVELS, goalTimeline, seekFromKey, seekFromPointer, seekTimeAt, mergeSegments, regionKey, regionLabelRequest, regionTooltip, visualTier, type TimelineSegment } from '../src/content/goal/goal-timeline';
+import { LEVELS, goalTimeline, seekFromKey, seekFromPointer, seekTimeAt, mapStatus, readyThrough, mergeSegments, regionKey, regionLabelRequest, regionTooltip, visualTier, type TimelineSegment } from '../src/content/goal/goal-timeline';
 import type { TimedWord } from '../src/shared/types';
 
 const pace = PROFILES.normal;
@@ -388,5 +388,60 @@ describe('region names (presentation only)', () => {
     const second = goalTimeline(map, pace, 600, 0, false).regions[1]!;
     expect(second.name).toBeUndefined();
     expect(regionTooltip(second).topics.length).toBeGreaterThan(0);
+  });
+});
+
+describe('Goal Map status line', () => {
+  const at = (map: GoalMap, position: number, mapping = true) => goalTimeline(map, pace, 600, position, mapping);
+  const clockOf = (t: number) => `${Math.floor(t / 60)}:${String(Math.floor(t % 60)).padStart(2, '0')}`;
+
+  it('says how far playback is covered from here: the end of the unbroken analyzed run', () => {
+    const map = newMap();
+    [0, 1, 2].forEach((i) => map.setRating(i, rating(5)));
+    const tl = at(map, 5);
+    expect(readyThrough(tl)).toBe(map.blocks[2]!.end);
+    expect(mapStatus(tl)).toBe(`Ready through ${clockOf(map.blocks[2]!.end)}`);
+  });
+
+  it('ignores blocks analyzed further ahead past a gap (mapping is not always in order)', () => {
+    const map = newMap();
+    map.setRating(0, rating(5));
+    map.setRating(3, rating(5)); // analyzed out of order: 1 and 2 aren't yet
+    map.setRating(4, rating(5));
+    expect(readyThrough(at(map, 5))).toBe(map.blocks[0]!.end);
+  });
+
+  it('stops at a failed block', () => {
+    const map = newMap();
+    map.setRating(0, rating(5));
+    map.setFailed(1);
+    map.setRating(2, rating(5));
+    expect(readyThrough(at(map, 5))).toBe(map.blocks[0]!.end);
+  });
+
+  it('says "Analyzing ahead…" when the current part is not analyzed yet', () => {
+    const map = newMap();
+    map.setRating(3, rating(5)); // ahead of the viewer, not where they are
+    const tl = at(map, 5);
+    expect(readyThrough(tl)).toBeNull();
+    expect(mapStatus(tl)).toBe('Analyzing ahead…');
+    map.setFailed(0);
+    expect(mapStatus(at(map, 5))).toBe('Analyzing ahead…');
+  });
+
+  it('follows the playhead: after a seek, coverage is counted from the new position', () => {
+    const map = newMap();
+    [0, 1, 4, 5].forEach((i) => map.setRating(i, rating(5)));
+    expect(readyThrough(at(map, 5))).toBe(map.blocks[1]!.end);
+    const mid = (map.blocks[4]!.start + map.blocks[4]!.end) / 2;
+    expect(readyThrough(at(map, mid))).toBe(map.blocks[5]!.end);
+  });
+
+  it('never shows a percentage, and shows nothing once the map is complete', () => {
+    const map = newMap();
+    map.setRating(0, rating(5));
+    for (const p of [0, 5, 300, 599]) expect(mapStatus(at(map, p))).not.toMatch(/%|Mapping/);
+    map.blocks.forEach((b, i) => map.setRating(i, rating(5)));
+    expect(mapStatus(at(map, 5, false))).toBe('');
   });
 });

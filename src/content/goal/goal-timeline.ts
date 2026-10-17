@@ -207,6 +207,32 @@ export function regionLabelRequest(map: GoalMap): { regions: RegionTopics[]; key
   return { regions: out, keys };
 }
 
+/**
+ * How far playback can go from the current position with every part analyzed: the end of the
+ * unbroken run of mapped blocks starting at the block under the playhead. Blocks rated further
+ * ahead (mapping isn't always in order) don't count past a gap. Null if the current part isn't
+ * analyzed yet.
+ */
+export function readyThrough(tl: GoalTimeline): number | null {
+  const segs = tl.segments;
+  let i = segs.findIndex((s) => tl.position >= s.start && tl.position < s.end);
+  if (i < 0 && segs.length && tl.position >= segs[segs.length - 1]!.end) i = segs.length - 1; // at the very end
+  if (i < 0 || segs[i]!.state !== 'mapped') return null;
+  while (i + 1 < segs.length && segs[i + 1]!.state === 'mapped' && segs[i + 1]!.start === segs[i]!.end) i++;
+  return segs[i]!.end;
+}
+
+/**
+ * The Goal Map's quiet status line: while analysis runs, how far ahead playback is covered
+ * ("Ready through 10:47"), or "Analyzing ahead…" when the current part isn't analyzed yet.
+ * Nothing once the map is complete: no percentage, no completion notice.
+ */
+export function mapStatus(tl: GoalTimeline): string {
+  if (!tl.mapping) return '';
+  const through = readyThrough(tl);
+  return through === null ? 'Analyzing ahead…' : `Ready through ${clock(through)}`;
+}
+
 const clock = (t: number) => {
   const s = Math.max(0, Math.floor(t));
   const h = Math.floor(s / 3600);

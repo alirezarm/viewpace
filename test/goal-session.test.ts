@@ -337,7 +337,8 @@ describe('Goal Mode', () => {
       expect(g.status('A')!.phase).toBe('mapping');
       expect(g.decide('A', 10, pace)).toMatchObject({ kind: 'target', rate: 2 });
       expect(g.decide('A', 300, pace).kind).toBe('hold'); // later parts aren't mapped yet
-      expect(g.status('A')!.message).toMatch(/^Mapping… \d+%/);
+      expect(g.status('A')!.message).toMatch(/^Analyzing ahead…/);
+      expect(g.status('A')!.message).not.toMatch(/%/);
     });
 
     it('starts at the playhead and works forward, then wraps to the start', async () => {
