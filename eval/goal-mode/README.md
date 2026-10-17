@@ -49,3 +49,6 @@ Report: `docs/goal-mode-poc1-evaluation.md`.
 - Historical prompts: production now holds only the final Goal Mode prompts. `context-metrics.ts`
   reads the POC 1.4 block prompt from its evaluated commit (`8adf93f`) via `git show`, and
   `breakdown-metrics.ts`/`context-metrics.ts` read POC 1.1's from `1b69f3a`.
+- Goal Map density: `map-density.ts <run.json>…` rebuilds a completed mapping with the production
+  `goalTimeline`/`mergeSegments` and reports blocks vs drawn regions, region lengths, speed changes
+  and the region list.
