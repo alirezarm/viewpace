@@ -1,4 +1,5 @@
 import type { Feedback } from '../shared/types';
+import type { GoalCardView } from './goal/goal-coordinator';
 import { VISUAL_TIERS, regionTooltip, seekFromKey, seekFromPointer, timelineClock, type GoalTimeline } from './goal/goal-timeline';
 
 /** Slow / medium / fast tiers drawn with the existing key-part, background and not-relevant styles. */
@@ -18,6 +19,8 @@ export interface BadgeView {
   ack: string | null;
   /** Goal Mode's whole-video timeline, or null when Goal Mode is off. */
   timeline: GoalTimeline | null;
+  /** The viewing-goal card shown with the Goal Map. */
+  goalCard: GoalCardView;
 }
 
 export interface BadgeHandlers {
@@ -26,6 +29,11 @@ export interface BadgeHandlers {
   onResume(): void;
   /** The viewer picked a point on the Goal Map: seek the video there (seconds). */
   onSeek(time: number): void;
+  /** Start (or restart) Goal Mode with this goal. */
+  onGoalStart(goal: string): void;
+  onGoalStop(): void;
+  /** Open or close the goal input. */
+  onGoalEditing(editing: boolean): void;
 }
 
 const HOST_ID = 'autospeed-badge';
@@ -82,6 +90,28 @@ button:focus-visible { outline: 2px solid #ffc857; outline-offset: 2px; }
 .tip .more { font-size: 12px; color: #aaa; margin-top: 1px; }
 .tip .td { font-size: 12px; color: #d6d6d6; margin-top: 1px; }
 .bar { position: relative; height: 16px; cursor: pointer; border-radius: 2px; }
+/* Viewing goal, on top of the map: a prompt, the input, or the goal itself with an edit action. */
+.goal + .map { margin-top: 7px; }
+.gchip { display: block; width: 100%; padding: 0; text-align: left; background: none; color: #d6d6d6; font-size: 12px; }
+.gchip:hover { color: #fff; }
+.gline { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #f1f1f1; }
+.gtext { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.gedit { flex: none; padding: 0 4px; border-radius: 6px; background: none; color: #aaa; font-size: 13px; }
+.gedit:hover { color: #fff; background: rgba(255,255,255,.1); }
+.gentry { display: flex; flex-direction: column; gap: 6px; margin: 0; font-size: 12px; }
+.gq { color: #d6d6d6; }
+.grow { display: flex; gap: 6px; }
+.grow input { flex: 1; min-width: 0; padding: 6px 8px; border: 1px solid rgba(255,255,255,.2); border-radius: 8px;
+  background: rgba(0,0,0,.35); color: #f1f1f1; font: inherit; }
+.grow input:focus { outline: 2px solid #ffc857; outline-offset: 0; border-color: transparent; }
+.gstart { padding: 6px 10px; border-radius: 8px; background: #ffc857; color: #1a1a1a; font-weight: 600; }
+.gprev { align-self: flex-start; max-width: 100%; padding: 0; background: none; color: #aaa; text-align: left;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.gprev:hover { color: #fff; }
+.gmsg { color: #ffc857; }
+.gacts { display: flex; gap: 10px; }
+.gacts button { padding: 0; background: none; color: #aaa; }
+.gacts button:hover { color: #fff; }
 .bar:focus-visible { outline: 2px solid #ffc857; outline-offset: 3px; }
 .bar::before { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 2px; border-radius: 1px;
   background: rgba(255,255,255,.18); }
@@ -107,6 +137,7 @@ export class Badge {
   private el: Record<string, HTMLElement> = {};
   private open = false;
   private timelineKey = '';
+  private goalMode: GoalCardView['mode'] = 'hidden';
   /** The map last drawn (duration and playhead), for keyboard seeking. */
   private timeline: GoalTimeline | null = null;
   /** Index of the map region under the pointer, or -1. */
@@ -136,10 +167,23 @@ export class Badge {
           <button class="secondary" data-k="toggle"></button>
         </div>
         <div class="tl" data-k="tl" hidden>
+          <div class="goal" data-k="goal">
+            <button class="gchip" data-k="gchip" hidden>🎯 Set a viewing goal</button>
+            <form class="gentry" data-k="gentry" hidden>
+              <label class="gq" for="vp-goal">🎯 What do you want to get from this video?</label>
+              <div class="grow"><input id="vp-goal" data-k="ginput" maxlength="300" autocomplete="off" placeholder="Enter a viewing goal…" /><button class="gstart" type="submit">Start</button></div>
+              <button class="gprev" type="button" data-k="gprev" hidden></button>
+              <div class="gmsg" data-k="gmsg" role="status" hidden></div>
+              <div class="gacts"><button type="button" data-k="gcancel">Cancel</button><button type="button" data-k="gstop" hidden>Stop Goal Mode</button></div>
+            </form>
+            <div class="gline" data-k="gline" hidden><span class="gtext" data-k="gtext"></span><button class="gedit" data-k="gedit" aria-label="Edit viewing goal" title="Edit goal">✎</button></div>
+          </div>
+          <div class="map" data-k="map">
           <div class="bar" data-k="bar" role="slider" tabindex="0" aria-valuemin="0">
             <span class="now" data-k="now"></span>
           </div>
           <div class="foot"><span data-k="tlStart">0:00</span><span class="st" data-k="tlStatus"></span><span data-k="tlEnd"></span></div>
+          </div>
           <div class="tip" data-k="tip" hidden><div class="tr" data-k="tipRange"></div><div data-k="tipTopics"></div><div class="td" data-k="tipDetail"></div></div>
         </div>
         <button class="resume" data-k="resume" hidden>Resume ViewPace</button>
@@ -152,7 +196,7 @@ export class Badge {
     this.root.querySelectorAll<HTMLElement>('[data-k]').forEach((e) => (this.el[e.dataset.k!] = e));
 
     // Keep clicks and keys from reaching the YouTube player (which would pause or seek).
-    for (const type of ['click', 'dblclick', 'mousedown', 'keydown']) {
+    for (const type of ['click', 'dblclick', 'mousedown', 'keydown', 'keyup', 'keypress']) {
       this.host.addEventListener(type, (e) => e.stopPropagation());
     }
     this.root.addEventListener('click', (e) => {
@@ -168,6 +212,16 @@ export class Badge {
       const f = t.closest<HTMLElement>('[data-f]')?.dataset.f;
       if (f) return handlers.onFeedback(f as Feedback);
       const k = t.closest<HTMLElement>('[data-k]')?.dataset.k;
+      if (k === 'gchip' || k === 'gedit') return handlers.onGoalEditing(true);
+      if (k === 'gcancel') return handlers.onGoalEditing(false);
+      if (k === 'gstop') return handlers.onGoalStop();
+      if (k === 'gprev') {
+        // Reuse the previous goal: fill it in; the viewer still presses Start.
+        const input = this.el.ginput as HTMLInputElement;
+        input.value = this.el.gprev!.dataset.goal ?? '';
+        input.focus();
+        return;
+      }
       if (k === 'pill') this.setOpen(!this.open);
       else if (k === 'toggle') {
         handlers.onToggleEnabled();
@@ -180,8 +234,13 @@ export class Badge {
       this.showTip(seg ? Number(seg.dataset.i) : -1);
     });
     this.el.bar!.addEventListener('mouseleave', () => this.showTip(-1));
+    this.el.gentry!.addEventListener('submit', (e) => {
+      e.preventDefault(); // Enter or Start
+      handlers.onGoalStart((this.el.ginput as HTMLInputElement).value);
+    });
     this.root.addEventListener('keydown', (e) => {
       const key = (e as KeyboardEvent).key;
+      if (key === 'Escape' && this.goalMode === 'entry') handlers.onGoalEditing(false);
       if (key === 'Escape') this.setOpen(false);
       if ((e.target as HTMLElement).dataset?.k === 'bar' && this.timeline) {
         const time = seekFromKey(key, this.timeline.position, this.timeline.duration);
@@ -197,7 +256,43 @@ export class Badge {
     this.open = open;
     this.el.panel!.hidden = !open;
     this.el.pill!.setAttribute('aria-expanded', String(open));
-    this.host.toggleAttribute('data-open', open);
+    this.syncOpen();
+  }
+
+  /** Stay visible while the panel is open or a goal is being typed, even if YouTube hides its controls. */
+  private syncOpen(): void {
+    this.host.toggleAttribute('data-open', this.open || this.goalMode === 'entry');
+  }
+
+  /** The goal card above the map. The input's text is only set when it opens, never while typing. */
+  private renderGoal(v: GoalCardView): void {
+    const was = this.goalMode;
+    this.goalMode = v.mode;
+    this.el.goal!.hidden = v.mode === 'hidden';
+    this.el.gchip!.hidden = v.mode !== 'chip';
+    this.el.gentry!.hidden = v.mode !== 'entry';
+    this.el.gline!.hidden = v.mode !== 'active';
+    if (v.mode === 'active') {
+      const text = `🎯 ${v.goal}`;
+      if (this.el.gtext!.textContent !== text) this.el.gtext!.textContent = text;
+      this.el.gtext!.title = v.goal;
+    }
+    if (v.mode === 'entry') {
+      const input = this.el.ginput as HTMLInputElement;
+      if (was !== 'entry') {
+        input.value = v.value;
+        input.focus();
+      }
+      const prev = this.el.gprev!;
+      prev.hidden = !v.suggestion;
+      prev.dataset.goal = v.suggestion ?? '';
+      prev.textContent = v.suggestion ? `Previous: ${v.suggestion}` : '';
+      prev.title = v.suggestion ?? '';
+      this.el.gmsg!.hidden = !v.message;
+      this.el.gmsg!.textContent = v.message ?? '';
+      this.el.gstop!.hidden = !v.canStop;
+    }
+    if (was !== v.mode) this.syncOpen();
   }
 
   remove(): void {
@@ -241,6 +336,7 @@ export class Badge {
     set('toggle', v.state === 'off' ? 'Turn on ViewPace' : 'Turn off ViewPace');
     this.el.resume!.hidden = v.state !== 'paused-by-user';
     this.host.toggleAttribute('data-flash', v.flash || v.state === 'paused-by-user');
+    this.renderGoal(v.goalCard);
     this.renderTimeline(v.timeline);
   }
 
@@ -274,7 +370,8 @@ export class Badge {
   /** Segments are rebuilt only when the map changes; the playhead marker moves every update. */
   private renderTimeline(tl: GoalTimeline | null): void {
     const box = this.el.tl!;
-    box.hidden = !tl;
+    box.hidden = !tl && this.goalMode === 'hidden'; // the card can show before there's a map
+    this.el.map!.hidden = !tl;
     this.timeline = tl && tl.duration > 0 ? tl : null;
     if (!tl || tl.duration <= 0) {
       this.timelineKey = '';

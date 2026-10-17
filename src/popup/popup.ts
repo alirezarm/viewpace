@@ -162,6 +162,10 @@ function renderGoal(status: GoalStatus | { error: string } | null | undefined, o
   stop.hidden = !running;
   start.textContent = running ? 'Restart with this goal' : 'Start Goal Mode';
   if (status) text.textContent = status.message;
+  // One goal state, owned by the tab: show the goal that's running there (also when it was set or
+  // edited on the video page), unless the user is typing here.
+  const box = $<HTMLTextAreaElement>('goal-text');
+  if (running && document.activeElement !== box && box.value !== status.goal) box.value = status.goal;
 }
 
 async function refreshGoal(onVideo: boolean): Promise<void> {
@@ -208,7 +212,7 @@ function bind(): void {
     renderGoal(await sendGoal({ kind: 'goal:start', goal: goalText }), true);
   });
   $<HTMLButtonElement>('goal-stop').addEventListener('click', async () => {
-    await sendGoal({ kind: 'goal:stop' });
+    await sendGoal({ kind: 'goal:stop' }); // the same stop as the video page's
     $('goal-status').textContent = 'Goal Mode stopped.';
     $<HTMLButtonElement>('goal-stop').hidden = true;
     $<HTMLButtonElement>('goal-start').textContent = 'Start Goal Mode';

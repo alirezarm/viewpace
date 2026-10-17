@@ -15,6 +15,8 @@ import { TranscriptStore } from './transcript';
 import { RateOwner } from './rate-owner';
 import { toggleCaptionsForTrack } from './caption-toggle';
 import { GoalController, type GoalDecision } from './goal/goal-session';
+import { GoalCoordinator } from './goal/goal-coordinator';
+import { loadGoals, onGoalsChanged, rememberGoal, stopGoal } from '../shared/goal-store';
 import { goalTarget } from './goal/goal-pacing';
 import { goalTimeline } from './goal/goal-timeline';
 import type { GoalMapRow } from './overlay';
@@ -37,6 +39,12 @@ const ai = new ComplexityCache(disabled);
 // Goal Mode (experimental): per-video goal, map and analysis; in memory only.
 const goal = new GoalController();
 const goalAnalyzer = new NanoGoalAnalyzer(nano);
+// Starts, stops and restores goals for both the in-page card and the popup; remembers them per video.
+const goals = new GoalCoordinator({
+  controller: goal,
+  storage: { load: loadGoals, remember: rememberGoal, stop: stopGoal },
+  prepare: (id, text, restore) => prepareGoal(id, text, restore),
+});
 let aiStatus: AiAvailability = 'disabled';
 
 let video: HTMLVideoElement | null = null;
@@ -91,6 +99,13 @@ const badge = new Badge({
   onSeek: (time) => {
     if (!video) return;
     video.currentTime = time;
+    tick();
+  },
+  // The in-page goal card: the same start/stop as the popup.
+  onGoalStart: (text) => void goals.start(currentVideoId(), text).then(() => tick()),
+  onGoalStop: () => void goals.stop(currentVideoId()).then(() => tick()),
+  onGoalEditing: (editing) => {
+    goals.setEditing(editing);
     tick();
   },
 });
@@ -375,6 +390,7 @@ function bindVideo(v: HTMLVideoElement | null): void {
 
 function onVideoChange(id: string | null): void {
   goal.onVideoChange(id); // goal, map and analysis belong to the previous video
+  goals.onVideoChange(id); // its saved goal (if any) is restored once captions are ready
   // Leaving a video (another video, the home page, the miniplayer, Shorts) gives the
   // user's own speed back; the next video starts from it until ViewPace is confident.
   releaseControl();
@@ -497,6 +513,8 @@ function tick(): void {
   }
   if (++ticksSinceFlush >= FLUSH_EVERY_TICKS) flushStats();
   const range = PROFILES[settings.profile];
+  // A goal saved for this video comes back once its captions and the on-device AI are ready.
+  goals.maybeRestore({ videoId: id, ready: settings.enabled && aiStatus === 'available' && Boolean(store.track(id)) });
   const goalSession = goal.active(id) ? goal.session! : null;
   const badgeBase: Omit<BadgeView, 'state' | 'line' | 'flash'> = {
     rate: video.playbackRate,
@@ -505,6 +523,7 @@ function tick(): void {
     ack: badgeAck,
     // Rebuilt every tick from the live map, so it fills in as each block's rating lands.
     timeline: goalSession ? goalTimeline(goalSession.map, range, video.duration, video.currentTime, goalSession.phase === 'mapping') : null,
+    goalCard: goals.card(id, settings.enabled && aiStatus === 'available'),
   };
 
   const base = {
@@ -529,7 +548,7 @@ function tick(): void {
   if (!settings.enabled) {
     releaseControl();
     overlay.update({ ...base, speech: '—', ai: '—', transcript: '—', chunk: '', reason: 'ViewPace disabled', notice: null, goalMap: null, goalNow: null });
-    badge.update({ ...badgeBase, state: 'off', line: null, flash: false, timeline: null });
+    badge.update({ ...badgeBase, state: 'off', line: null, flash: false, timeline: null, goalCard: { mode: 'hidden' } });
     tabStatus = { onVideo: true, state: 'off', rate: video.playbackRate };
     meter.tick(performance.now(), false, 1, 'speech');
     return;
@@ -709,13 +728,12 @@ chrome.runtime.onMessage.addListener((msg: TabRequest | GoalTabRequest, _sender,
     return false;
   }
   if (msg?.kind === 'goal:stop') {
-    goal.stop();
-    sendResponse(null);
-    return false;
+    void goals.stop(currentVideoId()).then(() => sendResponse(null));
+    return true; // async response
   }
   if (msg?.kind === 'goal:start') {
     // Always answer, even on an unexpected error, so the popup can show what went wrong.
-    void startGoal(msg.goal).then(sendResponse, (e: unknown) =>
+    void goals.start(currentVideoId(), msg.goal).then(sendResponse, (e: unknown) =>
       sendResponse({ error: `Goal Mode couldn't start: ${e instanceof Error ? e.message : String(e)}` }),
     );
     return true; // async response
@@ -767,17 +785,20 @@ function goalMapRows(t: number): GoalMapRow[] {
 }
 
 /** Goal Mode starts only on the user's explicit Start; nothing is analysed silently. */
-async function startGoal(text: string): Promise<{ error: string } | ReturnType<GoalController['status']>> {
-  const id = currentVideoId();
-  if (!id || !video) return { error: 'Open a YouTube video first.' };
+/**
+ * What Goal Mode needs to start on video `id`, or why it can't. `restore`: started again on its own
+ * for a goal saved on this video, so an earlier manual-speed pause is left as it is.
+ */
+function prepareGoal(id: string, text: string, restore: boolean): Parameters<GoalController['start']>[0] | { error: string } {
+  if (!video || currentVideoId() !== id) return { error: 'Open a YouTube video first.' };
   if (!settings.enabled) return { error: 'Turn ViewPace on first.' };
   if (!text.trim()) return { error: 'Tell ViewPace what you want from this video.' };
   // Goal Mode needs the full caption track (live on-screen captions can't map what's ahead).
   const track = store.track(id);
   const words = track && track.words.length > 0 ? track.words : null;
   const transcriptEnd = track ? Math.max(...track.cues.map((c) => c.end), track.words.at(-1)?.t ?? 0) : 0;
-  resumeAfterOverride(); // starting Goal Mode is an explicit choice: clear an earlier manual-speed pause
-  return goal.start({
+  if (!restore) resumeAfterOverride(); // starting Goal Mode is an explicit choice: clear an earlier manual-speed pause
+  return {
     videoId: id,
     goal: text,
     words,
@@ -786,12 +807,14 @@ async function startGoal(text: string): Promise<{ error: string } | ReturnType<G
     isCurrent: () => currentVideoId() === id,
     playhead: () => video?.currentTime ?? 0,
     title: videoTitle(),
-  });
+  };
 }
 
 // ---------- boot ----------
 async function boot(): Promise<void> {
   settings = await loadSettings();
+  void goals.init();
+  onGoalsChanged((g) => goals.setGoals(g));
   ai.setProvider(providerFor(settings));
   void refreshAiStatus();
   onSettingsChanged((s) => {
