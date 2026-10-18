@@ -216,10 +216,34 @@ describe('Goal Map regions (display aggregation)', () => {
     ]);
   });
 
-  it('absorbs a single block of another tier between two regions of one tier (A–B–A)', () => {
-    const regions = mergeSegments(rows([0, 1, 2, 0, 1])); // slow, slow, MEDIUM, slow, slow
-    expect(shape(regions)).toEqual([[0, 300, 'mapped', 0, 5]]);
-    expect(shape(mergeSegments(rows([4, 0, 4])))).toEqual([[0, 180, 'mapped', 2, 3]]); // fast, SLOW, fast
+  it('absorbs a harmless one-block flicker between two regions of one tier (A–B–A)', () => {
+    expect(shape(mergeSegments(rows([0, 1, 2, 0, 1])))).toEqual([[0, 300, 'mapped', 0, 5]]); // slow, slow, MEDIUM, slow, slow
+    expect(shape(mergeSegments(rows([4, 2, 4])))).toEqual([[0, 180, 'mapped', 2, 3]]); // fast, MEDIUM, fast
+    expect(shape(mergeSegments(rows([0, 4, 0])))).toEqual([[0, 180, 'mapped', 0, 3]]); // slow, FAST, slow: a dip, not a peak
+  });
+
+  it('never hides a Key block in faster surroundings: Fast → Key → Fast stays visible', () => {
+    expect(shape(mergeSegments(rows([4, 0, 4])))).toEqual([
+      [0, 60, 'mapped', 2, 1],
+      [60, 120, 'mapped', 0, 1],
+      [120, 180, 'mapped', 2, 1],
+    ]);
+    expect(mergeSegments(rows([2, 0, 2]))).toHaveLength(3); // Medium → Key → Medium too
+  });
+
+  it('never hides an Important block in faster surroundings: Fast → Important → Fast stays visible', () => {
+    expect(shape(mergeSegments(rows([3, 1, 4])))).toEqual([
+      [0, 60, 'mapped', 2, 1],
+      [60, 120, 'mapped', 0, 1],
+      [120, 180, 'mapped', 2, 1],
+    ]);
+  });
+
+  it('protection uses each block\'s own pacing, so the peak keeps its exact speed in the card', () => {
+    const regions = mergeSegments(rows([4, 4, 0, 4, 4]));
+    expect(regions.map((r) => r.blocks)).toEqual([2, 1, 2]);
+    expect(regionTooltip(regions[1]!).detail).toBe('Key · 1×');
+    expect(regionTooltip(regions[0]!).detail).toBe('Not relevant · 2×'); // the fast sides don't claim 1–2×
   });
 
   it('does not absorb a run of two or more blocks', () => {
@@ -278,7 +302,7 @@ describe('Goal Map regions (display aggregation)', () => {
     expect(regionTooltip(mergeSegments(rows([0, 0]))[0]!).detail).toBe('Key · 1×');
     expect(regionTooltip(mergeSegments(rows([1, 0, 1]))[0]!).detail).toBe('Important · 1–1.15×');
     expect(regionTooltip(mergeSegments(rows([3, 4, 4]))[0]!).detail).toBe('Not relevant · 1.75–2×');
-    expect(regionTooltip(mergeSegments(rows([0, 2, 0]))[0]!).detail).toBe('Key · 1–1.4×'); // absorbed block's speed is shown
+    expect(regionTooltip(mergeSegments(rows([0, 2, 0]))[0]!).detail).toBe('Key · 1–1.4×'); // an absorbed (medium) block's speed is shown
   });
 
   it('hover card names the meaning covering most of the region\'s time (ties: the slower one)', () => {
@@ -443,5 +467,22 @@ describe('Goal Map status line', () => {
     for (const p of [0, 5, 300, 599]) expect(mapStatus(at(map, p))).not.toMatch(/%|Mapping/);
     map.blocks.forEach((b, i) => map.setRating(i, rating(5)));
     expect(mapStatus(at(map, 5, false))).toBe('');
+  });
+});
+
+describe('region names describe the whole region', () => {
+  it('sends topics from across a long region whose start differs from its dominant theme', () => {
+    const map = newMap();
+    // One fast region: two early "OS / context window" blocks, then security topics to the end.
+    const topics = ['LLM as operating system kernel', 'LLM context window as working memory', 'Jailbreak attacks on language models', 'Prompt injection attack example', 'Prompt injection attacks and LLM vulnerabilities', 'Jailbreaking with adversarial examples', 'Prompt injection and data exfiltration risks', 'Data poisoning attacks on LLMs', 'LLM security and evolving attack defenses'];
+    map.blocks.forEach((b, i) => map.setRating(i, rating(i % 2 ? 0 : 2, 0, topics[i % topics.length]!)));
+    const { regions } = regionLabelRequest(map);
+    expect(regions).toHaveLength(1);
+    const sent = regions[0]!.topics;
+    expect(regions[0]!.blocks).toBe(map.blocks.length);
+    expect(sent.length).toBeLessThanOrEqual(8);
+    const security = sent.filter((t) => /jailbreak|injection|poisoning|security|attack/i.test(t)).length;
+    expect(security).toBeGreaterThan(sent.length / 2); // the dominant theme, not the opening
+    expect(sent).toContain(topics[topics.length - 1]); // the end of the region is represented
   });
 });

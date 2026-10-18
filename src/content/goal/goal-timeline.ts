@@ -7,7 +7,7 @@
  * their own state and never look like low relevance.
  */
 import { PROFILES, type Profile } from '../controller';
-import { MAX_LABEL_REGIONS, MAX_REGION_TOPICS, type RegionTopics } from '../../shared/goal-prompt';
+import { MAX_LABEL_REGIONS, representativeTopics, type RegionTopics } from '../../shared/goal-prompt';
 import type { GoalMap } from './goal-map';
 import { GOAL_PACING, goalTarget, pacingLevel } from './goal-pacing';
 
@@ -108,11 +108,15 @@ function region(parts: TimelineSegment[], tier: number | undefined): TimelineReg
   return { ...r, tier, label: label || undefined, minRate: Math.min(...rates), maxRate: Math.max(...rates) };
 }
 
+/** Pacing rows that smoothing must never hide inside faster surroundings: Key (0) and Important (1). */
+export const PROTECTED_LEVEL = 1;
+
 /**
  * Group segments into what the map draws (display only):
  *  1. merge runs of neighbours with the same state and, when mapped, the same visual tier;
  *  2. absorb a single mapped block of another tier sitting between two regions of one tier (A–B–A
- *     becomes one A region). Longer runs are kept.
+ *     becomes one A region). Longer runs are kept. Smoothing removes small differences but never a
+ *     relevance peak: a Key or Important block between faster regions always stays visible.
  * Mapped regions never merge across an unmapped or failed part, so the map regroups naturally as
  * blocks are rated.
  */
@@ -129,13 +133,16 @@ export function mergeSegments(segments: TimelineSegment[]): TimelineRegion[] {
     const run = runs[i]!;
     const prev = out[out.length - 1];
     const next = runs[i + 1];
+    // A peak: slower than its surroundings and holding a Key or Important block (by each block's own pacing row).
+    const peak = run.tier !== undefined && prev?.tier !== undefined && run.tier < prev.tier && run.parts.some((p) => (p.level ?? Infinity) <= PROTECTED_LEVEL);
     const flicker =
       run.parts.length === 1 &&
       run.tier !== undefined &&
       prev?.tier !== undefined &&
       next?.tier !== undefined &&
       prev.tier === next.tier &&
-      prev.tier !== run.tier;
+      prev.tier !== run.tier &&
+      !peak;
     if (flicker) {
       prev!.parts.push(...run.parts, ...next!.parts);
       i++; // `next` is now part of `prev`
@@ -184,15 +191,16 @@ function distinctTopics(topics: string[]): string[] {
 }
 
 /**
- * The one naming request for a completed map: its analyzed regions with their blocks' own topics,
- * bounded (the MAX_LABEL_REGIONS longest regions, MAX_REGION_TOPICS topics each) so it is always a
- * single call; regions left out keep their topic list. `keys` maps the request ids back to regions.
+ * The one naming request for a completed map: its analyzed regions with topics representing each
+ * whole region (representativeTopics) and its block count, bounded (the MAX_LABEL_REGIONS longest
+ * regions) so it is always a single call; regions left out keep their topic list. `keys` maps the
+ * request ids back to regions.
  */
 export function regionLabelRequest(map: GoalMap): { regions: RegionTopics[]; keys: Map<string, string> } {
   // Region boundaries depend only on pacing rows, so any pace gives the same regions.
   const regions = goalTimeline(map, PROFILES.normal, 0, 0, false)
     .regions.filter((r) => r.state === 'mapped')
-    .map((r) => ({ r, topics: distinctTopics(r.topics).slice(0, MAX_REGION_TOPICS) }))
+    .map((r) => ({ r, topics: representativeTopics(r.topics) })) // across the whole region, not its first topics
     .filter((x) => x.topics.length > 0);
   const kept = [...regions]
     .sort((a, b) => b.r.end - b.r.start - (a.r.end - a.r.start))
@@ -202,7 +210,7 @@ export function regionLabelRequest(map: GoalMap): { regions: RegionTopics[]; key
   const out: RegionTopics[] = kept.map((x, i) => {
     const id = String(i + 1);
     keys.set(id, regionKey(x.r));
-    return { id, topics: x.topics };
+    return { id, topics: x.topics, blocks: x.r.blocks };
   });
   return { regions: out, keys };
 }

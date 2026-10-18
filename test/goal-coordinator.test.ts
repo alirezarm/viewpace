@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { PROFILES } from '../src/content/controller';
-import { GoalCoordinator } from '../src/content/goal/goal-coordinator';
+import { GoalCoordinator, startFailure } from '../src/content/goal/goal-coordinator';
 import { GoalController, type GoalAnalyzer } from '../src/content/goal/goal-session';
 import { EMPTY_GOALS, withGoal, type GoalStore } from '../src/shared/goal-store';
 import { parseBlockRating } from '../src/shared/goal-prompt';
@@ -107,7 +107,7 @@ describe('viewing goal: saved but not active', () => {
     await flush();
     expect(after.controller.session).toBeNull();
     expect(after.env.nano).toEqual([]); // no Nano call at all
-    expect(after.coord.card('A', true)).toEqual({ mode: 'saved', goal: 'Understand how LLMs are trained' });
+    expect(after.coord.card('A', true)).toEqual({ mode: 'saved', goal: 'Understand how LLMs are trained', message: null });
   });
 
   it('Resume starts mapping with the saved goal', async () => {
@@ -133,7 +133,62 @@ describe('viewing goal: saved but not active', () => {
     coord.setEditing(true);
     expect(coord.card('A', true)).toEqual({ mode: 'entry', value: 'saved goal', suggestion: null, canStop: false, message: null });
     coord.setEditing(false);
-    expect(coord.card('A', true)).toEqual({ mode: 'saved', goal: 'saved goal' });
+    expect(coord.card('A', true)).toEqual({ mode: 'saved', goal: 'saved goal', message: null });
+  });
+});
+
+describe('viewing goal: Resume that cannot start', () => {
+  /** A page whose captions aren't captured yet (prepare can't give the words), until `captions()` is called. */
+  function noCaptionsYet() {
+    const p = page(withGoal(EMPTY_GOALS, 'A', 'saved goal', 1));
+    let ready = false;
+    const prepare = (p.coord as unknown as { deps: { prepare: (id: string, g: string) => unknown } }).deps.prepare;
+    (p.coord as unknown as { deps: { prepare: unknown } }).deps.prepare = (id: string, g: string) => {
+      const opts = prepare(id, g) as Record<string, unknown>;
+      return 'error' in opts || ready ? opts : { ...opts, words: null };
+    };
+    return { ...p, captions: () => (ready = true) };
+  }
+
+  it('says why in the card, keeps the saved goal, and does not pretend Goal Mode is on', async () => {
+    const { coord, controller, stored } = noCaptionsYet();
+    await coord.init();
+    const saved = stored().byVideo.A;
+    const r = await coord.resume('A');
+    expect(r).toMatchObject({ phase: 'no-transcript' });
+    expect(controller.session).toBeNull();
+    expect(coord.card('A', true)).toEqual({ mode: 'saved', goal: 'saved goal', message: "Couldn't read this video's captions. Play it for a moment, then try again." });
+    expect(stored().byVideo.A).toEqual(saved);
+  });
+
+  it('a retry that works clears the message and starts mapping', async () => {
+    const { coord, controller, captions } = noCaptionsYet();
+    await coord.init();
+    await coord.resume('A');
+    captions();
+    expect(await coord.resume('A')).toMatchObject({ phase: 'mapping', goal: 'saved goal' });
+    expect(controller.session).toMatchObject({ goal: 'saved goal' });
+    expect(coord.card('A', true)).toEqual({ mode: 'active', goal: 'saved goal' });
+    coord.stop();
+    expect(coord.card('A', true)).toEqual({ mode: 'saved', goal: 'saved goal', message: null }); // no stale message
+  });
+
+  it('the message goes away on editing or another video', async () => {
+    const { coord, navigate } = noCaptionsYet();
+    await coord.init();
+    await coord.resume('A');
+    coord.setEditing(true);
+    coord.setEditing(false);
+    expect(coord.card('A', true)).toMatchObject({ message: null });
+    await coord.resume('A');
+    navigate('B');
+    navigate('A');
+    expect(coord.card('A', true)).toMatchObject({ message: null });
+  });
+
+  it('turns failures into plain words (no internals)', () => {
+    expect(startFailure({ phase: 'no-ai' } as never)).toBe("Chrome's on-device AI isn't available right now. Try again later.");
+    expect(startFailure(null)).toBe("Couldn't start Goal Mode. Try again.");
   });
 });
 
@@ -147,7 +202,7 @@ describe('viewing goal: active', () => {
     coord.stop();
     expect(controller.session).toBeNull();
     expect(stored().byVideo.A).toEqual(saved); // untouched
-    expect(coord.card('A', true)).toEqual({ mode: 'saved', goal: 'goal for A' });
+    expect(coord.card('A', true)).toEqual({ mode: 'saved', goal: 'goal for A', message: null });
     const calls = env.nano.length;
     await flush();
     expect(env.nano.length).toBe(calls); // no more analysis
@@ -194,7 +249,7 @@ describe('viewing goal: active', () => {
     expect(coord.status('A')).toMatchObject({ goal: 'edited on the page' }); // popup goal:status
     coord.stop(); // popup goal:stop
     expect(coord.status('A')).toBeNull();
-    expect(coord.card('A', true)).toEqual({ mode: 'saved', goal: 'edited on the page' });
+    expect(coord.card('A', true)).toEqual({ mode: 'saved', goal: 'edited on the page', message: null });
     await coord.resume('A'); // page Resume
     expect(coord.status('A')).toMatchObject({ phase: 'mapping', goal: 'edited on the page' });
   });
@@ -229,9 +284,9 @@ describe('viewing goal across videos', () => {
     await flush();
     const calls = env.nano.length;
     expect(controller.session).toBeNull();
-    expect(coord.card('A', true)).toEqual({ mode: 'saved', goal: 'goal for A' });
+    expect(coord.card('A', true)).toEqual({ mode: 'saved', goal: 'goal for A', message: null });
     navigate('B');
-    expect(coord.card('B', true)).toEqual({ mode: 'saved', goal: 'goal for B' });
+    expect(coord.card('B', true)).toEqual({ mode: 'saved', goal: 'goal for B', message: null });
     await flush();
     expect(env.nano.length).toBe(calls);
   });

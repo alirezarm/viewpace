@@ -17,7 +17,7 @@ describe('the one ViewPace card', () => {
   });
 
   it('shows a saved goal (with Resume) and no map until it is resumed', () => {
-    expect(cardLayout(view({ mode: 'saved', goal: 'g' }), false)).toMatchObject({ goal: true, map: false });
+    expect(cardLayout(view({ mode: 'saved', goal: 'g', message: null }), false)).toMatchObject({ goal: true, map: false });
   });
 
   it('opens speed feedback inside the same card, and folds back when it closes', () => {

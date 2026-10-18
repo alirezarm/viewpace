@@ -121,6 +121,7 @@ button:focus-visible { outline: 2px solid #ffc857; outline-offset: 2px; }
 .gchip { display: block; width: 100%; padding: 0; text-align: left; background: none; color: #d6d6d6; font-size: 12px; }
 .gchip:hover { color: #fff; }
 .gline, .gsaved { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #f1f1f1; }
+.gnote { margin-top: 4px; font-size: 12px; color: #ffc857; }
 .gresume { flex: none; padding: 2px 8px; border-radius: 6px; background: #ffc857; color: #1a1a1a; font-weight: 600; font-size: 12px; }
 .gtext { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .gedit { flex: none; padding: 0 4px; border-radius: 6px; background: none; color: #aaa; font-size: 13px; }
@@ -202,6 +203,7 @@ export class Badge {
               <div class="gacts"><button type="button" data-k="gcancel">Cancel</button><button type="button" data-k="gstop" hidden>Stop Goal Mode</button></div>
             </form>
             <div class="gsaved" data-k="gsaved" hidden><span class="gtext" data-k="gsavedtext" role="button" tabindex="0" aria-label="Edit viewing goal"></span><button class="gresume" data-k="gresume">Resume</button><button class="gedit" data-k="gsavededit" aria-label="Edit viewing goal" title="Edit goal">✎</button></div>
+            <div class="gnote" data-k="gnote" role="status" hidden></div>
             <div class="gline" data-k="gline" hidden><span class="gtext" data-k="gtext" role="button" tabindex="0" aria-label="Edit viewing goal"></span><button class="gedit" data-k="gedit" aria-label="Edit viewing goal" title="Edit goal">✎</button></div>
           </div>
           <div class="map" data-k="map">
@@ -329,6 +331,10 @@ export class Badge {
       if (this.el.gsavedtext!.textContent !== text) this.el.gsavedtext!.textContent = text;
       this.el.gsavedtext!.title = v.goal;
     }
+    // Why the last Resume didn't start, right under the saved goal (cleared when it does start).
+    const note = v.mode === 'saved' ? v.message : null;
+    this.el.gnote!.hidden = !note;
+    if (this.el.gnote!.textContent !== (note ?? '')) this.el.gnote!.textContent = note ?? '';
     if (v.mode === 'active') {
       const text = `🎯 ${v.goal}`;
       if (this.el.gtext!.textContent !== text) this.el.gtext!.textContent = text;

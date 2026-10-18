@@ -32,9 +32,16 @@ export interface GoalCoordinatorDeps {
 export type GoalCardView =
   | { mode: 'hidden' } // Goal Mode can't run here (no on-device AI, ViewPace off…)
   | { mode: 'chip' } // no goal: a one-line "Set a viewing goal" prompt
-  | { mode: 'saved'; goal: string } // this video's saved goal, not running: Resume or edit
+  | { mode: 'saved'; goal: string; message: string | null } // this video's saved goal, not running: Resume or edit (and why the last Resume failed)
   | { mode: 'entry'; value: string; suggestion: string | null; canStop: boolean; message: string | null } // typing a goal
   | { mode: 'active'; goal: string }; // Goal Mode is running with this goal: shown above the map
+
+/** A short, user-facing reason a start didn't happen, from what GoalController reported. */
+export function startFailure(status: GoalStatus | null): string {
+  if (status?.phase === 'no-transcript') return "Couldn't read this video's captions. Play it for a moment, then try again.";
+  if (status?.phase === 'no-ai') return "Chrome's on-device AI isn't available right now. Try again later.";
+  return "Couldn't start Goal Mode. Try again.";
+}
 
 export class GoalCoordinator {
   goals: GoalStore = EMPTY_GOALS;
@@ -67,15 +74,22 @@ export class GoalCoordinator {
       this.message = opts.error;
       return opts;
     }
-    const status = await this.deps.controller.start(opts);
+    let status: GoalStatus | null;
+    try {
+      status = await this.deps.controller.start(opts);
+    } catch {
+      this.message = startFailure(null);
+      return { error: this.message };
+    }
     const s = this.deps.controller.session;
     // Remember it only if this very session is still the current one (no navigation or newer goal meanwhile).
     if (status?.phase === 'mapping' && s && s.videoId === videoId && s.goal === status.goal) {
       this.editing = false;
       this.message = null;
       this.goals = await this.deps.storage.remember(videoId, status.goal);
-    } else {
-      this.message = status?.message ?? null;
+    } else if (!status || status.phase === 'no-transcript' || status.phase === 'no-ai') {
+      // Didn't start (no captions yet, no on-device AI…): say why, keep the goal, leave Resume/Start to retry.
+      this.message = startFailure(status);
     }
     return status;
   }
@@ -122,6 +136,6 @@ export class GoalCoordinator {
     }
     if (running) return { mode: 'active', goal: status.goal };
     if (!available) return { mode: 'hidden' };
-    return saved ? { mode: 'saved', goal: saved } : { mode: 'chip' };
+    return saved ? { mode: 'saved', goal: saved, message: this.message } : { mode: 'chip' };
   }
 }

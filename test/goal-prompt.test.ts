@@ -17,7 +17,51 @@ import {
   buildRegionPrompt,
   regionSchema,
   MAX_LABEL_REGIONS,
+  representativeTopics,
 } from '../src/shared/goal-prompt';
+
+describe('topics representing a whole region', () => {
+  const early = ['LLM as operating system kernel', 'LLM context window as working memory', 'LLMs as an operating system ecosystem'];
+  const security = [
+    'Jailbreak attacks and LLM safety',
+    'Jailbreak attacks on language models',
+    'LLM training: jailbreaking and encoding',
+    'LLM jailbreaking with adversarial examples',
+    'Prompt injection attack example',
+    'Prompt injection attacks and LLM vulnerabilities',
+    'Prompt injection attack on LLMs',
+    'Prompt injection and data exfiltration risks',
+    'Data poisoning attacks on LLMs',
+    'LLM vulnerabilities: prompt injection attacks',
+    'LLM security and evolving attack defenses',
+  ];
+
+  it('keeps every topic of a short region, in order', () => {
+    expect(representativeTopics(['a b c', 'd e f', 'a b c'])).toEqual(['a b c', 'd e f']);
+  });
+
+  it('is not biased to the first topics: the dominant theme fills most of the sample', () => {
+    const picked = representativeTopics([...early, ...security]);
+    expect(picked).toHaveLength(8);
+    expect(picked.filter((t) => early.includes(t)).length).toBeLessThanOrEqual(2);
+    expect(picked.filter((t) => /jailbreak|injection|poisoning|security|attack/i.test(t)).length).toBeGreaterThanOrEqual(6);
+  });
+
+  it('covers the start, middle and end of the region, in time order', () => {
+    const all = [...early, ...security];
+    const picked = representativeTopics(all);
+    expect(picked[0]).toBe(all[0]);
+    expect(picked[picked.length - 1]).toBe(all[all.length - 1]);
+    const idx = picked.map((t) => all.indexOf(t));
+    expect([...idx].sort((a, b) => a - b)).toEqual(idx);
+  });
+
+  it('counts repeated topics as the theme they are', () => {
+    const asides = ['Speaker biography', 'Conference logistics', 'Audience question', 'Slide deck typo', 'Coffee break', 'Book recommendation', 'Weather remark', 'Camera setup', 'Sponsor thanks', 'Microphone check', 'Hiring announcement', 'Closing joke'];
+    const repeats = ['Intro', 'Prompt injection demo', 'Prompt injection demo', 'Prompt injection demo', ...asides];
+    expect(representativeTopics(repeats)).toContain('Prompt injection demo');
+  });
+});
 
 describe('region names from the model', () => {
   const ids = ['1', '2', '3'];
@@ -47,17 +91,17 @@ describe('region names from the model', () => {
   it('asks for exactly the ids sent, from the goal and block topics only (no transcript)', () => {
     expect(regionSchema(ids).properties.labels.items.properties.id.enum).toEqual(ids);
     const p = buildRegionPrompt('Understand how LLMs are trained', [
-      { id: '1', topics: ['LLM definition and Llama 2 model', 'Llama 2 weights'] },
-      { id: '2', topics: ['Next-word prediction'] },
+      { id: '1', topics: ['LLM definition and Llama 2 model', 'Llama 2 weights'], blocks: 2 },
+      { id: '2', topics: ['Next-word prediction'], blocks: 1 },
     ]);
-    expect(p).toBe("Viewer's goal: Understand how LLMs are trained\n\nParts:\nPart 1:\n- LLM definition and Llama 2 model\n- Llama 2 weights\n\nPart 2:\n- Next-word prediction");
+    expect(p).toBe("Viewer's goal: Understand how LLMs are trained\n\nParts:\nPart 1 (2 pieces):\n- LLM definition and Llama 2 model\n- Llama 2 weights\n\nPart 2 (1 piece):\n- Next-word prediction");
   });
 
   it('stays bounded however many regions or topics come in', () => {
-    const many = Array.from({ length: 60 }, (_, i) => ({ id: String(i + 1), topics: Array(20).fill('t'.repeat(300)) }));
+    const many = Array.from({ length: 60 }, (_, i) => ({ id: String(i + 1), topics: Array(20).fill('t'.repeat(300)), blocks: 20 }));
     const p = buildRegionPrompt('g', many);
     expect(p.match(/^Part /gm)).toHaveLength(MAX_LABEL_REGIONS);
-    expect(p.length).toBeLessThan(MAX_LABEL_REGIONS * 6 * 90 + 1000);
+    expect(p.length).toBeLessThan(MAX_LABEL_REGIONS * 8 * 90 + 2000);
   });
 });
 
