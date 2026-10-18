@@ -1,0 +1,1355 @@
+{
+ "video": "https://www.youtube.com/watch?v=zjkBMFhNj_g",
+ "goals": {
+  "A": "Understand how LLMs are trained and turned into assistants.",
+  "B": "Understand the security risks of LLMs, especially jailbreaks and prompt injection."
+ },
+ "checks": [
+  {
+   "name": "Gemini Nano available in the test profile",
+   "pass": true,
+   "detail": "available"
+  },
+  {
+   "name": "Goal prompt shown on a video with no saved goal",
+   "pass": true,
+   "detail": "card: chip"
+  },
+  {
+   "name": "Breakdown, first mapped block and first goal-aware pacing all happen before mapping completes",
+   "pass": true,
+   "detail": "{\"submitted\":0,\"completeS\":148,\"phase\":\"ready\",\"blocks\":50,\"failed\":0,\"breakdownReadyS\":7.4,\"firstMappedBlockS\":12.5,\"firstGoalAwarePacingS\":12.5,\"firstSpeedChangeS\":12.5,\"firstReadyThroughS\":12.5,\"firstReadyThrough\":\"Ready through 1:03\"}"
+  },
+  {
+   "name": "Goal A mapping completed",
+   "pass": true,
+   "detail": "phase ready, 50 blocks, 0 failed, 148 s"
+  },
+  {
+   "name": "Playback kept running during mapping",
+   "pass": true,
+   "detail": "t 87 s (was 10 s)"
+  },
+  {
+   "name": "Per-block results recorded for Goal A",
+   "pass": true,
+   "detail": "50 blocks"
+  },
+  {
+   "name": "Goal Map click on a mapped region seeks there",
+   "pass": true,
+   "detail": "expected \u2248740 s, got 735 s (map ~13 s per pixel)"
+  },
+  {
+   "name": "Stop ends Goal Mode",
+   "pass": true,
+   "detail": "goal:status null, map false"
+  },
+  {
+   "name": "Stop keeps the saved goal (Resume shown)",
+   "pass": true,
+   "detail": "card saved, saved \"Understand how LLMs are trained and turned into assistants.\""
+  },
+  {
+   "name": "Failed Resume gives visible feedback",
+   "pass": true,
+   "detail": "card saved, note \"Couldn't read this video's captions. Play it for a moment, then try again.\""
+  },
+  {
+   "name": "Failed Resume keeps the saved goal and does not pretend Goal Mode is on",
+   "pass": true,
+   "detail": "saved \"Understand how LLMs are trained and turned into assistants.\", map false"
+  },
+  {
+   "name": "After reload the saved goal shows with Resume",
+   "pass": true,
+   "detail": "card saved \"\ud83c\udfaf Understand how LLMs are trained and turned into assistants.\""
+  },
+  {
+   "name": "After reload mapping does NOT restart",
+   "pass": true,
+   "detail": "goal:status null, segments 0"
+  },
+  {
+   "name": "Resume starts mapping",
+   "pass": true,
+   "detail": "first mapped block 8.2 s after Resume"
+  },
+  {
+   "name": "A successful retry clears the failure message",
+   "pass": true,
+   "detail": "note null"
+  },
+  {
+   "name": "Goal Map click into an unmapped part seeks there",
+   "pass": true,
+   "detail": "t 2501 s of 3588"
+  },
+  {
+   "name": "Seeking into an unmapped part makes it analyzed next",
+   "pass": true,
+   "detail": "analyzed 36.9 s after the seek; 0 unmapped regions still left between 20% and the seek point (work jumped ahead)"
+  },
+  {
+   "name": "Goal B mapping completed",
+   "pass": true,
+   "detail": "phase ready, 50 blocks, 1 failed, 281.1 s"
+  },
+  {
+   "name": "Editing the goal saves the new one for this video",
+   "pass": true,
+   "detail": "\"Understand the security risks of LLMs, especially jailbreaks and prompt injection.\""
+  },
+  {
+   "name": "Goal A: every block's speed matches the speed table",
+   "pass": true,
+   "detail": "50 blocks"
+  },
+  {
+   "name": "Goal A: Key and Important blocks are visible as slow on the map",
+   "pass": true,
+   "detail": "24 Key/Important blocks, all in slow regions"
+  },
+  {
+   "name": "Goal B: every block's speed matches the speed table",
+   "pass": true,
+   "detail": "49 blocks"
+  },
+  {
+   "name": "Goal B: Key and Important blocks are visible as slow on the map",
+   "pass": true,
+   "detail": "10 Key/Important blocks, all in slow regions"
+  },
+  {
+   "name": "Goal B: its security region is named for security",
+   "pass": true,
+   "detail": "45:43\u201356:21: LLM Security Risks; 57:44\u201358:42: LLM Vulnerabilities"
+  },
+  {
+   "name": "Goal A and Goal B maps differ materially",
+   "pass": true,
+   "detail": "45/49 blocks at a different speed, 41 differ by \u22653 in relevance, high-relevance overlap (Jaccard) 0.03"
+  }
+ ],
+ "timings": {
+  "goalA": {
+   "submitted": 0,
+   "completeS": 148,
+   "phase": "ready",
+   "blocks": 50,
+   "failed": 0,
+   "breakdownReadyS": 7.4,
+   "firstMappedBlockS": 12.5,
+   "firstGoalAwarePacingS": 12.5,
+   "firstSpeedChangeS": 12.5,
+   "firstReadyThroughS": 12.5,
+   "firstReadyThrough": "Ready through 1:03"
+  },
+  "goalB": {
+   "submitted": 0,
+   "completeS": 281.1,
+   "phase": "ready",
+   "blocks": 50,
+   "failed": 1,
+   "breakdownReadyS": 25.4,
+   "firstMappedBlockS": 28.9,
+   "firstGoalAwarePacingS": 28.9,
+   "firstSpeedChangeS": 28.9,
+   "firstReadyThroughS": 28.9,
+   "firstReadyThrough": "Ready through 1:03"
+  }
+ },
+ "longRegions": [
+  {
+   "goal": "A",
+   "range": "1:03\u201323:37",
+   "name": "LLM Training Process",
+   "detail": "Key \u00b7 1\u20131.75\u00d7"
+  },
+  {
+   "goal": "A",
+   "range": "50:24\u201359:49",
+   "name": "LLM Security & Attacks",
+   "detail": "Not relevant \u00b7 1.75\u20132\u00d7"
+  },
+  {
+   "goal": "B",
+   "range": "0:00\u201345:43",
+   "name": "LLM Model Training",
+   "detail": "Not relevant \u00b7 1.75\u20132\u00d7"
+  },
+  {
+   "goal": "B",
+   "range": "45:43\u201356:21",
+   "name": "LLM Security Risks",
+   "detail": "Key \u00b7 1\u00d7"
+  }
+ ],
+ "blocks": {
+  "A": [
+   {
+    "range": "0:00\u20131:03",
+    "start": 0,
+    "rate": 1.4,
+    "relevance": 5,
+    "attention": 3,
+    "topic": "LLM definition, Llama 2 model details",
+    "status": "rated"
+   },
+   {
+    "range": "1:03\u20132:09",
+    "start": 63,
+    "rate": 1.15,
+    "relevance": 7,
+    "attention": 6,
+    "topic": "Llama 2 model weights and architecture release",
+    "status": "rated"
+   },
+   {
+    "range": "2:09\u20133:24",
+    "start": 129,
+    "rate": 1.75,
+    "relevance": 3,
+    "attention": 6,
+    "topic": "Neural network implementation and usage",
+    "status": "rated"
+   },
+   {
+    "range": "3:24\u20134:39",
+    "start": 204,
+    "rate": 1,
+    "relevance": 7,
+    "attention": 7,
+    "topic": "LLM training: parameters and inference",
+    "status": "rated"
+   },
+   {
+    "range": "4:39\u20136:01",
+    "start": 279,
+    "rate": 1,
+    "relevance": 8,
+    "attention": 7,
+    "topic": "LLM training process and compression",
+    "status": "rated"
+   },
+   {
+    "range": "6:01\u20137:23",
+    "start": 361,
+    "rate": 1.15,
+    "relevance": 7,
+    "attention": 6,
+    "topic": "LLM training: next word prediction",
+    "status": "rated"
+   },
+   {
+    "range": "7:23\u20138:36",
+    "start": 443,
+    "rate": 1.4,
+    "relevance": 5,
+    "attention": 7,
+    "topic": "Next word prediction and compression",
+    "status": "rated"
+   },
+   {
+    "range": "8:36\u20139:51",
+    "start": 516,
+    "rate": 1,
+    "relevance": 7,
+    "attention": 7,
+    "topic": "LLM training: next word prediction & inference",
+    "status": "rated"
+   },
+   {
+    "range": "9:51\u201310:47",
+    "start": 591,
+    "rate": 1,
+    "relevance": 7,
+    "attention": 7,
+    "topic": "LLM training: mimicking, hallucination, knowledge",
+    "status": "rated"
+   },
+   {
+    "range": "10:47\u201312:01",
+    "start": 647,
+    "rate": 1,
+    "relevance": 7,
+    "attention": 7,
+    "topic": "LLM training, Transformer architecture details",
+    "status": "rated"
+   },
+   {
+    "range": "12:01\u201313:21",
+    "start": 721,
+    "rate": 1,
+    "relevance": 7,
+    "attention": 8,
+    "topic": "LLM training: parameters, knowledge, weirdness",
+    "status": "rated"
+   },
+   {
+    "range": "13:21\u201314:31",
+    "start": 801,
+    "rate": 1,
+    "relevance": 10,
+    "attention": 7,
+    "topic": "LLM training stages: pre-training, fine-tuning",
+    "status": "rated"
+   },
+   {
+    "range": "14:31\u201315:59",
+    "start": 871,
+    "rate": 1,
+    "relevance": 10,
+    "attention": 7,
+    "topic": "Assistant model training process overview",
+    "status": "rated"
+   },
+   {
+    "range": "15:59\u201316:59",
+    "start": 959,
+    "rate": 1,
+    "relevance": 10,
+    "attention": 7,
+    "topic": "LLM training: pre-training, fine-tuning",
+    "status": "rated"
+   },
+   {
+    "range": "16:59\u201317:52",
+    "start": 1019,
+    "rate": 1,
+    "relevance": 10,
+    "attention": 7,
+    "topic": "LLM training: pre-training & fine-tuning",
+    "status": "rated"
+   },
+   {
+    "range": "17:52\u201319:13",
+    "start": 1072,
+    "rate": 1,
+    "relevance": 10,
+    "attention": 7,
+    "topic": "LLM training: pre-training and fine-tuning",
+    "status": "rated"
+   },
+   {
+    "range": "19:13\u201320:35",
+    "start": 1153,
+    "rate": 1,
+    "relevance": 10,
+    "attention": 7,
+    "topic": "LLM training and fine-tuning process",
+    "status": "rated"
+   },
+   {
+    "range": "20:35\u201321:34",
+    "start": 1235,
+    "rate": 1,
+    "relevance": 8,
+    "attention": 7,
+    "topic": "LLM training stages and fine-tuning",
+    "status": "rated"
+   },
+   {
+    "range": "21:34\u201322:21",
+    "start": 1294,
+    "rate": 1,
+    "relevance": 8,
+    "attention": 7,
+    "topic": "Fine-tuning with human feedback",
+    "status": "rated"
+   },
+   {
+    "range": "22:21\u201323:37",
+    "start": 1341,
+    "rate": 1.15,
+    "relevance": 7,
+    "attention": 6,
+    "topic": "Human labeling and LLM collaboration",
+    "status": "rated"
+   },
+   {
+    "range": "23:37\u201324:56",
+    "start": 1417,
+    "rate": 1.4,
+    "relevance": 5,
+    "attention": 4,
+    "topic": "LLM leaderboard and model types",
+    "status": "rated"
+   },
+   {
+    "range": "24:56\u201326:14",
+    "start": 1496,
+    "rate": 1.4,
+    "relevance": 5,
+    "attention": 7,
+    "topic": "Scaling laws and LLM performance prediction",
+    "status": "rated"
+   },
+   {
+    "range": "26:14\u201327:17",
+    "start": 1574,
+    "rate": 1.4,
+    "relevance": 5,
+    "attention": 6,
+    "topic": "LLM training with bigger models and data",
+    "status": "rated"
+   },
+   {
+    "range": "27:17\u201328:15",
+    "start": 1637,
+    "rate": 1.15,
+    "relevance": 7,
+    "attention": 6,
+    "topic": "LLM capabilities, fine-tuning examples",
+    "status": "rated"
+   },
+   {
+    "range": "28:15\u201329:17",
+    "start": 1695,
+    "rate": 1.15,
+    "relevance": 7,
+    "attention": 6,
+    "topic": "LLM using tools like web browsing",
+    "status": "rated"
+   },
+   {
+    "range": "29:17\u201330:31",
+    "start": 1757,
+    "rate": 2,
+    "relevance": 2,
+    "attention": 7,
+    "topic": "LLM valuation and calculator usage",
+    "status": "rated"
+   },
+   {
+    "range": "30:31\u201331:58",
+    "start": 1831,
+    "rate": 2,
+    "relevance": 0,
+    "attention": 3,
+    "topic": "Scale AI valuation analysis using ChatGPT",
+    "status": "rated"
+   },
+   {
+    "range": "31:58\u201333:08",
+    "start": 1918,
+    "rate": 1,
+    "relevance": 7,
+    "attention": 7,
+    "topic": "LLMs using tools, image generation",
+    "status": "rated"
+   },
+   {
+    "range": "33:08\u201334:34",
+    "start": 1988,
+    "rate": 1.75,
+    "relevance": 3,
+    "attention": 4,
+    "topic": "LLMs, tool use, and multimodality capabilities",
+    "status": "rated"
+   },
+   {
+    "range": "34:34\u201335:46",
+    "start": 2074,
+    "rate": 2,
+    "relevance": 2,
+    "attention": 6,
+    "topic": "System 1 vs System 2 thinking in LLMs",
+    "status": "rated"
+   },
+   {
+    "range": "35:46\u201337:03",
+    "start": 2146,
+    "rate": 1.75,
+    "relevance": 3,
+    "attention": 6,
+    "topic": "LLMs lack conscious reasoning, system 1 only",
+    "status": "rated"
+   },
+   {
+    "range": "37:03\u201338:12",
+    "start": 2223,
+    "rate": 1.4,
+    "relevance": 5,
+    "attention": 7,
+    "topic": "LLM training: time, accuracy, self-improvement",
+    "status": "rated"
+   },
+   {
+    "range": "38:12\u201339:34",
+    "start": 2292,
+    "rate": 1.4,
+    "relevance": 5,
+    "attention": 6,
+    "topic": "AlphaGo training: imitation then self-improvement",
+    "status": "rated"
+   },
+   {
+    "range": "39:34\u201340:50",
+    "start": 2374,
+    "rate": 1,
+    "relevance": 7,
+    "attention": 7,
+    "topic": "LLM training: self-improvement and reward",
+    "status": "rated"
+   },
+   {
+    "range": "40:50\u201342:15",
+    "start": 2450,
+    "rate": 1.15,
+    "relevance": 7,
+    "attention": 6,
+    "topic": "LLM customization and fine-tuning overview",
+    "status": "rated"
+   },
+   {
+    "range": "42:15\u201343:27",
+    "start": 2535,
+    "rate": 1.4,
+    "relevance": 5,
+    "attention": 3,
+    "topic": "LLM as operating system kernel",
+    "status": "rated"
+   },
+   {
+    "range": "43:27\u201344:22",
+    "start": 2607,
+    "rate": 1.15,
+    "relevance": 7,
+    "attention": 6,
+    "topic": "LLM context window as working memory",
+    "status": "rated"
+   },
+   {
+    "range": "44:22\u201345:43",
+    "start": 2662,
+    "rate": 1.75,
+    "relevance": 3,
+    "attention": 7,
+    "topic": "LLMs as an operating system ecosystem",
+    "status": "rated"
+   },
+   {
+    "range": "45:43\u201346:57",
+    "start": 2743,
+    "rate": 1.75,
+    "relevance": 3,
+    "attention": 7,
+    "topic": "LLM security challenges: jailbreak attacks",
+    "status": "rated"
+   },
+   {
+    "range": "46:57\u201347:47",
+    "start": 2817,
+    "rate": 2,
+    "relevance": 2,
+    "attention": 7,
+    "topic": "Jailbreak attacks on language models",
+    "status": "rated"
+   },
+   {
+    "range": "47:47\u201349:00",
+    "start": 2867,
+    "rate": 1.75,
+    "relevance": 3,
+    "attention": 7,
+    "topic": "LLM training with base64 encoding",
+    "status": "rated"
+   },
+   {
+    "range": "49:00\u201350:24",
+    "start": 2940,
+    "rate": 1,
+    "relevance": 7,
+    "attention": 7,
+    "topic": "LLM training: jailbreaking and encoding",
+    "status": "rated"
+   },
+   {
+    "range": "50:24\u201351:29",
+    "start": 3024,
+    "rate": 2,
+    "relevance": 2,
+    "attention": 7,
+    "topic": "LLM jailbreaking with adversarial examples",
+    "status": "rated"
+   },
+   {
+    "range": "51:29\u201352:41",
+    "start": 3089,
+    "rate": 2,
+    "relevance": 2,
+    "attention": 5,
+    "topic": "Prompt injection attack example",
+    "status": "rated"
+   },
+   {
+    "range": "52:41\u201353:57",
+    "start": 3161,
+    "rate": 2,
+    "relevance": 2,
+    "attention": 7,
+    "topic": "Prompt injection attacks and LLM vulnerabilities",
+    "status": "rated"
+   },
+   {
+    "range": "53:57\u201355:09",
+    "start": 3237,
+    "rate": 2,
+    "relevance": 2,
+    "attention": 7,
+    "topic": "Prompt injection attack on LLMs",
+    "status": "rated"
+   },
+   {
+    "range": "55:09\u201356:21",
+    "start": 3309,
+    "rate": 2,
+    "relevance": 2,
+    "attention": 7,
+    "topic": "Prompt injection and data exfiltration risks",
+    "status": "rated"
+   },
+   {
+    "range": "56:21\u201357:44",
+    "start": 3381,
+    "rate": 1.75,
+    "relevance": 3,
+    "attention": 7,
+    "topic": "Data poisoning and trigger phrases in LLMs",
+    "status": "rated"
+   },
+   {
+    "range": "57:44\u201358:42",
+    "start": 3464,
+    "rate": 1.75,
+    "relevance": 3,
+    "attention": 7,
+    "topic": "LLM prompt injection attacks",
+    "status": "rated"
+   },
+   {
+    "range": "58:42\u201359:49",
+    "start": 3522,
+    "rate": 2,
+    "relevance": 0,
+    "attention": 2,
+    "topic": "LLM security and evolving attack defenses",
+    "status": "rated"
+   }
+  ],
+  "B": [
+   {
+    "range": "0:00\u20131:03",
+    "start": 0,
+    "rate": 2,
+    "relevance": 2,
+    "attention": 3,
+    "topic": "LLM definition, Llama 2 model details",
+    "status": "rated"
+   },
+   {
+    "range": "1:03\u20132:09",
+    "start": 63,
+    "rate": 2,
+    "relevance": 2,
+    "attention": 3,
+    "topic": "Llama 2 model architecture and parameters",
+    "status": "rated"
+   },
+   {
+    "range": "2:09\u20133:24",
+    "start": 129,
+    "rate": 2,
+    "relevance": 2,
+    "attention": 3,
+    "topic": "LLM architecture and execution",
+    "status": "rated"
+   },
+   {
+    "range": "3:24\u20134:39",
+    "start": 204,
+    "rate": 1.75,
+    "relevance": 3,
+    "attention": 6,
+    "topic": "LLM training, parameters, inference process",
+    "status": "rated"
+   },
+   {
+    "range": "4:39\u20136:01",
+    "start": 279,
+    "rate": 2,
+    "relevance": 2,
+    "attention": 3,
+    "topic": "LLM training process: data, GPUs, compression",
+    "status": "rated"
+   },
+   {
+    "range": "6:01\u20137:23",
+    "start": 361,
+    "rate": 2,
+    "relevance": 2,
+    "attention": 6,
+    "topic": "LLM neural network prediction process",
+    "status": "rated"
+   },
+   {
+    "range": "7:23\u20138:36",
+    "start": 443,
+    "rate": 2,
+    "relevance": 2,
+    "attention": 7,
+    "topic": "Neural network prediction and compression",
+    "status": "rated"
+   },
+   {
+    "range": "8:36\u20139:51",
+    "start": 516,
+    "rate": 2,
+    "relevance": 2,
+    "attention": 3,
+    "topic": "LLM training and inference process",
+    "status": "rated"
+   },
+   {
+    "range": "9:51\u201310:47",
+    "start": 591,
+    "rate": 1.75,
+    "relevance": 3,
+    "attention": 6,
+    "topic": "LLM hallucination and text generation",
+    "status": "rated"
+   },
+   {
+    "range": "10:47\u201312:01",
+    "start": 647,
+    "rate": 2,
+    "relevance": 2,
+    "attention": 4,
+    "topic": "LLM architecture and word prediction",
+    "status": "rated"
+   },
+   {
+    "range": "12:01\u201313:21",
+    "start": 721,
+    "rate": 1.75,
+    "relevance": 3,
+    "attention": 7,
+    "topic": "LLM parameters, knowledge, and weirdness",
+    "status": "rated"
+   },
+   {
+    "range": "13:21\u201314:31",
+    "start": 801,
+    "rate": 1.75,
+    "relevance": 3,
+    "attention": 4,
+    "topic": "LLMs as inscrutable empirical artifacts",
+    "status": "rated"
+   },
+   {
+    "range": "14:31\u201315:59",
+    "start": 871,
+    "rate": 2,
+    "relevance": 2,
+    "attention": 3,
+    "topic": "Assistant model training process",
+    "status": "rated"
+   },
+   {
+    "range": "15:59\u201316:59",
+    "start": 959,
+    "rate": 2,
+    "relevance": 2,
+    "attention": 3,
+    "topic": "LLM training: pre-training vs fine-tuning",
+    "status": "rated"
+   },
+   {
+    "range": "16:59\u201317:52",
+    "start": 1019,
+    "rate": 1.75,
+    "relevance": 3,
+    "attention": 7,
+    "topic": "LLM training: pre-training vs fine-tuning",
+    "status": "rated"
+   },
+   {
+    "range": "17:52\u201319:13",
+    "start": 1072,
+    "rate": 2,
+    "relevance": 2,
+    "attention": 5,
+    "topic": "LLM pre-training and fine-tuning process",
+    "status": "rated"
+   },
+   {
+    "range": "19:13\u201320:35",
+    "start": 1153,
+    "rate": 2,
+    "relevance": 2,
+    "attention": 3,
+    "topic": "Fine-tuning LLMs for assistant models",
+    "status": "rated"
+   },
+   {
+    "range": "20:35\u201321:34",
+    "start": 1235,
+    "rate": 2,
+    "relevance": 2,
+    "attention": 3,
+    "topic": "LLM fine-tuning stages and comparison labels",
+    "status": "rated"
+   },
+   {
+    "range": "21:34\u201322:21",
+    "start": 1294,
+    "rate": 2,
+    "relevance": 2,
+    "attention": 3,
+    "topic": "Reinforcement learning from human feedback (RLHF)",
+    "status": "rated"
+   },
+   {
+    "range": "22:21\u201323:37",
+    "start": 1341,
+    "rate": 2,
+    "relevance": 2,
+    "attention": 3,
+    "topic": "Human-AI collaboration in labeling LLMs",
+    "status": "rated"
+   },
+   {
+    "range": "23:37\u201324:56",
+    "start": 1417,
+    "rate": 2,
+    "relevance": 2,
+    "attention": 2,
+    "topic": "LLM leaderboard and model types",
+    "status": "rated"
+   },
+   {
+    "range": "24:56\u201326:14",
+    "start": 1496,
+    "rate": 1.75,
+    "relevance": 3,
+    "attention": 6,
+    "topic": "Scaling laws and LLM performance prediction",
+    "status": "rated"
+   },
+   {
+    "range": "26:14\u201327:17",
+    "start": 1574,
+    "rate": 2,
+    "relevance": 2,
+    "attention": 3,
+    "topic": "LLM model scaling and accuracy improvements",
+    "status": "rated"
+   },
+   {
+    "range": "27:17\u201328:15",
+    "start": 1637,
+    "rate": 2,
+    "relevance": 2,
+    "attention": 3,
+    "topic": "LLM capabilities and fine-tuning examples",
+    "status": "rated"
+   },
+   {
+    "range": "28:15\u201329:17",
+    "start": 1695,
+    "rate": 1.75,
+    "relevance": 3,
+    "attention": 4,
+    "topic": "LLM using browsing tools for information",
+    "status": "rated"
+   },
+   {
+    "range": "29:17\u201330:31",
+    "start": 1757,
+    "rate": 2,
+    "relevance": 0,
+    "attention": 3,
+    "topic": "LLM valuation and calculator usage",
+    "status": "rated"
+   },
+   {
+    "range": "30:31\u201331:58",
+    "start": 1831,
+    "rate": 2,
+    "relevance": 0,
+    "attention": 2,
+    "topic": "Scale AI valuation and extrapolation",
+    "status": "rated"
+   },
+   {
+    "range": "31:58\u201333:08",
+    "start": 1918,
+    "rate": 1.75,
+    "relevance": 3,
+    "attention": 6,
+    "topic": "LLMs using tools, image generation via DALL-E",
+    "status": "rated"
+   },
+   {
+    "range": "33:08\u201334:34",
+    "start": 1988,
+    "rate": 2,
+    "relevance": 2,
+    "attention": 3,
+    "topic": "Multimodality of LLMs: Images, Audio",
+    "status": "rated"
+   },
+   {
+    "range": "34:34\u201335:46",
+    "start": 2074,
+    "rate": 2,
+    "relevance": 2,
+    "attention": 3,
+    "topic": "LLM development directions, system 1/2 thinking",
+    "status": "rated"
+   },
+   {
+    "range": "35:46\u201337:03",
+    "start": 2146,
+    "rate": 2,
+    "relevance": 2,
+    "attention": 3,
+    "topic": "LLM system 1 vs system 2 reasoning",
+    "status": "rated"
+   },
+   {
+    "range": "37:03\u201338:12",
+    "start": 2223,
+    "rate": 2,
+    "relevance": 2,
+    "attention": 3,
+    "topic": "LLM system design and self-improvement",
+    "status": "rated"
+   },
+   {
+    "range": "38:12\u201339:34",
+    "start": 2292,
+    "rate": 2,
+    "relevance": 2,
+    "attention": 3,
+    "topic": "AlphaGo's self-improvement process",
+    "status": "rated"
+   },
+   {
+    "range": "39:34\u201340:50",
+    "start": 2374,
+    "rate": 2,
+    "relevance": 2,
+    "attention": 3,
+    "topic": "LLM self-improvement and reward functions",
+    "status": "rated"
+   },
+   {
+    "range": "40:50\u201342:15",
+    "start": 2450,
+    "rate": 2,
+    "relevance": 2,
+    "attention": 3,
+    "topic": "LLM customization and GPTs App Store",
+    "status": "rated"
+   },
+   {
+    "range": "42:15\u201343:27",
+    "start": 2535,
+    "rate": 2,
+    "relevance": 2,
+    "attention": 3,
+    "topic": "LLM as operating system kernel",
+    "status": "rated"
+   },
+   {
+    "range": "43:27\u201344:22",
+    "start": 2607,
+    "rate": 1.75,
+    "relevance": 3,
+    "attention": 6,
+    "topic": "LLM context window as working memory",
+    "status": "rated"
+   },
+   {
+    "range": "44:22\u201345:43",
+    "start": 2662,
+    "rate": 2,
+    "relevance": 2,
+    "attention": 6,
+    "topic": "LLMs as an operating system ecosystem",
+    "status": "rated"
+   },
+   {
+    "range": "45:43\u201346:57",
+    "start": 2743,
+    "rate": 1,
+    "relevance": 10,
+    "attention": 7,
+    "topic": "LLM security: jailbreak attacks explained",
+    "status": "rated"
+   },
+   {
+    "range": "46:57\u201347:47",
+    "start": 2817,
+    "rate": 1,
+    "relevance": 8,
+    "attention": 7,
+    "topic": "LLM jailbreak via roleplay attack vector",
+    "status": "rated"
+   },
+   {
+    "range": "47:47\u201349:00",
+    "start": 2867,
+    "rate": 1,
+    "relevance": 9,
+    "attention": 7,
+    "topic": "Base64 encoding bypasses safety filters",
+    "status": "rated"
+   },
+   {
+    "range": "49:00\u201350:24",
+    "start": 2940,
+    "rate": 1,
+    "relevance": 10,
+    "attention": 7,
+    "topic": "LLM jailbreaks using universal transferable suffixes",
+    "status": "rated"
+   },
+   {
+    "range": "50:24\u201351:29",
+    "start": 3024,
+    "rate": 1,
+    "relevance": 10,
+    "attention": 7,
+    "topic": "LLM jailbreaks using adversarial examples",
+    "status": "rated"
+   },
+   {
+    "range": "51:29\u201352:41",
+    "start": 3089,
+    "rate": 1,
+    "relevance": 9,
+    "attention": 7,
+    "topic": "Prompt injection attack example",
+    "status": "rated"
+   },
+   {
+    "range": "52:41\u201353:57",
+    "start": 3161,
+    "rate": 1,
+    "relevance": 10,
+    "attention": 7,
+    "topic": "Prompt injection attack example explained",
+    "status": "rated"
+   },
+   {
+    "range": "53:57\u201355:09",
+    "start": 3237,
+    "rate": 1,
+    "relevance": 10,
+    "attention": 8,
+    "topic": "Prompt injection via image URL exfiltration",
+    "status": "rated"
+   },
+   {
+    "range": "55:09\u201356:21",
+    "start": 3309,
+    "rate": 1,
+    "relevance": 7,
+    "attention": 7,
+    "topic": "Google Apps Script exfiltration vulnerability",
+    "status": "rated"
+   },
+   {
+    "range": "56:21\u201357:44",
+    "start": 3381,
+    "rate": null,
+    "relevance": null,
+    "attention": null,
+    "topic": null,
+    "status": "not mapped (failed)"
+   },
+   {
+    "range": "57:44\u201358:42",
+    "start": 3464,
+    "rate": 1,
+    "relevance": 7,
+    "attention": 7,
+    "topic": "LLM vulnerabilities: trigger word attacks",
+    "status": "rated"
+   },
+   {
+    "range": "58:42\u201359:49",
+    "start": 3522,
+    "rate": 1.4,
+    "relevance": 5,
+    "attention": 3,
+    "topic": "LLM security: cat and mouse game",
+    "status": "rated"
+   }
+  ]
+ },
+ "regions": {
+  "A": [
+   {
+    "cls": "mapped l2",
+    "left": 0,
+    "width": 1.772,
+    "tip": {
+     "range": "0:00\u20131:03",
+     "topics": [
+      "LLM Model Details"
+     ],
+     "detail": "Relevant \u00b7 1.4\u00d7"
+    }
+   },
+   {
+    "cls": "mapped l0",
+    "left": 1.772,
+    "width": 37.715,
+    "tip": {
+     "range": "1:03\u201323:37",
+     "topics": [
+      "LLM Training Process"
+     ],
+     "detail": "Key \u00b7 1\u20131.75\u00d7"
+    }
+   },
+   {
+    "cls": "mapped l2",
+    "left": 39.487,
+    "width": 6.121,
+    "tip": {
+     "range": "23:37\u201327:17",
+     "topics": [
+      "LLM Scaling & Performance"
+     ],
+     "detail": "Relevant \u00b7 1.4\u00d7"
+    }
+   },
+   {
+    "cls": "mapped l0",
+    "left": 45.607,
+    "width": 3.36,
+    "tip": {
+     "range": "27:17\u201329:17",
+     "topics": [
+      "LLM Capabilities & Use"
+     ],
+     "detail": "Important \u00b7 1.15\u00d7"
+    }
+   },
+   {
+    "cls": "mapped l4",
+    "left": 48.967,
+    "width": 4.469,
+    "tip": {
+     "range": "29:17\u201331:58",
+     "topics": [
+      "LLM Valuation & Economics"
+     ],
+     "detail": "Not relevant \u00b7 2\u00d7"
+    }
+   },
+   {
+    "cls": "mapped l0",
+    "left": 53.437,
+    "width": 1.971,
+    "tip": {
+     "range": "31:58\u201333:08",
+     "topics": [
+      "LLM Tool Integration"
+     ],
+     "detail": "Key \u00b7 1\u00d7"
+    }
+   },
+   {
+    "cls": "mapped l4",
+    "left": 55.408,
+    "width": 6.525,
+    "tip": {
+     "range": "33:08\u201337:03",
+     "topics": [
+      "LLM Reasoning & Limitations"
+     ],
+     "detail": "Low relevance \u00b7 1.75\u20132\u00d7"
+    }
+   },
+   {
+    "cls": "mapped l2",
+    "left": 61.933,
+    "width": 4.203,
+    "tip": {
+     "range": "37:03\u201339:34",
+     "topics": [
+      "LLM Training & Improvement"
+     ],
+     "detail": "Relevant \u00b7 1.4\u00d7"
+    }
+   },
+   {
+    "cls": "mapped l0",
+    "left": 66.136,
+    "width": 8.048,
+    "tip": {
+     "range": "39:34\u201344:22",
+     "topics": [
+      "LLM Customization & Architecture"
+     ],
+     "detail": "Important \u00b7 1\u20131.4\u00d7"
+    }
+   },
+   {
+    "cls": "mapped l4",
+    "left": 74.184,
+    "width": 7.737,
+    "tip": {
+     "range": "44:22\u201349:00",
+     "topics": [
+      "LLM Ecosystem & Security"
+     ],
+     "detail": "Low relevance \u00b7 1.75\u20132\u00d7"
+    }
+   },
+   {
+    "cls": "mapped l0",
+    "left": 81.92,
+    "width": 2.326,
+    "tip": {
+     "range": "49:00\u201350:24",
+     "topics": [
+      "LLM Jailbreaking & Encoding"
+     ],
+     "detail": "Key \u00b7 1\u00d7"
+    }
+   },
+   {
+    "cls": "mapped l4",
+    "left": 84.246,
+    "width": 15.754,
+    "tip": {
+     "range": "50:24\u201359:49",
+     "topics": [
+      "LLM Security & Attacks"
+     ],
+     "detail": "Not relevant \u00b7 1.75\u20132\u00d7"
+    }
+   }
+  ],
+  "B": [
+   {
+    "cls": "mapped l4",
+    "left": 0,
+    "width": 76.429,
+    "tip": {
+     "range": "0:00\u201345:43",
+     "topics": [
+      "LLM Model Training"
+     ],
+     "detail": "Not relevant \u00b7 1.75\u20132\u00d7"
+    }
+   },
+   {
+    "cls": "mapped l0",
+    "left": 76.429,
+    "width": 17.779,
+    "tip": {
+     "range": "45:43\u201356:21",
+     "topics": [
+      "LLM Security Risks"
+     ],
+     "detail": "Key \u00b7 1\u00d7"
+    }
+   },
+   {
+    "cls": "failed",
+    "left": 94.208,
+    "width": 2.295,
+    "tip": {
+     "range": "56:21\u201357:44",
+     "topics": [],
+     "detail": "Couldn't be analyzed"
+    }
+   },
+   {
+    "cls": "mapped l0",
+    "left": 96.503,
+    "width": 1.621,
+    "tip": {
+     "range": "57:44\u201358:42",
+     "topics": [
+      "LLM Vulnerabilities"
+     ],
+     "detail": "Key \u00b7 1\u00d7"
+    }
+   },
+   {
+    "cls": "mapped l2",
+    "left": 98.125,
+    "width": 1.875,
+    "tip": {
+     "range": "58:42\u201359:49",
+     "topics": [
+      "LLM Security Measures"
+     ],
+     "detail": "Relevant \u00b7 1.4\u00d7"
+    }
+   }
+  ]
+ },
+ "comparison": {
+  "pairs": 49,
+  "diffRate": 45,
+  "diffRel": 41,
+  "highA": 24,
+  "highB": 10,
+  "highJaccard": 0.03
+ },
+ "screenshots": [
+  {
+   "name": "goalA-just-started",
+   "file": "01-goalA-just-started.png"
+  },
+  {
+   "name": "goalA-partially-mapped",
+   "file": "02-goalA-partially-mapped.png"
+  },
+  {
+   "name": "goalA-completed-map",
+   "file": "03-goalA-completed-map.png"
+  },
+  {
+   "name": "goalA-tooltip-open",
+   "file": "04-goalA-tooltip-open.png"
+  },
+  {
+   "name": "resume-failed-feedback",
+   "file": "05-resume-failed-feedback.png"
+  },
+  {
+   "name": "saved-inactive-after-reload",
+   "file": "06-saved-inactive-after-reload.png"
+  },
+  {
+   "name": "resumed-partially-mapped-after-seek",
+   "file": "07-resumed-partially-mapped-after-seek.png"
+  },
+  {
+   "name": "goalB-just-started",
+   "file": "08-goalB-just-started.png"
+  },
+  {
+   "name": "goalB-partially-mapped",
+   "file": "09-goalB-partially-mapped.png"
+  },
+  {
+   "name": "goalB-completed-map",
+   "file": "10-goalB-completed-map.png"
+  }
+ ],
+ "suspicious": [
+  "YouTube showed pre-roll ads on 1 load(s); the test waited them out (ViewPace pauses during ads)"
+ ]
+}

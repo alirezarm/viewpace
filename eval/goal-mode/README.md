@@ -52,3 +52,29 @@ Report: `docs/goal-mode-poc1-evaluation.md`.
 - Goal Map density: `map-density.ts <run.json>…` rebuilds a completed mapping with the production
   `goalTimeline`/`mergeSegments` and reports blocks vs drawn regions, region lengths, speed changes
   and the region list.
+
+## Product smoke test (real extension, real YouTube)
+
+`smoke-test.ts` drives the installed extension like a user on the Karpathy talk with two goals
+(start, progressive mapping, Goal Map seeks, Stop, reload, a provoked failed Resume, Resume, a
+second goal) and writes `report.md`/`report.json` with PASS/FAIL checks, timings, every block,
+the final regions and their names, plus screenshots. It changes no production code. Reference
+result: `eval-results/goal-mode-smoke/2026-10-18-after-fixes/` (25/25).
+
+How to rerun (about 15-25 min, longer with YouTube ads):
+
+1. `npm run build`, copy `dist/` to a never-used folder (stale service worker, see above) and add a
+   blank `check.html` to it.
+2. Start Chrome by hand (not via automation, or YouTube serves empty captions) with a profile that
+   has Gemini Nano downloaded:
+   `open -na "Google Chrome" --args --user-data-dir=<profile> --remote-debugging-port=9333 --enable-unsafe-extension-debugging --no-first-run`.
+   If Nano is missing (e.g. after a Chrome update), the first check fails with its availability;
+   download it once from the extension's popup.
+3. Attach the DevTools CLI and install the copy, noting its id:
+   `npx -p chrome-devtools-mcp@latest chrome-devtools start --browserUrl http://127.0.0.1:9333 --categoryExtensions`
+   then `… chrome-devtools install_extension <folder>`. Only one ViewPace copy may be installed.
+4. `npx esbuild eval/goal-mode/smoke-test.ts --bundle --platform=node --format=esm --outfile=/tmp/smoke.mjs`
+   then `EVAL_EXT_ID=<id> [SMOKE_OUT=<dir>] node /tmp/smoke.mjs`.
+
+Nano's ratings vary slightly between runs, so the checks test behaviour (and that the two goals'
+maps differ), not exact scores. The test clears this video's saved goal before it starts.
